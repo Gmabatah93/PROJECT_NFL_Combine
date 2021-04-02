@@ -1,9 +1,12 @@
 library(readr)
 library(dplyr)
 library(ggplot2)
+library(RColorBrewer)
 theme_set(theme_minimal())
 library(stringr)
 library(forcats)
+library(FactoMineR)
+library(factoextra)
 
 # Data ----
 nfl <- read_csv("Data/NFLCombine.csv")
@@ -39,21 +42,28 @@ nfl <- nfl %>%
          round = round %>% factor,
          draft_year = draft_year %>% factor)
 
-# Offense Defense
-# - 1426
-nfl_offense <- nfl %>% 
-  filter(position %in% c("WR","OT","RB","OG","TE","C","FB","QB","LS","OL"))
+# Offense-Defense
+nfl <- nfl %>% 
+  mutate(side = ifelse(position %in% c("WR","OT","RB","OG","TE","C","FB","QB","LS","OL"), "Offense", "Defense"))
+# - offense: 1426
+nfl %>% 
+  filter(side == "Offense") %>% 
+  count()
 # - 1459
-nfl_defense <- nfl %>%
-  filter(position %in% c("CB","DE","DT","OLB","ILB","FS","SS","EDGE","S","LB"))
+nfl %>% 
+  filter(side == "Defense") %>% 
+  count()
 
 # Exploratory Data Analysis: Offense ----
-nfl_offense %>% count(drafted)
+nfl %>% 
+  filter(side =="Offense") %>% 
+  count(drafted)
 # - note: 874 drafted
 
 # Position
-gg_offense_Position <- nfl_offense %>%
-  filter(drafted == "Yes") %>% 
+gg_offense_Position <- nfl %>%
+  filter(side == "Offense",
+         drafted == "Yes") %>% 
   group_by(position) %>% count() %>% 
   ggplot(aes(n, fct_reorder(position, n))) +
   geom_col() +
@@ -66,8 +76,9 @@ gg_offense_Position <- nfl_offense %>%
     plot.subtitle = element_text(hjust = 0.5, color = "red"))
 
 # School
-gg_offense_School <- nfl_offense %>%
-  filter(drafted == "Yes") %>% 
+gg_offense_School <- nfl %>%
+  filter(side == "Offense",
+         drafted == "Yes") %>% 
   group_by(school) %>% count(sort = TRUE) %>% 
   filter(n > 10) %>% 
   ggplot(aes(n, fct_reorder(school, n))) +
@@ -81,8 +92,9 @@ gg_offense_School <- nfl_offense %>%
     plot.subtitle = element_text(hjust = 0.5, color = "red"))
 
 # Team
-gg_offense_Team <- nfl_offense %>%
-  filter(drafted == "Yes") %>% 
+gg_offense_Team <- nfl %>%
+  filter(side == "Offense",
+         drafted == "Yes") %>% 
   group_by(team) %>% count(sort = TRUE) %>% 
   ggplot(aes(n, fct_reorder(team, n))) +
   geom_col() +
@@ -94,14 +106,30 @@ gg_offense_Team <- nfl_offense %>%
     plot.title = element_text(hjust = 0.5),
     plot.subtitle = element_text(hjust = 0.5, color = "red"))
 
+# Correlation Matrix
+gg_offense_cor <- nfl %>% 
+  filter(side == "Offense") %>% 
+  select(height, weight, forty, vertical, bench, broad_jump, three_cone, shuttle) %>% 
+  cor() %>% ggcorrplot::ggcorrplot(type = "lower", lab = TRUE) +
+  labs(
+    subtitle = "Offense"
+  ) + 
+  theme(
+    plot.subtitle = element_text(hjust = 0.5, color = "red")
+  )
 
+
+#
 # Exploratory Data Analysis: Defense ----
-nfl_defense %>% count(drafted)
+nfl %>% 
+  filter(side == "Defense") %>% 
+  count(drafted)
 # - note: 1013 drafted
 
 # Position
-gg_defense_Position <- nfl_defense %>%
-  filter(drafted == "Yes") %>% 
+gg_defense_Position <- nfl %>%
+  filter(side == "Defense",
+         drafted == "Yes") %>% 
   group_by(position) %>% count() %>% 
   ggplot(aes(n, fct_reorder(position, n))) +
   geom_col() +
@@ -114,8 +142,9 @@ gg_defense_Position <- nfl_defense %>%
     plot.subtitle = element_text(hjust = 0.5, color = "blue"))
 
 # School
-gg_defense_School <- nfl_defense %>%
-  filter(drafted == "Yes") %>% 
+gg_defense_School <- nfl %>%
+  filter(side == "Defense",
+         drafted == "Yes") %>% 
   group_by(school) %>% count(sort = TRUE) %>% 
   filter(n > 10) %>% 
   ggplot(aes(n, fct_reorder(school, n))) +
@@ -129,8 +158,9 @@ gg_defense_School <- nfl_defense %>%
     plot.subtitle = element_text(hjust = 0.5, color = "blue"))
 
 # Team
-gg_defense_Team <- nfl_defense %>%
-  filter(drafted == "Yes") %>% 
+gg_defense_Team <- nfl %>%
+  filter(side == "Defense",
+         drafted == "Yes") %>% 
   group_by(team) %>% count(sort = TRUE) %>% 
   ggplot(aes(n, fct_reorder(team, n))) +
   geom_col() +
@@ -141,3 +171,111 @@ gg_defense_Team <- nfl_defense %>%
   theme(
     plot.title = element_text(hjust = 0.5),
     plot.subtitle = element_text(hjust = 0.5, color = "blue"))
+
+
+# Exploratory Data Analysis: Principal Componenet Analysis ----
+nfl_PCA <- nfl %>% 
+  select(drafted, player, height, weight, forty, vertical, bench, broad_jump, three_cone, shuttle) %>% 
+  PCA(graph = FALSE, scale.unit = TRUE,
+      # Target: Drafted
+      quali.sup = c(1,2) 
+      )
+
+# Eigenvalues
+nfl_PCA %>% 
+  fviz_eig(addlabels = TRUE, ylim = c(0,70)) +
+  labs(
+    title = "Eigenvalues",
+    x = "Principal Components",
+    y = element_blank()
+  ) +
+  theme_minimal() +
+  theme(
+     axis.text.y = element_blank()
+  )
+
+# Principal Component 1
+nfl_PCA %>% 
+  fviz_contrib(choice = "var", axes = 1) + 
+  theme_minimal() +
+  theme(
+    plot.background = element_blank()
+  )
+# Principal Component 2
+nfl_PCA %>% 
+  fviz_contrib(choice = "var", axes = 2) + 
+  theme_minimal() +
+  theme(
+    plot.background = element_blank()
+  )
+
+# BiPlot
+nfl_PCA %>% fviz_pca_var(alpha.var = "cos2")
+
+# - Side
+nfl_PCA %>% 
+  fviz_pca_biplot(
+  geom = "point", pointshape = 21, fill.ind = "gray", col.ind = nfl$side,
+  col.var = "black", alpha.var = "cos2",
+  palette = c("blue","red"),
+  legend.title = "", mean.point = FALSE
+) +
+  labs(
+    title = "Side",
+    x = element_blank(),
+    y = element_blank(),
+    alpha = "Quality of Representation"
+  ) +
+  theme(
+    plot.background = element_blank(),
+    legend.position = "top"
+  )
+
+# - Position
+nfl_PCA %>% 
+  fviz_pca_biplot(
+    geom = "point", pointshape = 21, fill.ind = "gray", col.ind = nfl$position,
+    col.var = "black", alpha.var = "cos2",
+    palette = "Spectral",
+    legend.title = "", mean.point = FALSE
+  ) +
+  labs(
+    title = "Side",
+    x = element_blank(),
+    y = element_blank(),
+    alpha = "Quality of Representation"
+  ) +
+  theme(
+    plot.background = element_blank(),
+    legend.position = "top"
+  )
+
+# - Round
+nfl_PCA %>% 
+  fviz_pca_biplot(
+    geom = "point", pointshape = 21, fill.ind = "gray", col.ind = nfl$round,
+    col.var = "black", alpha.var = "cos2",
+    palette = "Set1",
+    legend.title = "", mean.point = FALSE
+  ) +
+  labs(
+    title = "Round",
+    x = element_blank(),
+    y = element_blank(),
+    alpha = "Quality of Representation"
+  ) +
+  theme(
+    plot.background = element_blank(),
+    legend.position = "top"
+  )
+
+# - Drafted
+
+
+
+
+
+
+
+
+
