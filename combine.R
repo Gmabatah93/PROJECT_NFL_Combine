@@ -10,6 +10,11 @@ library(factoextra)
 
 # Data ----
 nfl <- read_csv("Data/NFLCombine.csv")
+
+# More Cleaning
+nfl$school <- nfl$school %>% str_replace(pattern = "St",replacement = "ate")
+nfl$school %>% str_replace(pattern = "atete",replacement = "State")
+
 # - clean: Draft Variables
 # -- Spilt to Columns: Team | Round | Pick | Draft_Year
 draft <- nfl$drafted %>% str_split(pattern = "/", simplify = TRUE) %>% as_tibble() %>% 
@@ -53,6 +58,21 @@ nfl %>%
 nfl %>% 
   filter(side == "Defense") %>% 
   count()
+
+# Conference
+nfl <- nfl %>% 
+  mutate(conference = case_when(
+    school %in% c("Northwestern", "Iowa", "Wisconsin", "Minnesota","Nebraska","Purdue","Illinois","Ohio State","Indiana","Penn St.","Maryland","Rutgers","Michigan","Michigan St.") ~ "Big 10",
+    school %in% c("Iowa State", "Oklahoma","Oklahoma St.","Texas","TCU","West Virginia", "Kansas State", "Texas Tech", "Baylor","Kansas") ~ "Big 12",
+    school %in% c("Cincinnati", "Tulsa", "Memphis", "UCF", "SMU", "Houston", "Navy", "Tulane", "East Carolina", "Temple", "South Florida") ~ "American Athletic Conference",
+    school %in% c("Notre Dame","Clemson","Miami","North Carolina", "North Carolina St.", "Boston College","Pittsburgh","Virginia Tech","Virginia","Wake Forrest","Georgia Tech","Louisville","Florida State","Duke","Syracuse") ~ "Atlantic Coast",
+    school %in% c("Marshall", "Florida Atlantic","Western Kentucky","Charlotte","Old Dominion","Middle Tennesse","Florida International","Texas-San Antonio","North Texas","Rice","Southern Miss","Texas-El Paso") ~ "Conference USA",
+    school %in% c("USC","Colorado","Utah","Arizona State","UCLA","Arizona","Washington","Oregon","Stanford","Oregon State","Washington St.","California") ~ "Pac-12",
+    school %in% c("Alabama","Texas A&M","Auburn","LSU","Mississippi","Arkansas","MS State","Florida","Georgia","Missouri","Kentucky","Tennessee", "South Carolina","Vanderbilt") ~ "Southeastern",
+    school %in% c("Buffalo", "Kent State","Ohio","Miami OH","Akron","Bowling Green","Ball State","Western Michigan", "Toledo","Central Michigan","Eastern Michigan","Northern Illinois") ~ "Mid-American",
+    school %in% c("San Jose St.", "Boise St.","Nevada","San Diego St.","Hawaii","Fresno St.", "Air Force","Wyoming","New Mexico","Colorado State","Utah State","UNLV") ~ "Mountain West",
+    school %in% c("North Dakota St.") ~ "Missouri Valley"
+  ))
 
 # Exploratory Data Analysis: Offense ----
 nfl %>% 
