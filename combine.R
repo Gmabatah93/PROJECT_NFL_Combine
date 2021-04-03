@@ -17,6 +17,15 @@ nfl$school <- nfl$school %>% str_replace(pattern = "St", replacement = "State")
 nfl$school <- nfl$school %>% str_replace(pattern = "Stateate",replacement = "State")
 nfl$school <- nfl$school %>% str_replace(pattern = "Statete",replacement = "State")
 nfl$school <- nfl$school %>% str_replace(pattern = "Statenford",replacement = "Stanford")
+nfl$school <- nfl$school %>% str_replace(pattern = "Statephen", replacement = "Stephen")
+nfl$school <- nfl$school %>% str_replace(pattern = "Statellman", replacement = "Stillman")
+
+#
+nfl$school <- nfl$school %>% str_replace(pattern = "Southern California", replacement = "USC")
+nfl$school <- nfl$school %>% str_replace(pattern = "Texas Christian", replacement = "TCU")
+nfl$school <- nfl$school %>% str_replace(pattern = "Louisiana State", replacement = "LSU")
+nfl$school <- nfl$school %>% str_replace(pattern = "Brigham Young", replacement = "BYU")
+nfl$school <- nfl$school %>% str_replace(pattern = "Southern Methodist", replacement = "SMU")
 
 
 # clean: Split Draft information "drafted"
@@ -41,10 +50,6 @@ draft <- draft %>%
 nfl <- nfl %>% 
   bind_cols(draft)
 
-# - Change the old drafted variable to a tag
-nfl <- nfl %>% 
-  mutate(drafted = ifelse(is.na(drafted), "No","Yes") %>% factor)
-
 # - DataType Conversions
 nfl <- nfl %>% 
   # Do not need "draft_year" already have "year"
@@ -56,27 +61,54 @@ nfl <- nfl %>%
          round = round %>% factor,
          pick = pick %>% factor)
 
-# Feature Engineering
+
+
+# Data: Feature Engineering ----
+
+# - Change the old drafted variable to a tag
+nfl <- nfl %>% 
+  mutate(drafted = ifelse(is.na(drafted), "No","Yes") %>% factor)
+
 # - Offense-Defense
 nfl <- nfl %>% 
   mutate(side = ifelse(position %in% c("WR","OT","RB","OG","TE","C","FB","QB","LS","OL"), "Offense", "Defense"))
+
 # - Conference
 nfl <- nfl %>% 
   mutate(conference = case_when(
     school %in% c("Northwestern", "Iowa", "Wisconsin", "Minnesota","Nebraska","Purdue","Illinois","Ohio State","Indiana","Penn State","Maryland","Rutgers","Michigan","Michigan State") ~ "Big 10",
     school %in% c("Iowa State", "Oklahoma","Oklahoma State","Texas","TCU","West Virginia", "Kansas State", "Texas Tech", "Baylor","Kansas") ~ "Big 12",
-    school %in% c("Cincinnati", "Tulsa", "Memphis", "UCF", "SMU", "Houston", "Navy", "Tulane", "East Carolina", "Temple", "South Florida") ~ "American Athletic Conference",
-    school %in% c("Notre Dame","Clemson","Miami (FL)","North Carolina", "North Carolina State", "Boston College","Pittsburgh","Virginia Tech","Virginia","Wake Forrest","Georgia Tech","Louisville","Florida State","Duke","Syracuse") ~ "Atlantic Coast",
-    school %in% c("Marshall", "Florida Atlantic","Western Kentucky","Charlotte","Old Dominion","Middle Tennesse","Florida International","Texas-San Antonio","North Texas","Rice","Southern Miss","Texas-El Paso") ~ "Conference USA",
+    school %in% c("Cincinnati", "Tulsa", "Memphis", "Central Florida", "SMU", "Houston", "Navy", "Tulane", "East Carolina", "Temple", "South Florida","Connecticut") ~ "American Athletic Conference",
+    school %in% c("Notre Dame","Clemson","Miami (FL)","North Carolina", "North Carolina State", "Boston College","Pittsburgh","Virginia Tech","Virginia","Wake Forest","Georgia Tech","Louisville","Florida State","Duke","Syracuse") ~ "Atlantic Coast",
+    school %in% c("Marshall", "Florida Atlantic","Western Kentucky","Charlotte","Old Dominion","Middle Tennessee State","Florida International","Texas-San Antonio","North Texas","Rice","Southern Miss","Texas-El Paso","Louisiana Tech") ~ "Conference USA",
     school %in% c("USC","Colorado","Utah","Arizona State","UCLA","Arizona","Washington","Oregon","Stanford","Oregon State","Washington State","California") ~ "Pac-12",
-    school %in% c("Alabama","Texas A&M","Auburn","LSU","Mississippi","Arkansas","MS State","Florida","Georgia","Missouri","Kentucky","Tennessee", "South Carolina","Vanderbilt") ~ "Southeastern",
+    school %in% c("Alabama","Texas A&M","Auburn","LSU","Mississippi","Arkansas","Mississippi State","Florida","Georgia","Missouri","Kentucky","Tennessee", "South Carolina","Vanderbilt") ~ "Southeastern",
     school %in% c("Buffalo", "Kent State","Ohio","Miami OH","Akron","Bowling Green","Ball State","Western Michigan", "Toledo","Central Michigan","Eastern Michigan","Northern Illinois") ~ "Mid-American",
     school %in% c("San Jose State", "Boise State","Nevada","San Diego State","Hawaii","Fresno State", "Air Force","Wyoming","New Mexico","Colorado State","Utah State","UNLV") ~ "Mountain West",
     school %in% c("Fordham") ~ "Atlantic 10",
-    school %in% c("Maine") ~ " America East Conference",
-    school %in% c("North Dakota State") ~ "Missouri Valley"
+    school %in% c("Maine") ~ "America East Conference",
+    school %in% c("North Dakota State", "South Dakota State", "Illinois State", "Youngstown State","Northern Iowa","Southern Illinois", "South Dakota","Missouri State","North Dakota") ~ "Missouri Valley",
+    school %in% c("Stephen F. Austin","McNeese State","Abilene Christian") ~ "Southland",
+    school %in% c("Appalachian State","Louisiana-Lafayette","Georgia State","South Alabama","Troy","Louisiana","Texas State", "Arkansas State","Coastal Carolina","Georgia Southern","Louisiana-Monroe") ~ "Sunbelt",
+    school %in% c("Weber State","Eastern Washington", "Southern Utah","Montana", "Montana State","Cal Poly","Portland State","Idaho","	California-Davis","Northern Colorado","California-Davis") ~ "Big Sky",
+    school %in% c("Jacksonville State", "Eastern Kentucky","Tennessee State","Tennessee-Martin", "Tennessee Tech") ~ "Ohio Valley",
+    school %in% c("New Mexico State","BYU","Massachusetts") ~ "Independent",
+    school %in% c("Wagner") ~ "Northeast",
+    school %in% c("Charleston Southern","Presbyterian","Hampton","Monmouth (NJ)") ~ "Big South",
+    school %in% c("Bucknell", "Lafayette","Lehigh") ~ "Patriot League",
+    school %in% c("Villanova","William & Mary","Delaware","James Madison","Towson","Elon", "New Hampshire","Richmond","Hofstra") ~ "Colonial",
+    school %in% c("Chattanooga","Samford","Furman","Citadel","Stillman") ~ "Southern",
+    school %in% c("Harvard","Princeton","Cornell","Brown") ~ "Ivy League",
+    school %in% c("South Carolina State", "North Carolina Central", "Norfolk State","Florida A&M","Howard") ~ "Mid-Eastern",
+    school %in% c("Central Arkansas", "Southeastern Louisiana", "Northwestern State","Nicholls State") ~ "Southland",
+    school %in% c("Arkansas-Pine Bluff","Alabama A&M","Alcorn State","Jackson State","Alabama State","Grambling State") ~ "Southwestern",
+    
+    school %in% c("Humboldt State","Indiana (PA)","West Georgia","Lindenwood","Kutztown","Ashland","Wayne State (MI)","Grand Valley State","Harding","Hobart & William Smith","Newberry","Northwest Missouri State","Bloomsburg",
+                  "Saginaw Valley State","Shepherd","Missouri Western","Concordia (MN)","West Texas A&M","Chadron State","Glenville State","Valdosta State","Missouri Southern","California (PA)","Midwestern State",
+                  "Slippery Rock","Hillsdale","Mount Union","Southern Arkansas","Hartwick","Liberty","West Liberty","Whitworth","Nebraska-Omaha","Tarleton State","Michigan Tech") ~ "Division II & III"
   ))
 
+nfl %>% filter(conference %>% is.na()) %>% View
 # Exploratory Data Analysis: Offense ----
 nfl %>% 
   filter(side =="Offense") %>% 
