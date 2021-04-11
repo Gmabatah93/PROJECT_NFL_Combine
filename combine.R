@@ -1,8 +1,10 @@
 library(readr)
 library(dplyr)
+library(tidyr)
 library(ggplot2)
 library(RColorBrewer)
 theme_set(theme_minimal())
+library(broom)
 library(stringr)
 library(forcats)
 library(FactoMineR)
@@ -70,7 +72,7 @@ nfl <- nfl %>%
 
 # - Offense-Defense
 nfl <- nfl %>% 
-  mutate(side = ifelse(position %in% c("WR","OT","RB","OG","TE","C","FB","QB","LS","OL"), "Offense", "Defense"))
+  mutate(side = ifelse(position %in% c("WR","OT","RB","OG","TE","C","FB","QB","LS","OL"), "Offense", "Defense") %>% factor())
 
 # - Conference
 nfl <- nfl %>% 
@@ -98,87 +100,182 @@ nfl <- nfl %>%
                   "Saginaw Valley State","Shepherd","Missouri Western","Concordia (MN)","West Texas A&M","Chadron State","Glenville State","Valdosta State","Missouri Southern","California (PA)","Midwestern State",
                   "Slippery Rock","Hillsdale","Mount Union","Southern Arkansas","Hartwick","Liberty","West Liberty","Whitworth","Nebraska-Omaha","Tarleton State","Michigan Tech","Bowie State","Fort Hays State","Central Missouri",
                   "Minnesota-Morris","Mars Hill","Augustana (SD)","Clarion","Winston-Salem State","Texas A&M-Kingsville","Northeastern State","Azusa Pacific") ~ "Division II & III"
-  ))
+  ) %>% factor())
 
 
 nfl <- nfl %>% 
   select(player, side, position, school, conference, year, everything())
 
+
+
+
+#
+# Exploratory Data Analysis: PCA ----
+
+# Corrplot
+nfl %>% 
+  select(height:shuttle) %>% cor %>% 
+  corrplot::corrplot(method = "number", type = "upper")
+
+# PCA Object
+combine_PCA <- nfl %>% 
+  select(height:drafted) %>% 
+  PCA(quali.sup = 9, graph = FALSE)
+# - Graph
+combine_PCA %>%  fviz_pca_var(col.q = "red")
+combine_PCA %>% 
+  fviz_pca_biplot(repel = TRUE,
+                  arrowsize = 1,
+                  col.var = "grey25", alpha.var = "cos2",
+                  geom.ind = "point", pointsize = 0.5,
+                  col.ind = "grey85", 
+                  legend.title = list(alpha = "Quality of Representation"))
+
+# Eigen: 70.1% Explained by PC1
+combine_PCA %>% fviz_eig(addlabels = TRUE)
+# - variables:
+combine_PCA$var$coord[,c(1,2)]
+combine_PCA$var$cos2[,c(1,2)]
+combine_PCA$var$contrib[,c(1,2)]
+combine_PCA %>% fviz_contrib(choice = "var", axes = 1)
+combine_PCA %>% fviz_contrib(choice = "var", axes = 2)
+combine_PCA %>% fviz_contrib(choice = "var", axes = c(1,2))
+
+
+
+# - PCA: Drafted
+combine_PCA %>% 
+  fviz_pca_biplot(repel = TRUE,
+                  arrowsize = 1, 
+                  col.var = "grey25", alpha.var = "cos2",
+                  geom.ind = "point", pointsize = 0.5,
+                  col.ind = nfl$drafted, 
+                  addEllipses = TRUE, ellispe.type = "norm",
+                  palette = c("tomato", "forestgreen"),
+                  legend.title = "Drafted")
+
+# - PCA: Round
+combine_PCA %>% 
+  fviz_pca_biplot(repel = TRUE,
+                  arrowsize = 1, 
+                  col.var = "grey25", alpha.var = "cos2",
+                  geom.ind = "point", pointsize = 0.5,
+                  col.ind = nfl$round, 
+                  addEllipses = TRUE, ellispe.type = "norm",
+                  legend.title = "Round")
+
+# - PCA: Conference
+combine_PCA %>% 
+  fviz_pca_biplot(repel = TRUE,
+                  arrowsize = 1, 
+                  col.var = "grey25", alpha.var = "cos2",
+                  geom.ind = "point", pointsize = 0.5,
+                  col.ind = nfl$conference, 
+                  addEllipses = TRUE, ellispe.type = "norm",
+                  legend.title = "Conference",
+                  legend.position = "bottom")
+
+# - PCA: Side
+combine_PCA %>% 
+  fviz_pca_biplot(repel = TRUE,
+                  arrowsize = 1, 
+                  col.var = "grey25", alpha.var = "cos2",
+                  geom.ind = "point", pointsize = 0.5,
+                  col.ind = nfl$side, 
+                  addEllipses = TRUE, ellispe.type = "norm",
+                  palette = c("blue","red"),
+                  legend.title = "Side")
+
+# - PCA: Position
+combine_PCA %>% 
+  fviz_pca_biplot(repel = TRUE,
+                  arrowsize = 1, 
+                  col.var = "grey25", alpha.var = "cos2",
+                  geom.ind = "point", pointsize = 0.5,
+                  col.ind = nfl$position, 
+                  addEllipses = TRUE, ellispe.type = "norm",
+                  legend.title = "Position")
+
+
+# NEW Dataset
+nfl_combine_summary <- nfl %>% 
+  select(side, position, conference, weight, forty, broad_jump, bench, drafted)
 #
 # Exploratory Data Analysis: Offense ----
-nfl %>% 
+nfl_combine_summary %>% 
   filter(side =="Offense") %>% 
   count(drafted)
 # - note: 874 drafted
 
-# Position
-gg_offense_Position <- nfl %>%
-  filter(side == "Offense",
-         drafted == "Yes") %>% 
-  group_by(position) %>% count() %>% 
-  ggplot(aes(n, fct_reorder(position, n))) +
-  geom_col() +
-  labs(
-    title = "Position: Who got Drafted ?",
-    subtitle = "Offense",
-    y = "Position") + 
-  theme(
-    plot.title = element_text(hjust = 0.5),
-    plot.subtitle = element_text(hjust = 0.5, color = "red"))
-
-# Conference
-gg_offense_Conference <- nfl %>%
-  filter(side == "Offense",
-         drafted == "Yes") %>% 
-  group_by(conference) %>% count(sort = TRUE) %>% 
-  ggplot(aes(n, fct_reorder(conference, n))) +
-  geom_col() +
-  labs(
-    title = "Conference",
-    subtitle = "Offense",
-    y = "School") +
-  theme(
-    plot.title = element_text(hjust = 0.5),
-    plot.subtitle = element_text(hjust = 0.5, color = "red"))
-# - first round
-nfl %>% 
-  filter(side == "Offense",round == "1st") %>%
-  group_by(conference) %>% 
-  count() %>% 
-  ggplot(aes(n, fct_reorder(conference,n))) + 
-  geom_col()
-
-# Team
-gg_offense_Team <- nfl %>%
-  filter(side == "Offense",
-         drafted == "Yes") %>% 
-  group_by(team) %>% count(sort = TRUE) %>% 
-  ggplot(aes(n, fct_reorder(team, n))) +
-  geom_col() +
-  labs(
-    title = "Team:",
-    subtitle = "Offense",
-    y = "Team") +
-  theme(
-    plot.title = element_text(hjust = 0.5),
-    plot.subtitle = element_text(hjust = 0.5, color = "red"))
-
-# Correlation Matrix
-gg_offense_cor <- nfl %>% 
+# STATS: 
+# - Summary
+nfl_combine_summary %>% 
   filter(side == "Offense") %>% 
-  select(height, weight, forty, vertical, bench, broad_jump, three_cone, shuttle) %>% 
-  cor() %>% ggcorrplot::ggcorrplot(type = "lower", lab = TRUE) +
-  labs(
-    subtitle = "Offense"
-  ) + 
-  theme(
-    plot.subtitle = element_text(hjust = 0.5, color = "red")
-  )
+  summarise(Avg_Weight = mean(weight),
+            Avg_Forty = mean(forty),
+            Avg_BroadJump = mean(broad_jump),
+            Avg_Bench = mean(bench))
+# - By Conference
+combine_summary_Offense_Conference_Gather <- nfl_combine_summary %>% 
+  filter(side == "Offense") %>% 
+  group_by(conference, drafted) %>% 
+  summarise(Weight = mean(weight),
+            Forty = mean(forty),
+            BroadJump = mean(broad_jump),
+            Bench = mean(bench)) %>% 
+  gather(Weight, Forty, BroadJump, Bench,
+         key = "Measure", value = "Stat")
+
+combine_summary_Offense_Conference_Gather %>% 
+  ggplot(aes(conference, Stat, fill = drafted)) +
+  geom_col(position = "dodge") +
+  facet_wrap(~Measure, scales = "free_y") +
+  labs(title = "Offense-Conference: Stats") +
+  theme_bw() + theme(
+    plot.title = element_text(hjust = 0.5, size = 12),
+    axis.text.x = element_text(angle = 90, hjust = 1)
+  ) +
+  scale_fill_manual(values = c("grey70","forestgreen"))
+# - By Position
+combine_summary_Offense_Position_Gather <- nfl_combine_summary %>% 
+  filter(side == "Offense") %>% 
+  group_by(position, drafted) %>% 
+  summarise(Weight = mean(weight),
+            Forty = mean(forty),
+            BroadJump = mean(broad_jump),
+            Bench = mean(bench)) %>% 
+  gather(Weight, Forty, BroadJump, Bench,
+         key = "Measure", value = "Stat")
+
+combine_summary_Offense_Position_Gather %>% 
+  ggplot(aes(position, Stat, fill = drafted)) +
+  geom_col(position = "dodge") +
+  facet_wrap(~Measure, scales = "free_y") +
+  labs(title = "Offense-Position: Stats") +
+  theme_bw() + theme(
+    plot.title = element_text(hjust = 0.5, size = 12)
+  ) +
+  scale_fill_manual(values = c("grey70","forestgreen"))
 
 
+# Statistical Test
+nfl_combine_summary %>% 
+  filter(side == "Offense") %>% 
+  glm(drafted ~ weight + forty + broad_jump + bench, family = "binomial", data = .) %>% 
+  tidy() %>% 
+  mutate(estimate = plogis(estimate))
 
+nfl_combine_summary %>% 
+  filter(side == "Offense") %>% 
+  glm(drafted ~ conference + weight + forty + broad_jump + bench, family = "binomial", data = .) %>% 
+  tidy() %>% 
+  mutate(estimate = plogis(estimate))
 
-
+nfl_combine_summary %>% 
+  filter(side == "Offense") %>% 
+  glm(drafted ~ position + weight + forty + broad_jump + bench, family = "binomial", data = .) %>% 
+  tidy() %>% 
+  mutate(estimate = plogis(estimate))
 
 
 
@@ -189,156 +286,72 @@ nfl %>%
   count(drafted)
 # - note: 1013 drafted
 
-# Position
-gg_defense_Position <- nfl %>%
-  filter(side == "Defense",
-         drafted == "Yes") %>% 
-  group_by(position) %>% count() %>% 
-  ggplot(aes(n, fct_reorder(position, n))) +
-  geom_col() +
-  labs(
-    title = "Position: Who got Drafted ?",
-    subtitle = "Defense",
-    y = "Position") + 
-  theme(
-    plot.title = element_text(hjust = 0.5),
-    plot.subtitle = element_text(hjust = 0.5, color = "blue"))
+# STATS: 
+# - Summary
+nfl_combine_summary %>% 
+  filter(side == "Defense") %>% 
+  summarise(Avg_Weight = mean(weight),
+            Avg_Forty = mean(forty),
+            Avg_BroadJump = mean(broad_jump),
+            Avg_Bench = mean(bench))
+# - By Conference
+combine_summary_Defense_Conference_Gather <- nfl_combine_summary %>% 
+  filter(side == "Defense") %>% 
+  group_by(conference, drafted) %>% 
+  summarise(Weight = mean(weight),
+            Forty = mean(forty),
+            BroadJump = mean(broad_jump),
+            Bench = mean(bench)) %>% 
+  gather(Weight, Forty, BroadJump, Bench,
+         key = "Measure", value = "Stat")
 
-# School
-gg_defense_School <- nfl %>%
-  filter(side == "Defense",
-         drafted == "Yes") %>% 
-  group_by(school) %>% count(sort = TRUE) %>% 
-  filter(n > 10) %>% 
-  ggplot(aes(n, fct_reorder(school, n))) +
-  geom_col() +
-  labs(
-    title = "School: Who got Drafted ?",
-    subtitle = "Defense",
-    y = "School") +
-  theme(
-    plot.title = element_text(hjust = 0.5),
-    plot.subtitle = element_text(hjust = 0.5, color = "blue"))
-
-# Team
-gg_defense_Team <- nfl %>%
-  filter(side == "Defense",
-         drafted == "Yes") %>% 
-  group_by(team) %>% count(sort = TRUE) %>% 
-  ggplot(aes(n, fct_reorder(team, n))) +
-  geom_col() +
-  labs(
-    title = "Team:",
-    subtitle = "Defense",
-    y = "Team") +
-  theme(
-    plot.title = element_text(hjust = 0.5),
-    plot.subtitle = element_text(hjust = 0.5, color = "blue"))
-
-
-# Exploratory Data Analysis: Principal Componenet Analysis ----
-nfl_PCA <- nfl %>% 
-  select(drafted, player, height, weight, forty, vertical, bench, broad_jump, three_cone, shuttle) %>% 
-  PCA(graph = FALSE, scale.unit = TRUE,
-      # Target: Drafted
-      quali.sup = c(1,2) 
-      )
-
-# Eigenvalues
-nfl_PCA %>% 
-  fviz_eig(addlabels = TRUE, ylim = c(0,70)) +
-  labs(
-    title = "Eigenvalues",
-    x = "Principal Components",
-    y = element_blank()
+combine_summary_Offense_Conference_Gather %>% 
+  ggplot(aes(conference, Stat, fill = drafted)) +
+  geom_col(position = "dodge") +
+  facet_wrap(~Measure, scales = "free_y") +
+  labs(title = "Defense-Conference: Stats") +
+  theme_bw() + theme(
+    plot.title = element_text(hjust = 0.5, size = 12),
+    axis.text.x = element_text(angle = 90, hjust = 1)
   ) +
-  theme_minimal() +
-  theme(
-     axis.text.y = element_blank()
-  )
+  scale_fill_manual(values = c("grey70","forestgreen"))
+# - By Position
+combine_summary_Defense_Position_Gather <- nfl_combine_summary %>% 
+  filter(side == "Defense") %>% 
+  group_by(position, drafted) %>% 
+  summarise(Weight = mean(weight),
+            Forty = mean(forty),
+            BroadJump = mean(broad_jump),
+            Bench = mean(bench)) %>% 
+  gather(Weight, Forty, BroadJump, Bench,
+         key = "Measure", value = "Stat")
 
-# Principal Component 1
-nfl_PCA %>% 
-  fviz_contrib(choice = "var", axes = 1) + 
-  theme_minimal() +
-  theme(
-    plot.background = element_blank()
-  )
-# Principal Component 2
-nfl_PCA %>% 
-  fviz_contrib(choice = "var", axes = 2) + 
-  theme_minimal() +
-  theme(
-    plot.background = element_blank()
-  )
-
-# BiPlot
-nfl_PCA %>% fviz_pca_var(alpha.var = "cos2")
-
-# - Side
-nfl_PCA %>% 
-  fviz_pca_biplot(
-  geom = "point", pointshape = 21, fill.ind = "gray", col.ind = nfl$side,
-  col.var = "black", alpha.var = "cos2",
-  palette = c("blue","red"),
-  legend.title = "", mean.point = FALSE
-) +
-  labs(
-    title = "Side",
-    x = element_blank(),
-    y = element_blank(),
-    alpha = "Quality of Representation"
+combine_summary_Offense_Position_Gather %>% 
+  ggplot(aes(position, Stat, fill = drafted)) +
+  geom_col(position = "dodge") +
+  facet_wrap(~Measure, scales = "free_y") +
+  labs(title = "Defense-Position: Stats") +
+  theme_bw() + theme(
+    plot.title = element_text(hjust = 0.5, size = 12)
   ) +
-  theme(
-    plot.background = element_blank(),
-    legend.position = "top"
-  )
+  scale_fill_manual(values = c("grey70","forestgreen"))
 
-# - Position
-nfl_PCA %>% 
-  fviz_pca_biplot(
-    geom = "point", pointshape = 21, fill.ind = "gray", col.ind = nfl$position,
-    col.var = "black", alpha.var = "cos2",
-    palette = "Spectral",
-    legend.title = "", mean.point = FALSE
-  ) +
-  labs(
-    title = "Side",
-    x = element_blank(),
-    y = element_blank(),
-    alpha = "Quality of Representation"
-  ) +
-  theme(
-    plot.background = element_blank(),
-    legend.position = "top"
-  )
+# Statistical Test
+nfl_combine_summary %>% 
+  filter(side == "Defense") %>% 
+  glm(drafted ~ weight + forty + broad_jump + bench, family = "binomial", data = .) %>% 
+  tidy() %>% 
+  mutate(estimate = plogis(estimate))
 
-# - Round
-nfl_PCA %>% 
-  fviz_pca_biplot(
-    geom = "point", pointshape = 21, fill.ind = "gray", col.ind = nfl$round,
-    col.var = "black", alpha.var = "cos2",
-    palette = "Set1",
-    legend.title = "", mean.point = FALSE
-  ) +
-  labs(
-    title = "Round",
-    x = element_blank(),
-    y = element_blank(),
-    alpha = "Quality of Representation"
-  ) +
-  theme(
-    plot.background = element_blank(),
-    legend.position = "top"
-  )
+nfl_combine_summary %>% 
+  filter(side == "Offense") %>% 
+  glm(drafted ~ conference + weight + forty + broad_jump + bench, family = "binomial", data = .) %>% 
+  tidy() %>% 
+  mutate(estimate = plogis(estimate))
 
-# - Drafted
-
-
-
-
-
-
-
-
+nfl_combine_summary %>% 
+  filter(side == "Offense") %>% 
+  glm(drafted ~ position + weight + forty + broad_jump + bench, family = "binomial", data = .) %>% 
+  tidy() %>% 
+  mutate(estimate = plogis(estimate))
 
