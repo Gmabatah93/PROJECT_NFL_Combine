@@ -10,6 +10,7 @@ library(forcats)
 library(FactoMineR)
 library(factoextra)
 library(tidymodels)
+library(workflowsets)
 
 # Data ----
 nfl <- read_csv("Data/NFLCombine.csv")
@@ -460,24 +461,23 @@ nfl_combine_summary %>%
   mutate(estimate = plogis(estimate))
 
 
-# Modeling: Prepocess & Fit ----
-nfl %>% 
+# Modeling: Prepocess ----
+# Data
+nfl_data <- nfl %>% 
+  select(position, conference, weight, height, forty, bench, broad_jump, drafted)
+nfl_data %>% 
   ggplot(aes(drafted)) +
   geom_bar()
+nfl_data$drafted %>% table %>% prop.table() %>% round(2)
 
-# - Split
-nfl_split <- initial_split(nfl, prop = 0.80, strata = drafted)
+# Split
+nfl_split <- initial_split(nfl_data, prop = 0.80, strata = drafted)
 nfl_train <- training(nfl_split)
 nfl_test <- testing(nfl_split)
-nfl_val_split <- validation_split(nfl_train, prop = 0.75)
-nfl_val <- training(nfl_val_split$splits[[1]])
-
+# - Validation Set
+nfl_val <- validation_split(nfl_train, prop = 0.75)
 # - K-Folds
 nfl_folds <- vfold_cv(nfl_train, v = 10)
-nfl_folds$splits[[1]] %>% analysis()
-# - repeated K-Folds
-nfl_repeated_folds <- vfold_cv(nfl_train, v = 10, repeats = 5)
-# 
 
 # Preprocess
 nfl_recipe <- 
@@ -485,12 +485,9 @@ nfl_recipe <-
        data = nfl_train) %>% 
   step_other(position, threshold = 0.01) %>% 
   step_dummy(position, conference)
-nfl_prep <- prep(nfl_recipe)  
-nfl_train_prep <- bake(nfl_prep, new_data = NULL)
-nfl_test_prep <- bake(nfl_prep, nfl_test)
 
+# Modeling: Fit ----
 # Fit
-keep_pred <- control_resamples(save_pred = TRUE, save_workflow = TRUE)
 
 # - Logistic Regression
 log_model <- 
@@ -505,18 +502,18 @@ log_wfow <-
 log_fit <- 
   fit(log_wfow, data = nfl_train)
 
-# - Resample
-log_resample_kfold <- 
-  log_wfow %>% 
-  fit_resamples(resamples = nfl_folds, control = keep_pred)
-log_resample_val <- 
-  log_wfow %>% 
-  fit_resamples(resamples = nfl_val_split, control = keep_pred)
+# - Regularized Regression
+log_reg_model <- 
+  logistic_reg() %>% 
+  set_engine("glmnet")
 
-log_resample_kfold %>% collect_metrics()
-log_resample_kfold %>% collect_predictions() 
-log_resample_val %>% collect_metrics()  
-log_resample_val %>% collect_predictions()  
+log_reg_wflow <- 
+  workflow() %>% 
+  add_model(log_reg_model) %>% 
+  add_recipe(nfl_recipe)
+
+log_reg_fit <- 
+  fit(log_reg_wflow, data = nfl_train)
 
 # - Random Forrest
 rf_model <- 
@@ -533,6 +530,25 @@ rf_fit <-
   rf_wflow %>% 
   fit(data = nfl_train)
 
+
+
+
+
+# Resample
+keep_pred <- control_resamples(save_pred = TRUE, save_workflow = TRUE)
+
+log_resample_kfold <- 
+  log_wfow %>% 
+  fit_resamples(resamples = nfl_folds, control = keep_pred)
+log_resample_val <- 
+  log_wfow %>% 
+  fit_resamples(resamples = nfl_val_split, control = keep_pred)
+
+log_resample_kfold %>% collect_metrics()
+log_resample_kfold %>% collect_predictions() 
+log_resample_val %>% collect_metrics()  
+log_resample_val %>% collect_predictions()  
+
 # Modeling: Diagnostics ----
 
 # Logistic Regression
@@ -543,11 +559,58 @@ log_fit %>% tidy()
 LOG_test_pred <- 
   data_frame(LOG_Pred = predict(log_fit, new_data = nfl_test) %>% pull(),
              LOG_Prob = predict(log_fit, new_data = nfl_test, type = "prob") %>% pull())
-
-# Conf Matrix
+# - Conf Matrix
 LOG_test_pred %>% 
   mutate(Actual = nfl_test$drafted) %>% 
   conf_mat(truth = Actual, estimate = LOG_Pred)
+# - Metrics
+LOG_test_results <- 
+  data_frame(Model = "Logistic_Regression",
+             Accuracy = accuracy(LOG_test_pred, truth = nfl_test$drafted, estimate = LOG_Pred) %>% pull(.estimate) %>% round(3),
+             Detection_Rate = detection_prevalence(LOG_test_pred , truth = nfl_test$drafted, estimate = LOG_Pred, event_level = "second") %>% pull(.estimate) %>% round(3),
+             MCC = mcc(LOG_test_pred, truth = nfl_test$drafted, estimate = LOG_Pred, event_level = "second") %>% pull(.estimate) %>% round(3),
+             Sensitivity = sens(LOG_test_pred, truth = nfl_test$drafted, estimate = LOG_Pred, event_level = "second") %>% pull(.estimate) %>% round(3),
+             Specificity = spec(LOG_test_pred, truth = nfl_test$drafted, estimate = LOG_Pred, event_level = "second") %>% pull(.estimate) %>% round(3),
+             Precision = precision(LOG_test_pred, truth = nfl_test$drafted, estimate = LOG_Pred, event_level = "second") %>% pull(.estimate) %>% round(3),
+             Recall = recall(LOG_test_pred, truth = nfl_test$drafted, estimate = LOG_Pred, event_level = "second") %>% pull(.estimate) %>% round(3),
+             F1 = f_meas(LOG_test_pred, truth = nfl_test$drafted, estimate = LOG_Pred, event_level = "second") %>% pull(.estimate) %>% round(3),
+             PPV = ppv(LOG_test_pred, truth = nfl_test$drafted, estimate = LOG_Pred, event_level = "second") %>% pull(.estimate) %>% round(3),
+             NPV = npv(LOG_test_pred, truth = nfl_test$drafted, estimate = LOG_Pred, event_level = "second") %>% pull(.estimate) %>% round(3),
+             AUC = roc_auc(LOG_test_pred, nfl_test$drafted, LOG_Prob, event_level = "second") %>% pull(.estimate) %>% round(3))
+# - ROC Curve
+nfl_roc <- nfl_test_pred %>% 
+  roc_curve(Actual, Probability, event_level = "second")
+nfl_test_pred %>% 
+  roc_auc(Actual, Probability, event_level = "second")
+
+nfl_roc %>% autoplot()
+# - PR Curve
+nfl_pr <- nfl_test_pred %>% 
+  pr_curve(Actual, Probability, event_level = "second")
+
+nfl_pr %>% autoplot()
+# - Gain & Lift
+nfl_gain <- nfl_test_pred %>% 
+  gain_curve(Actual, Probability, event_level = "second")
+nfl_lift <- nfl_test_pred %>% 
+  lift_curve(Actual, Probability, event_level = "second")
+
+nfl_gain %>% autoplot()
+nfl_lift %>% autoplot()
+
+
+# Regularized Regression
+log_reg_fit %>% tidy()
+
+# - Predictions
+LOG_test_pred <- 
+  data_frame(LOG_Pred = predict(log_reg_fit, new_data = nfl_test) %>% pull(),
+             LOG_Prob = predict(log_fit, new_data = nfl_test, type = "prob") %>% pull())
+# - Conf Matrix
+LOG_test_pred %>% 
+  mutate(Actual = nfl_test$drafted) %>% 
+  conf_mat(truth = Actual, estimate = LOG_Pred)
+# - Metrics
 LOG_test_results <- 
   data_frame(Model = "Logistic_Regression",
              Accuracy = accuracy(LOG_test_pred, truth = nfl_test$drafted, estimate = LOG_Pred) %>% pull(.estimate) %>% round(3),
@@ -563,42 +626,16 @@ LOG_test_results <-
              AUC = roc_auc(LOG_test_pred, nfl_test$drafted, LOG_Prob, event_level = "second") %>% pull(.estimate) %>% round(3))
 
 
-# ROC Curve
-nfl_roc <- nfl_test_pred %>% 
-  roc_curve(Actual, Probability, event_level = "second")
-nfl_test_pred %>% 
-  roc_auc(Actual, Probability, event_level = "second")
-
-nfl_roc %>% autoplot()
-
-# PR Curve
-nfl_pr <- nfl_test_pred %>% 
-  pr_curve(Actual, Probability, event_level = "second")
-
-nfl_pr %>% autoplot()
-
-# Gain & Lift
-nfl_gain <- nfl_test_pred %>% 
-  gain_curve(Actual, Probability, event_level = "second")
-nfl_lift <- nfl_test_pred %>% 
-  lift_curve(Actual, Probability, event_level = "second")
-
-nfl_gain %>% autoplot()
-nfl_lift %>% autoplot()
-
-
-
-
 # Random Forrest
 # - Predictions
 RF_test_pred <- 
   data_frame(RF_Pred = predict(rf_fit, new_data = nfl_test) %>% pull(),
              RF_Prob = predict(rf_fit, new_data = nfl_test, type = "prob") %>% pull())
-
-# Conf Matrix
+# - Conf Matrix
 RF_test_pred %>% 
   mutate(Actual = nfl_test$drafted) %>% 
   conf_mat(truth = Actual, estimate = RF_Pred)
+# - Metrics
 RF_test_results <- 
   data_frame(Model = "Random_Forrest",
              Accuracy = accuracy(RF_test_pred, truth = nfl_test$drafted, estimate = RF_Pred) %>% pull(.estimate) %>% round(3),
