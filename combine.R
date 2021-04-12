@@ -460,12 +460,24 @@ nfl_combine_summary %>%
   mutate(estimate = plogis(estimate))
 
 
-# Modeling
+# Modeling: Prepocess & Fit ----
+nfl %>% 
+  ggplot(aes(drafted)) +
+  geom_bar()
 
 # - Split
 nfl_split <- initial_split(nfl, prop = 0.80, strata = drafted)
 nfl_train <- training(nfl_split)
 nfl_test <- testing(nfl_split)
+nfl_val_split <- validation_split(nfl_train, prop = 0.75)
+nfl_val <- training(nfl_val_split$splits[[1]])
+
+# - K-Folds
+nfl_folds <- vfold_cv(nfl_train, v = 10)
+nfl_folds$splits[[1]] %>% analysis()
+# - repeated K-Folds
+nfl_repeated_folds <- vfold_cv(nfl_train, v = 10, repeats = 5)
+# 
 
 # Preprocess
 nfl_recipe <- 
@@ -478,15 +490,129 @@ nfl_train_prep <- bake(nfl_prep, new_data = NULL)
 nfl_test_prep <- bake(nfl_prep, nfl_test)
 
 # Fit
+keep_pred <- control_resamples(save_pred = TRUE, save_workflow = TRUE)
+
+# - Logistic Regression
 log_model <- 
   logistic_reg() %>% 
   set_engine("glm")
 
-log_model_fit <- 
-  log_model %>% 
-  fit(drafted ~ position + conference + weight + forty + broad_jump + bench,
-      data = nfl_train)
+log_wfow <- 
+  workflow() %>% 
+  add_model(log_model) %>% 
+  add_recipe(nfl_recipe) 
 
-# Diagnostics
-log_model_fit %>% 
-tidy()
+log_fit <- 
+  fit(log_wfow, data = nfl_train)
+
+# - Resample
+log_resample_kfold <- 
+  log_wfow %>% 
+  fit_resamples(resamples = nfl_folds, control = keep_pred)
+log_resample_val <- 
+  log_wfow %>% 
+  fit_resamples(resamples = nfl_val_split, control = keep_pred)
+
+log_resample_kfold %>% collect_metrics()
+log_resample_kfold %>% collect_predictions() 
+log_resample_val %>% collect_metrics()  
+log_resample_val %>% collect_predictions()  
+
+# - Random Forrest
+rf_model <- 
+  rand_forest(trees = 1000) %>% 
+  set_engine("ranger") %>% 
+  set_mode("classification")
+
+rf_wflow <- 
+  workflow() %>% 
+  add_formula(drafted ~ position + conference + weight + forty + broad_jump + bench) %>% 
+  add_model(rf_model) 
+  
+rf_fit <- 
+  rf_wflow %>% 
+  fit(data = nfl_train)
+
+# Modeling: Diagnostics ----
+
+# Logistic Regression
+log_model_fit %>% tidy()
+log_fit %>% tidy()
+
+# - Predictions
+LOG_test_pred <- 
+  data_frame(LOG_Pred = predict(log_fit, new_data = nfl_test) %>% pull(),
+             LOG_Prob = predict(log_fit, new_data = nfl_test, type = "prob") %>% pull())
+
+# Conf Matrix
+LOG_test_pred %>% 
+  mutate(Actual = nfl_test$drafted) %>% 
+  conf_mat(truth = Actual, estimate = LOG_Pred)
+LOG_test_results <- 
+  data_frame(Model = "Logistic_Regression",
+             Accuracy = accuracy(LOG_test_pred, truth = nfl_test$drafted, estimate = LOG_Pred) %>% pull(.estimate) %>% round(3),
+             Detection_Rate = detection_prevalence(LOG_test_pred , truth = nfl_test$drafted, estimate = LOG_Pred, event_level = "second") %>% pull(.estimate) %>% round(3),
+             MCC = mcc(LOG_test_pred, truth = nfl_test$drafted, estimate = LOG_Pred, event_level = "second") %>% pull(.estimate) %>% round(3),
+             Sensitivity = sens(LOG_test_pred, truth = nfl_test$drafted, estimate = LOG_Pred, event_level = "second") %>% pull(.estimate) %>% round(3),
+             Specificity = spec(LOG_test_pred, truth = nfl_test$drafted, estimate = LOG_Pred, event_level = "second") %>% pull(.estimate) %>% round(3),
+             Precision = precision(LOG_test_pred, truth = nfl_test$drafted, estimate = LOG_Pred, event_level = "second") %>% pull(.estimate) %>% round(3),
+             Recall = recall(LOG_test_pred, truth = nfl_test$drafted, estimate = LOG_Pred, event_level = "second") %>% pull(.estimate) %>% round(3),
+             F1 = f_meas(LOG_test_pred, truth = nfl_test$drafted, estimate = LOG_Pred, event_level = "second") %>% pull(.estimate) %>% round(3),
+             PPV = ppv(LOG_test_pred, truth = nfl_test$drafted, estimate = LOG_Pred, event_level = "second") %>% pull(.estimate) %>% round(3),
+             NPV = npv(LOG_test_pred, truth = nfl_test$drafted, estimate = LOG_Pred, event_level = "second") %>% pull(.estimate) %>% round(3),
+             AUC = roc_auc(LOG_test_pred, nfl_test$drafted, LOG_Prob, event_level = "second") %>% pull(.estimate) %>% round(3))
+
+
+# ROC Curve
+nfl_roc <- nfl_test_pred %>% 
+  roc_curve(Actual, Probability, event_level = "second")
+nfl_test_pred %>% 
+  roc_auc(Actual, Probability, event_level = "second")
+
+nfl_roc %>% autoplot()
+
+# PR Curve
+nfl_pr <- nfl_test_pred %>% 
+  pr_curve(Actual, Probability, event_level = "second")
+
+nfl_pr %>% autoplot()
+
+# Gain & Lift
+nfl_gain <- nfl_test_pred %>% 
+  gain_curve(Actual, Probability, event_level = "second")
+nfl_lift <- nfl_test_pred %>% 
+  lift_curve(Actual, Probability, event_level = "second")
+
+nfl_gain %>% autoplot()
+nfl_lift %>% autoplot()
+
+
+
+
+# Random Forrest
+# - Predictions
+RF_test_pred <- 
+  data_frame(RF_Pred = predict(rf_fit, new_data = nfl_test) %>% pull(),
+             RF_Prob = predict(rf_fit, new_data = nfl_test, type = "prob") %>% pull())
+
+# Conf Matrix
+RF_test_pred %>% 
+  mutate(Actual = nfl_test$drafted) %>% 
+  conf_mat(truth = Actual, estimate = RF_Pred)
+RF_test_results <- 
+  data_frame(Model = "Random_Forrest",
+             Accuracy = accuracy(RF_test_pred, truth = nfl_test$drafted, estimate = RF_Pred) %>% pull(.estimate) %>% round(3),
+             Detection_Rate = detection_prevalence(RF_test_pred , truth = nfl_test$drafted, estimate = RF_Pred, event_level = "second") %>% pull(.estimate) %>% round(3),
+             MCC = mcc(RF_test_pred, truth = nfl_test$drafted, estimate = RF_Pred, event_level = "second") %>% pull(.estimate) %>% round(3),
+             Sensitivity = sens(RF_test_pred, truth = nfl_test$drafted, estimate = RF_Pred, event_level = "second") %>% pull(.estimate) %>% round(3),
+             Specificity = spec(RF_test_pred, truth = nfl_test$drafted, estimate = RF_Pred, event_level = "second") %>% pull(.estimate) %>% round(3),
+             Precision = precision(RF_test_pred, truth = nfl_test$drafted, estimate = RF_Pred, event_level = "second") %>% pull(.estimate) %>% round(3),
+             Recall = recall(RF_test_pred, truth = nfl_test$drafted, estimate = RF_Pred, event_level = "second") %>% pull(.estimate) %>% round(3),
+             F1 = f_meas(RF_test_pred, truth = nfl_test$drafted, estimate = RF_Pred, event_level = "second") %>% pull(.estimate) %>% round(3),
+             PPV = ppv(RF_test_pred, truth = nfl_test$drafted, estimate = RF_Pred, event_level = "second") %>% pull(.estimate) %>% round(3),
+             NPV = npv(RF_test_pred, truth = nfl_test$drafted, estimate = RF_Pred, event_level = "second") %>% pull(.estimate) %>% round(3),
+             AUC = roc_auc(RF_test_pred, nfl_test$drafted, RF_Prob, event_level = "second") %>% pull(.estimate) %>% round(3))
+
+
+LOG_test_results %>% 
+  bind_rows(RF_test_results)
