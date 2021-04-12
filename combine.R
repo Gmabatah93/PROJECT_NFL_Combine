@@ -9,6 +9,7 @@ library(stringr)
 library(forcats)
 library(FactoMineR)
 library(factoextra)
+library(tidymodels)
 
 # Data ----
 nfl <- read_csv("Data/NFLCombine.csv")
@@ -110,6 +111,100 @@ nfl <- nfl %>%
 
 
 #
+# Exploratory Data Analysis ----
+
+# Count
+nfl %>%
+  count(position) %>% 
+  mutate(position = fct_reorder(position, n)) %>% 
+  ggplot(aes(position,n)) +
+  geom_col()
+nfl %>%
+  count(conference) %>% 
+  mutate(conference = fct_reorder(conference, n)) %>% 
+  ggplot(aes(conference,n)) +
+  geom_col() +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1))
+
+# Combine Data: Weight
+nfl_mean_weight <- nfl$weight %>% mean
+nfl %>% 
+  ggplot(aes(weight)) +
+  geom_histogram() + 
+  geom_vline(xintercept = nfl_mean_weight, color = "red")
+# - By poisition
+nfl %>% 
+  ggplot(aes(weight, fill = side)) +
+  geom_density(alpha = 0.3)
+nfl %>% 
+  ggplot(aes(position, weight, fill = side)) +
+  geom_boxplot() + geom_hline(yintercept = nfl_mean_weight, color = "red") +
+  geom_jitter(alpha = 0.09)
+# - By Conference
+nfl %>%
+  mutate(cond = case_when(
+    conference %in% c("Division I-A (SEC)", "Division I-A (ACC)", "Division I-A (Big 10)", "Division I-A (Big 12)", "Division I-A (Pac-12)") ~ "Elite",
+    conference %in% c("Division I-A (American)", "Division I-A (Sunbelt)", "Division I-A (Mountain West)", "Division I-A (MAC)","Division I-A (Conference USA)") ~ "Division I-A",
+    conference %in% c("Division I-AA") ~ "Division I-AA",
+    conference %in% c("Division II & III") ~ "Division II & III"
+  )) %>% 
+  ggplot(aes(conference, weight, fill = cond)) +
+  geom_boxplot() + geom_hline(yintercept = nfl_mean_weight, color = "red") +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1))
+
+# Combine Data: Forty
+nfl_mean_forty <- nfl$forty %>% mean
+nfl %>% 
+  ggplot(aes(forty)) +
+  geom_histogram() + 
+  geom_vline(xintercept = nfl_mean_forty, color = "red")
+# - By poisition
+nfl %>% 
+  ggplot(aes(forty, fill = side)) +
+  geom_density(alpha = 0.3)
+nfl %>% 
+  ggplot(aes(position, forty, fill = side)) +
+  geom_boxplot() + geom_hline(yintercept = nfl_mean_forty, color = "red") +
+  geom_jitter(alpha = 0.09) 
+# - By Conference
+nfl %>%
+  mutate(cond = case_when(
+    conference %in% c("Division I-A (SEC)", "Division I-A (ACC)", "Division I-A (Big 10)", "Division I-A (Big 12)", "Division I-A (Pac-12)") ~ "Elite",
+    conference %in% c("Division I-A (American)", "Division I-A (Sunbelt)", "Division I-A (Mountain West)", "Division I-A (MAC)","Division I-A (Conference USA)") ~ "Division I-A",
+    conference %in% c("Division I-AA") ~ "Division I-AA",
+    conference %in% c("Division II & III") ~ "Division II & III"
+  )) %>% 
+  ggplot(aes(conference, forty, fill = cond)) +
+  geom_boxplot() + geom_hline(yintercept = nfl_mean_forty, color = "red") +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1))
+
+# Combine Data: Bench
+nfl_mean_bench <- nfl$bench %>% mean
+nfl %>% 
+  ggplot(aes(bench)) +
+  geom_histogram() + 
+  geom_vline(xintercept = nfl_mean_bench, color = "red")
+# - By poisition
+nfl %>% 
+  ggplot(aes(bench, fill = side)) +
+  geom_density(alpha = 0.3)
+nfl %>% 
+  ggplot(aes(position, bench, fill = side)) +
+  geom_boxplot() + geom_hline(yintercept = nfl_mean_bench, color = "red") +
+  geom_jitter(alpha = 0.09) 
+# - By Conference
+nfl %>%
+  mutate(cond = case_when(
+    conference %in% c("Division I-A (SEC)", "Division I-A (ACC)", "Division I-A (Big 10)", "Division I-A (Big 12)", "Division I-A (Pac-12)") ~ "Elite",
+    conference %in% c("Division I-A (American)", "Division I-A (Sunbelt)", "Division I-A (Mountain West)", "Division I-A (MAC)","Division I-A (Conference USA)") ~ "Division I-A",
+    conference %in% c("Division I-AA") ~ "Division I-AA",
+    conference %in% c("Division II & III") ~ "Division II & III"
+  )) %>% 
+  ggplot(aes(conference, bench, fill = cond)) +
+  geom_boxplot() + geom_hline(yintercept = nfl_mean_bench, color = "red") +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1))
+
+#
 # Exploratory Data Analysis: PCA ----
 
 # Corrplot
@@ -121,8 +216,9 @@ nfl %>%
 combine_PCA <- nfl %>% 
   select(height:drafted) %>% 
   PCA(quali.sup = 9, graph = FALSE)
+combine_PCA$svd$vs^2
+combine_PCA$svd$V
 # - Graph
-combine_PCA %>%  fviz_pca_var(col.q = "red")
 combine_PCA %>% 
   fviz_pca_biplot(repel = TRUE,
                   arrowsize = 1,
@@ -197,9 +293,10 @@ combine_PCA %>%
                   legend.title = "Position")
 
 
-# NEW Dataset
+# New Dataset
 nfl_combine_summary <- nfl %>% 
   select(side, position, conference, weight, forty, broad_jump, bench, drafted)
+  
 #
 # Exploratory Data Analysis: Offense ----
 nfl_combine_summary %>% 
@@ -215,6 +312,7 @@ nfl_combine_summary %>%
             Avg_Forty = mean(forty),
             Avg_BroadJump = mean(broad_jump),
             Avg_Bench = mean(bench))
+
 # - By Conference
 combine_summary_Offense_Conference_Gather <- nfl_combine_summary %>% 
   filter(side == "Offense") %>% 
@@ -277,6 +375,12 @@ nfl_combine_summary %>%
   tidy() %>% 
   mutate(estimate = plogis(estimate))
 
+nfl_combine_summary %>% 
+  filter(side == "Offense") %>% 
+  glm(drafted ~ position + conference + weight + forty + broad_jump + bench, family = "binomial", data = .) %>% 
+  tidy() %>% 
+  mutate(estimate = plogis(estimate),
+         p.value = round(p.value,3)) %>% View
 
 
 #
@@ -355,3 +459,34 @@ nfl_combine_summary %>%
   tidy() %>% 
   mutate(estimate = plogis(estimate))
 
+
+# Modeling
+
+# - Split
+nfl_split <- initial_split(nfl, prop = 0.80, strata = drafted)
+nfl_train <- training(nfl_split)
+nfl_test <- testing(nfl_split)
+
+# Preprocess
+nfl_recipe <- 
+  recipe(drafted ~ position + conference + weight + forty + broad_jump + bench,
+       data = nfl_train) %>% 
+  step_other(position, threshold = 0.01) %>% 
+  step_dummy(position, conference)
+nfl_prep <- prep(nfl_recipe)  
+nfl_train_prep <- bake(nfl_prep, new_data = NULL)
+nfl_test_prep <- bake(nfl_prep, nfl_test)
+
+# Fit
+log_model <- 
+  logistic_reg() %>% 
+  set_engine("glm")
+
+log_model_fit <- 
+  log_model %>% 
+  fit(drafted ~ position + conference + weight + forty + broad_jump + bench,
+      data = nfl_train)
+
+# Diagnostics
+log_model_fit %>% 
+tidy()
