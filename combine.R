@@ -477,7 +477,7 @@ nfl_test <- testing(nfl_split)
 # - Validation Set
 nfl_val <- validation_split(nfl_train, prop = 0.75)
 # - K-Folds
-nfl_folds <- vfold_cv(nfl_train, v = 10)
+nfl_10fold <- vfold_cv(nfl_train, v = 10)
 
 # Preprocess
 nfl_recipe <- 
@@ -487,9 +487,9 @@ nfl_recipe <-
   step_dummy(position, conference)
 
 # Modeling: Fit ----
-# Fit
 
-# - Logistic Regression
+# Logistic Regression
+# - fit
 log_model <- 
   logistic_reg() %>% 
   set_engine("glm")
@@ -499,56 +499,182 @@ log_wfow <-
   add_model(log_model) %>% 
   add_recipe(nfl_recipe) 
 
-log_fit <- 
+log_final <- 
   fit(log_wfow, data = nfl_train)
 
-# - Regularized Regression
-log_reg_model <- 
-  logistic_reg() %>% 
-  set_engine("glmnet")
+# Regularized Regression
+# - tune
+log_reg_tune_spec <- 
+  logistic_reg(
+    penalty = tune(), 
+    mixture = tune()
+) %>% 
+  set_engine("glmnet") %>% 
+  set_mode("classification")
 
+log_reg_grid <- 
+  grid_regular(
+    penalty(),
+    mixture(),
+    levels = 15
+  )
+# - fit
 log_reg_wflow <- 
   workflow() %>% 
-  add_model(log_reg_model) %>% 
+  add_model(log_reg_tune_spec) %>% 
   add_recipe(nfl_recipe)
 
-log_reg_fit <- 
-  fit(log_reg_wflow, data = nfl_train)
+log_reg_resample <- 
+  log_reg_wflow %>% 
+  tune_grid(
+    resamples = nfl_10fold,
+    grid = log_reg_grid
+  )
+# - results
+log_reg_resample %>% 
+  collect_metrics() %>% 
+  filter(.metric == "roc_auc") %>% 
+  mutate(mixture = factor( round(mixture,3))) %>% 
+  ggplot(aes(penalty, mean, color = mixture)) +
+  geom_line(size = 1.5, alpha = 0.6) + 
+  theme_bw()
+log_reg_best <- 
+  log_reg_resample %>%
+  select_best("roc_auc")
+# - final
+log_reg_final <- 
+  log_reg_wflow %>% 
+  finalize_workflow(log_reg_best)
 
-# - Random Forrest
-rf_model <- 
-  rand_forest(trees = 1000) %>% 
+# Decision Tree
+# - Tune
+dt_tune_spec <- 
+  decision_tree(
+    cost_complexity = tune(),
+    tree_depth = tune()
+) %>% 
+  set_engine("rpart") %>% 
+  set_mode("classification")
+
+tree_grid <- 
+  grid_regular(
+    cost_complexity(),
+    tree_depth(),
+    levels = 5
+)
+# - fit
+dt_wflow <- 
+  workflow() %>% 
+  add_model(dt_tune_spec) %>% 
+  add_formula(drafted ~ position + conference + weight + forty + broad_jump + bench)
+  
+dt_resample <- 
+  dt_wflow %>% 
+  tune_grid(
+    resamples = nfl_10fold,
+    grid = tree_grid
+  )
+# - results
+dt_resample %>% 
+  collect_metrics() %>% 
+  mutate(tree_depth = factor(tree_depth)) %>% 
+  ggplot(aes(cost_complexity, mean, color = tree_depth)) +
+  geom_line(size = 1.5, alpha = 0.6) + geom_point(size = 2) +
+  facet_wrap(~.metric, scales = "free", nrow = 2) +
+  theme_bw()
+dt_resample %>% show_best("roc_auc")
+dt_best <- dt_resample %>% select_best("roc_auc")
+#- final 
+dt_final <- 
+  dt_wflow %>% 
+  finalize_workflow(dt_best)
+
+# Random Forrest
+# - grid search
+rf_tune_spec <- 
+  rand_forest(
+    mtry = tune(),
+    trees = tune(),
+    min_n = tune()
+) %>% 
   set_engine("ranger") %>% 
   set_mode("classification")
 
+forrest_grid <- 
+  grid_regular(
+    mtry() %>% range_set(c(1,20)),
+    trees(), 
+    min_n(),
+    levels = 5
+  )
+# - fit
 rf_wflow <- 
   workflow() %>% 
-  add_formula(drafted ~ position + conference + weight + forty + broad_jump + bench) %>% 
-  add_model(rf_model) 
-  
-rf_fit <- 
+  add_model(rf_tune_spec) %>% 
+  add_formula(drafted ~ position + conference + weight + forty + broad_jump + bench)
+
+rf_resample <- 
   rf_wflow %>% 
-  fit(data = nfl_train)
+  tune_grid(
+    resamples = nfl_10fold,
+    grid = forrest_grid
+  )
+# - results
+rf_resample %>% 
+  collect_metrics() %>% 
+  filter(.metric == "roc_auc") %>% 
+  mutate(mtry = factor(mtry),
+         trees = factor(trees),
+         min_n = factor(min_n)) %>% 
+  ggplot(aes(mtry, mean, color = min_n)) +
+  geom_line(size = 1.5, alpha = 0.6) + geom_point(size = 2) +
+  facet_wrap(~trees, nrow = 1)
+rf_best <- rf_resample %>% select_best("roc_auc")  
+# - final
+rf_final <- 
+  rf_wflow %>% 
+  finalize_workflow(rf_best)
 
+# Support Vector Machine
+# - tune
+svm_recipe <- 
+  recipe(drafted ~ position + conference + weight + forty + broad_jump + bench, data = nfl_train) %>% 
+  step_other(position, threshold = 0.01) %>% 
+  step_dummy(position, conference) %>% 
+  step_normalize(weight, forty, broad_jump, bench)
 
+svm_spec <- 
+  svm_rbf(cost = tune(), rbf_sigma = tune()) %>% 
+  set_engine("kernlab") %>% 
+  set_mode("classification")
 
+svm_grid <- 
+  grid_regular(
+    cost(), rbf_sigma(),
+    levels = 6
+  )
+# - fit
+svm_wflow <- 
+  workflow() %>% 
+  add_model(svm_spec) %>% 
+  add_recipe(svm_recipe)
 
-
-# Resample
-keep_pred <- control_resamples(save_pred = TRUE, save_workflow = TRUE)
-
-log_resample_kfold <- 
-  log_wfow %>% 
-  fit_resamples(resamples = nfl_folds, control = keep_pred)
-log_resample_val <- 
-  log_wfow %>% 
-  fit_resamples(resamples = nfl_val_split, control = keep_pred)
-
-log_resample_kfold %>% collect_metrics()
-log_resample_kfold %>% collect_predictions() 
-log_resample_val %>% collect_metrics()  
-log_resample_val %>% collect_predictions()  
-
+svm_fit <- 
+  svm_wflow %>% 
+  tune_grid(resamples = nfl_val, grid = svm_grid)
+# - results
+svm_fit %>% 
+  collect_metrics() %>%
+  mutate(cost = factor(cost),
+         rbf_sigma = factor(rbf_sigma)) %>% 
+  ggplot(aes(cost, mean, color = rbf_sigma)) +
+  geom_point(size = 2)
+svm_best <- svm_fit %>% select_best("roc_auc")
+# - final
+svm_final <- 
+  svm_wflow %>% 
+  finalize_workflow(svm_best)
+#
 # Modeling: Diagnostics ----
 
 # Logistic Regression
