@@ -1,34 +1,35 @@
-library(tidyverse)
+library(tidymodels)
+library(stringr)
 library(RColorBrewer)
 theme_set(theme_minimal())
 library(forcats)
 library(FactoMineR)
 library(factoextra)
-library(tidymodels)
 library(workflowsets)
+library(doParallel)
 
 # Data ----
-nfl <- readr::read_csv("Data/NFLCombine.csv")
+nfl_raw <- readr::read_csv("Data/NFLCombine.csv")
 
 # Clean: "St. & St" to State\
-nfl$school <- nfl$school %>% str_replace(pattern = "St.", replacement = "State")
-nfl$school <- nfl$school %>% str_replace(pattern = "St", replacement = "State")
-nfl$school <- nfl$school %>% str_replace(pattern = "Stateate",replacement = "State")
-nfl$school <- nfl$school %>% str_replace(pattern = "Statete",replacement = "State")
-nfl$school <- nfl$school %>% str_replace(pattern = "Statenford",replacement = "Stanford")
-nfl$school <- nfl$school %>% str_replace(pattern = "Statephen", replacement = "Stephen")
-nfl$school <- nfl$school %>% str_replace(pattern = "Statellman", replacement = "Stillman")
+nfl_raw$school <- nfl_raw$school %>% str_replace(pattern = "St.", replacement = "State")
+nfl_raw$school <- nfl_raw$school %>% str_replace(pattern = "St", replacement = "State")
+nfl_raw$school <- nfl_raw$school %>% str_replace(pattern = "Stateate",replacement = "State")
+nfl_raw$school <- nfl_raw$school %>% str_replace(pattern = "Statete",replacement = "State")
+nfl_raw$school <- nfl_raw$school %>% str_replace(pattern = "Statenford",replacement = "Stanford")
+nfl_raw$school <- nfl_raw$school %>% str_replace(pattern = "Statephen", replacement = "Stephen")
+nfl_raw$school <- nfl_raw$school %>% str_replace(pattern = "Statellman", replacement = "Stillman")
 
 #
-nfl$school <- nfl$school %>% str_replace(pattern = "Southern California", replacement = "USC")
-nfl$school <- nfl$school %>% str_replace(pattern = "Texas Christian", replacement = "TCU")
-nfl$school <- nfl$school %>% str_replace(pattern = "Louisiana State", replacement = "LSU")
-nfl$school <- nfl$school %>% str_replace(pattern = "Brigham Young", replacement = "BYU")
-nfl$school <- nfl$school %>% str_replace(pattern = "Southern Methodist", replacement = "SMU")
+nfl_raw$school <- nfl_raw$school %>% str_replace(pattern = "Southern California", replacement = "USC")
+nfl_raw$school <- nfl_raw$school %>% str_replace(pattern = "Texas Christian", replacement = "TCU")
+nfl_raw$school <- nfl_raw$school %>% str_replace(pattern = "Louisiana State", replacement = "LSU")
+nfl_raw$school <- nfl_raw$school %>% str_replace(pattern = "Brigham Young", replacement = "BYU")
+nfl_raw$school <- nfl_raw$school %>% str_replace(pattern = "Southern Methodist", replacement = "SMU")
 
 # clean: Split Draft information "drafted"
 # - Spilt to Columns: Team | Round | Pick | Draft_Year
-draft <- nfl$drafted %>% str_split(pattern = "/", simplify = TRUE) %>% as_tibble() %>% 
+draft <- nfl_raw$drafted %>% str_split(pattern = "/", simplify = TRUE) %>% as_tibble() %>% 
   select(team = V1, round = V2, pick = V3, draft_year = V4)
 # - team: remove white space at end
 draft$team <- draft$team %>% str_trim(side = "right")
@@ -45,11 +46,11 @@ draft <- draft %>%
          draft_year = ifelse(draft_year == "", NA, draft_year))
 
 # Add Split Draft Info back to Dataframe
-nfl <- nfl %>% 
+nfl_draft <- nfl_raw %>% 
   bind_cols(draft)
 
 # - DataType Conversions
-nfl <- nfl %>% 
+nfl_draft <- nfl_draft %>% 
   # Do not need "draft_year" already have "year"
   select(-draft_year) %>% 
   mutate(position = position %>% factor,
@@ -64,15 +65,15 @@ nfl <- nfl %>%
 # Data: Feature Engineering ----
 
 # - Change the old drafted variable to a tag
-nfl <- nfl %>% 
+nfl_draft <- nfl_draft %>% 
   mutate(drafted = ifelse(is.na(drafted), "No","Yes") %>% factor)
 
 # - Offense-Defense
-nfl <- nfl %>% 
+nfl_draft <- nfl_draft %>% 
   mutate(side = ifelse(position %in% c("WR","OT","RB","OG","TE","C","FB","QB","LS","OL"), "Offense", "Defense") %>% factor())
 
 # - Conference
-nfl <- nfl %>% 
+nfl_draft <- nfl_draft %>% 
   mutate(conference = case_when(
     # Division I-A
     school %in% c("Alabama","Texas A&M","Auburn","LSU","Mississippi","Arkansas","Mississippi State","Florida","Georgia","Missouri","Kentucky","Tennessee", "South Carolina","Vanderbilt") ~ "Division I-A (SEC)",
@@ -100,26 +101,33 @@ nfl <- nfl %>%
   ) %>% factor())
 
 
-nfl_df <- nfl %>% 
+nfl_df <- nfl_draft %>% 
   select(player, side, position, school, conference, year, everything()) %>% 
   select(-school, -pick) %>% 
-  mutate(round = case_when(
-    round == "1st" ~ "1st",
-    TRUE ~ "Not 1st"
-  ) %>% factor)
+  mutate(drafted = ifelse(is.na(drafted), "No", "Yes"),
+         round = case_when(
+                  round == "1st" ~ "1st",
+                  TRUE ~ "Not 1st"
+                  ) %>% factor
+  )
 
 
 #
-# Exploratory Data Analysis ----
+# Exploratory Data Analysis: Summary ----
+nfl_df %>% skimr::skim()
 
 # Count
+nfl_df %>% 
+  ggplot(aes(drafted)) +
+  geom_bar()
+
 nfl_df %>%
   group_by(drafted) %>% 
   count(position) %>% 
   mutate(position = fct_reorder(position, n)) %>% 
   ggplot(aes(position, n, fill = drafted)) +
   geom_col(position = "dodge")
-nfl %>%
+nfl_df %>%
   group_by(drafted) %>% 
   count(conference) %>% 
   mutate(conference = fct_reorder(conference, n)) %>% 
@@ -127,100 +135,18 @@ nfl %>%
   geom_col(position = "dodge") +
   theme(axis.text.x = element_text(angle = 45, hjust = 1))
 
-# Combine Data: Weight
-nfl_mean_weight <- nfl$weight %>% mean
-nfl %>% 
-  ggplot(aes(weight)) +
-  geom_histogram() + 
-  geom_vline(xintercept = nfl_mean_weight, color = "red")
-# - By poisition
-nfl %>% 
-  ggplot(aes(weight, fill = side)) +
-  geom_density(alpha = 0.3)
-nfl %>% 
-  ggplot(aes(position, weight, fill = drafted)) +
-  geom_boxplot() + geom_hline(yintercept = nfl_mean_weight, color = "red") +
-  geom_jitter(alpha = 0.09) +
-  facet_wrap(~ side)
-# - By Conference
-nfl %>%
-  mutate(cond = case_when(
-    conference %in% c("Division I-A (SEC)", "Division I-A (ACC)", "Division I-A (Big 10)", "Division I-A (Big 12)", "Division I-A (Pac-12)") ~ "Elite",
-    conference %in% c("Division I-A (American)", "Division I-A (Sunbelt)", "Division I-A (Mountain West)", "Division I-A (MAC)","Division I-A (Conference USA)") ~ "Division I-A",
-    conference %in% c("Division I-AA") ~ "Division I-AA",
-    conference %in% c("Division II & III") ~ "Division II & III"
-  )) %>% 
-  ggplot(aes(conference, weight, fill = cond)) +
-  geom_boxplot() + geom_hline(yintercept = nfl_mean_weight, color = "red") +
-  theme(axis.text.x = element_text(angle = 45, hjust = 1))
-
-# Combine Data: Forty
-nfl_mean_forty <- nfl$forty %>% mean
-nfl %>% 
-  ggplot(aes(forty)) +
-  geom_histogram() + 
-  geom_vline(xintercept = nfl_mean_forty, color = "red")
-# - By poisition
-nfl %>% 
-  ggplot(aes(forty, fill = side)) +
-  geom_density(alpha = 0.3)
-nfl %>% 
-  ggplot(aes(position, forty, fill = drafted)) +
-  geom_boxplot() + geom_hline(yintercept = nfl_mean_forty, color = "red") +
-  geom_jitter(alpha = 0.09) +
-  facet_wrap(~ side)
-# - By Conference
-nfl %>%
-  mutate(cond = case_when(
-    conference %in% c("Division I-A (SEC)", "Division I-A (ACC)", "Division I-A (Big 10)", "Division I-A (Big 12)", "Division I-A (Pac-12)") ~ "Elite",
-    conference %in% c("Division I-A (American)", "Division I-A (Sunbelt)", "Division I-A (Mountain West)", "Division I-A (MAC)","Division I-A (Conference USA)") ~ "Division I-A",
-    conference %in% c("Division I-AA") ~ "Division I-AA",
-    conference %in% c("Division II & III") ~ "Division II & III"
-  )) %>% 
-  ggplot(aes(conference, forty, fill = cond)) +
-  geom_boxplot() + geom_hline(yintercept = nfl_mean_forty, color = "red") +
-  theme(axis.text.x = element_text(angle = 45, hjust = 1))
-
-# Combine Data: Bench
-nfl_mean_bench <- nfl$bench %>% mean
-nfl %>% 
-  ggplot(aes(bench)) +
-  geom_histogram() + 
-  geom_vline(xintercept = nfl_mean_bench, color = "red")
-# - By poisition
-nfl %>% 
-  ggplot(aes(bench, fill = side)) +
-  geom_density(alpha = 0.3)
-nfl %>% 
-  ggplot(aes(position, bench, fill = side)) +
-  geom_boxplot() + geom_hline(yintercept = nfl_mean_bench, color = "red") +
-  geom_jitter(alpha = 0.09) 
-# - By Conference
-nfl %>%
-  mutate(cond = case_when(
-    conference %in% c("Division I-A (SEC)", "Division I-A (ACC)", "Division I-A (Big 10)", "Division I-A (Big 12)", "Division I-A (Pac-12)") ~ "Elite",
-    conference %in% c("Division I-A (American)", "Division I-A (Sunbelt)", "Division I-A (Mountain West)", "Division I-A (MAC)","Division I-A (Conference USA)") ~ "Division I-A",
-    conference %in% c("Division I-AA") ~ "Division I-AA",
-    conference %in% c("Division II & III") ~ "Division II & III"
-  )) %>% 
-  ggplot(aes(conference, bench, fill = cond)) +
-  geom_boxplot() + geom_hline(yintercept = nfl_mean_bench, color = "red") +
-  theme(axis.text.x = element_text(angle = 45, hjust = 1))
-
-#
-# Exploratory Data Analysis: PCA ----
-
-# Corrplot
+# Corrplot: Combine Stats
 nfl_df %>% 
   select(height:shuttle) %>% cor %>% 
   corrplot::corrplot(method = "number", type = "upper")
+
+#
+# Exploratory Data Analysis: PCA ----
 
 # PCA Object
 nfl_PCA <- nfl_df %>% 
   select(height:shuttle) %>% 
   PCA(graph = FALSE)
-nfl_PCA$svd$vs^2
-nfl_PCA$svd$V
 # - Graph
 nfl_PCA %>% 
   fviz_pca_biplot(repel = TRUE,
@@ -239,7 +165,6 @@ nfl_PCA$var$contrib[,c(1,2)]
 nfl_PCA %>% fviz_contrib(choice = "var", axes = 1)
 nfl_PCA %>% fviz_contrib(choice = "var", axes = 2)
 nfl_PCA %>% fviz_contrib(choice = "var", axes = c(1,2))
-
 
 
 # - PCA: Drafted
@@ -291,33 +216,117 @@ nfl_PCA%>%
                   arrowsize = 1, 
                   col.var = "grey25", alpha.var = "cos2",
                   geom.ind = "point", pointsize = 0.5,
-                  col.ind = nfl$position, 
+                  col.ind = nfl_df$position, 
                   addEllipses = TRUE, ellispe.type = "norm",
                   legend.title = "Position")
 
 
 # New Dataset
-nfl_combine_summary <- nfl_df %>% 
+nfl_df <- nfl_df %>% 
   select(side, position, conference, weight, forty, broad_jump, bench, drafted, round)
-  
+
 #
+# Exploratory Data Analysis: Combine ----
+# Combine Data: Weight
+nfl_mean_weight <- nfl_df$weight %>% mean
+nfl_df %>% 
+  ggplot(aes(weight)) +
+  geom_histogram() + 
+  geom_vline(xintercept = nfl_mean_weight, color = "red")
+# - By poisition
+nfl_df %>% 
+  ggplot(aes(weight, fill = side)) +
+  geom_density(alpha = 0.3)
+nfl_df %>% 
+  ggplot(aes(position, weight, fill = drafted)) +
+  geom_boxplot() + geom_hline(yintercept = nfl_mean_weight, color = "red") +
+  geom_jitter(alpha = 0.09) +
+  facet_wrap(~ side)
+# - By Conference
+nfl_df %>%
+  mutate(cond = case_when(
+    conference %in% c("Division I-A (SEC)", "Division I-A (ACC)", "Division I-A (Big 10)", "Division I-A (Big 12)", "Division I-A (Pac-12)") ~ "Elite",
+    conference %in% c("Division I-A (American)", "Division I-A (Sunbelt)", "Division I-A (Mountain West)", "Division I-A (MAC)","Division I-A (Conference USA)") ~ "Division I-A",
+    conference %in% c("Division I-AA") ~ "Division I-AA",
+    conference %in% c("Division II & III") ~ "Division II & III"
+  )) %>% 
+  ggplot(aes(conference, weight, fill = cond)) +
+  geom_boxplot() + geom_hline(yintercept = nfl_mean_weight, color = "red") +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1))
+
+# Combine Data: Forty
+nfl_mean_forty <- nfl_draft$forty %>% mean
+nfl_df %>% 
+  ggplot(aes(forty)) +
+  geom_histogram() + 
+  geom_vline(xintercept = nfl_mean_forty, color = "red")
+# - By poisition
+nfl_df %>% 
+  ggplot(aes(forty, fill = side)) +
+  geom_density(alpha = 0.3)
+nfl_df %>% 
+  ggplot(aes(position, forty, fill = drafted)) +
+  geom_boxplot() + geom_hline(yintercept = nfl_mean_forty, color = "red") +
+  geom_jitter(alpha = 0.09) +
+  facet_wrap(~ side)
+# - By Conference
+nfl_df %>%
+  mutate(cond = case_when(
+    conference %in% c("Division I-A (SEC)", "Division I-A (ACC)", "Division I-A (Big 10)", "Division I-A (Big 12)", "Division I-A (Pac-12)") ~ "Elite",
+    conference %in% c("Division I-A (American)", "Division I-A (Sunbelt)", "Division I-A (Mountain West)", "Division I-A (MAC)","Division I-A (Conference USA)") ~ "Division I-A",
+    conference %in% c("Division I-AA") ~ "Division I-AA",
+    conference %in% c("Division II & III") ~ "Division II & III"
+  )) %>% 
+  ggplot(aes(conference, forty, fill = cond)) +
+  geom_boxplot() + geom_hline(yintercept = nfl_mean_forty, color = "red") +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1))
+
+# Combine Data: Bench
+nfl_mean_bench <- nfl_draft$bench %>% mean
+nfl_df %>% 
+  ggplot(aes(bench)) +
+  geom_histogram() + 
+  geom_vline(xintercept = nfl_mean_bench, color = "red")
+# - By poisition
+nfl_df %>% 
+  ggplot(aes(bench, fill = side)) +
+  geom_density(alpha = 0.3)
+nfl_df %>% 
+  ggplot(aes(position, bench, fill = side)) +
+  geom_boxplot() + geom_hline(yintercept = nfl_mean_bench, color = "red") +
+  geom_jitter(alpha = 0.09) 
+# - By Conference
+nfl_df %>%
+  mutate(cond = case_when(
+    conference %in% c("Division I-A (SEC)", "Division I-A (ACC)", "Division I-A (Big 10)", "Division I-A (Big 12)", "Division I-A (Pac-12)") ~ "Elite",
+    conference %in% c("Division I-A (American)", "Division I-A (Sunbelt)", "Division I-A (Mountain West)", "Division I-A (MAC)","Division I-A (Conference USA)") ~ "Division I-A",
+    conference %in% c("Division I-AA") ~ "Division I-AA",
+    conference %in% c("Division II & III") ~ "Division II & III"
+  )) %>% 
+  ggplot(aes(conference, bench, fill = cond)) +
+  geom_boxplot() + geom_hline(yintercept = nfl_mean_bench, color = "red") +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1))
+
+#
+
 # Exploratory Data Analysis: Offense ----
-nfl_combine_summary %>% 
+nfl_df %>% 
   filter(side =="Offense") %>% 
   count(drafted)
 # - note: 874 drafted
 
 # STATS: 
-# - Summary
-nfl_combine_summary %>% 
+
+# Summary
+nfl_df %>% 
   filter(side == "Offense") %>% 
   summarise(Avg_Weight = mean(weight),
             Avg_Forty = mean(forty),
             Avg_BroadJump = mean(broad_jump),
             Avg_Bench = mean(bench))
 
-# - By Conference
-combine_summary_Offense_Conference_Gather <- nfl_combine_summary %>% 
+# By Conference
+nfl_offense_stat_Conference <- nfl_df %>% 
   filter(side == "Offense") %>% 
   group_by(conference, drafted, round) %>% 
   summarise(Weight = mean(weight),
@@ -326,8 +335,8 @@ combine_summary_Offense_Conference_Gather <- nfl_combine_summary %>%
             Bench = mean(bench)) %>% 
   gather(Weight, Forty, BroadJump, Bench,
          key = "Measure", value = "Stat")
-# -- drafted
-combine_summary_Offense_Conference_Gather %>% 
+# - drafted
+nfl_offense_stat_Conference %>% 
   ggplot(aes(conference, Stat, fill = drafted)) +
   geom_col(position = "dodge") +
   facet_wrap(~Measure, scales = "free_y") +
@@ -337,8 +346,8 @@ combine_summary_Offense_Conference_Gather %>%
     axis.text.x = element_text(angle = 90, hjust = 1)
   ) +
   scale_fill_manual(values = c("grey70","forestgreen"))
-# -- round
-combine_summary_Offense_Conference_Gather %>% 
+# - round
+nfl_offense_stat_Conference %>% 
   ggplot(aes(conference, Stat, fill = round)) +
   geom_col(position = "dodge") +
   facet_wrap(~Measure, scales = "free_y") +
@@ -349,18 +358,18 @@ combine_summary_Offense_Conference_Gather %>%
   ) +
   scale_fill_manual(values = c("midnightblue","grey70"))
 
-# - By Position
-combine_summary_Offense_Position_Gather <- nfl_combine_summary %>% 
+# By Position
+nfl_offense_stat_Position <- nfl_df %>% 
   filter(side == "Offense") %>% 
-  group_by(position, drafted) %>% 
+  group_by(position, drafted, round) %>% 
   summarise(Weight = mean(weight),
             Forty = mean(forty),
             BroadJump = mean(broad_jump),
             Bench = mean(bench)) %>% 
   gather(Weight, Forty, BroadJump, Bench,
          key = "Measure", value = "Stat")
-
-combine_summary_Offense_Position_Gather %>% 
+# - drafted
+nfl_offense_stat_Position %>% 
   ggplot(aes(position, Stat, fill = drafted)) +
   geom_col(position = "dodge") +
   facet_wrap(~Measure, scales = "free_y") +
@@ -369,127 +378,175 @@ combine_summary_Offense_Position_Gather %>%
     plot.title = element_text(hjust = 0.5, size = 12)
   ) +
   scale_fill_manual(values = c("grey70","forestgreen"))
+# - round
+nfl_offense_stat_Position %>% 
+  ggplot(aes(position, Stat, fill = round)) +
+  geom_col(position = "dodge") +
+  facet_wrap(~Measure, scales = "free_y") +
+  labs(title = "Offense-Position: Stats") +
+  theme_bw() + theme(
+    plot.title = element_text(hjust = 0.5, size = 12)
+  ) +
+  scale_fill_manual(values = c("midnightblue","grey70"))
 
 
 # Statistical Test
-nfl_combine_summary %>% 
+nfl_df %>% 
   filter(side == "Offense") %>% 
+  mutate(drafted = ifelse(drafted == "Yes", 1, 0)) %>% 
   glm(drafted ~ weight + forty + broad_jump + bench, family = "binomial", data = .) %>% 
   tidy() %>% 
-  mutate(estimate = plogis(estimate))
+  mutate(estimate = plogis(estimate),
+         p.value = round(p.value,3))
 
-nfl_combine_summary %>% 
+nfl_df %>% 
   filter(side == "Offense") %>% 
+  mutate(drafted = ifelse(drafted == "Yes", 1, 0)) %>% 
   glm(drafted ~ conference + weight + forty + broad_jump + bench, family = "binomial", data = .) %>% 
   tidy() %>% 
-  mutate(estimate = plogis(estimate))
+  mutate(estimate = plogis(estimate),
+         p.value = round(p.value,3))
 
-nfl_combine_summary %>% 
+nfl_df %>% 
   filter(side == "Offense") %>% 
+  mutate(drafted = ifelse(drafted == "Yes", 1, 0)) %>%
   glm(drafted ~ position + weight + forty + broad_jump + bench, family = "binomial", data = .) %>% 
   tidy() %>% 
-  mutate(estimate = plogis(estimate))
+  mutate(estimate = plogis(estimate),
+         p.value = round(p.value,3))
 
-nfl_combine_summary %>% 
+nfl_df %>% 
   filter(side == "Offense") %>% 
+  mutate(drafted = ifelse(drafted == "Yes", 1, 0)) %>%
   glm(drafted ~ position + conference + weight + forty + broad_jump + bench, family = "binomial", data = .) %>% 
   tidy() %>% 
   mutate(estimate = plogis(estimate),
-         p.value = round(p.value,3)) %>% View
+         p.value = round(p.value,3))
 
 
 #
 # Exploratory Data Analysis: Defense ----
-nfl %>% 
+nfl_df %>% 
   filter(side == "Defense") %>% 
   count(drafted)
-# - note: 1013 drafted
+# - note: 874 drafted
 
 # STATS: 
-# - Summary
-nfl_combine_summary %>% 
+
+# Summary
+nfl_df %>% 
   filter(side == "Defense") %>% 
   summarise(Avg_Weight = mean(weight),
             Avg_Forty = mean(forty),
             Avg_BroadJump = mean(broad_jump),
             Avg_Bench = mean(bench))
-# - By Conference
-combine_summary_Defense_Conference_Gather <- nfl_combine_summary %>% 
+
+# By Conference
+nfl_defense_stat_Conference <- nfl_df %>% 
   filter(side == "Defense") %>% 
-  group_by(conference, drafted) %>% 
+  group_by(conference, drafted, round) %>% 
   summarise(Weight = mean(weight),
             Forty = mean(forty),
             BroadJump = mean(broad_jump),
             Bench = mean(bench)) %>% 
   gather(Weight, Forty, BroadJump, Bench,
          key = "Measure", value = "Stat")
-
-combine_summary_Offense_Conference_Gather %>% 
+# - drafted
+nfl_defense_stat_Conference %>% 
   ggplot(aes(conference, Stat, fill = drafted)) +
   geom_col(position = "dodge") +
   facet_wrap(~Measure, scales = "free_y") +
-  labs(title = "Defense-Conference: Stats") +
+  labs(title = "Offense-Conference: Stats") +
   theme_bw() + theme(
     plot.title = element_text(hjust = 0.5, size = 12),
     axis.text.x = element_text(angle = 90, hjust = 1)
   ) +
   scale_fill_manual(values = c("grey70","forestgreen"))
-# - By Position
-combine_summary_Defense_Position_Gather <- nfl_combine_summary %>% 
+# - round
+nfl_defense_stat_Conference %>% 
+  ggplot(aes(conference, Stat, fill = round)) +
+  geom_col(position = "dodge") +
+  facet_wrap(~Measure, scales = "free_y") +
+  labs(title = "Offense-Conference: Stats") +
+  theme_bw() + theme(
+    plot.title = element_text(hjust = 0.5, size = 12),
+    axis.text.x = element_text(angle = 90, hjust = 1)
+  ) +
+  scale_fill_manual(values = c("midnightblue","grey70"))
+
+# By Position
+nfl_defense_stat_Position <- nfl_df %>% 
   filter(side == "Defense") %>% 
-  group_by(position, drafted) %>% 
+  group_by(position, drafted, round) %>% 
   summarise(Weight = mean(weight),
             Forty = mean(forty),
             BroadJump = mean(broad_jump),
             Bench = mean(bench)) %>% 
   gather(Weight, Forty, BroadJump, Bench,
          key = "Measure", value = "Stat")
-
-combine_summary_Offense_Position_Gather %>% 
+# - drafted
+nfl_defense_stat_Position %>% 
   ggplot(aes(position, Stat, fill = drafted)) +
   geom_col(position = "dodge") +
   facet_wrap(~Measure, scales = "free_y") +
-  labs(title = "Defense-Position: Stats") +
+  labs(title = "Offense-Position: Stats") +
   theme_bw() + theme(
     plot.title = element_text(hjust = 0.5, size = 12)
   ) +
   scale_fill_manual(values = c("grey70","forestgreen"))
+# - round
+nfl_defense_stat_Position %>% 
+  ggplot(aes(position, Stat, fill = round)) +
+  geom_col(position = "dodge") +
+  facet_wrap(~Measure, scales = "free_y") +
+  labs(title = "Offense-Position: Stats") +
+  theme_bw() + theme(
+    plot.title = element_text(hjust = 0.5, size = 12)
+  ) +
+  scale_fill_manual(values = c("midnightblue","grey70"))
+
 
 # Statistical Test
-nfl_combine_summary %>% 
+nfl_df %>% 
   filter(side == "Defense") %>% 
+  mutate(drafted = ifelse(drafted == "Yes", 1, 0)) %>% 
   glm(drafted ~ weight + forty + broad_jump + bench, family = "binomial", data = .) %>% 
   tidy() %>% 
-  mutate(estimate = plogis(estimate))
+  mutate(estimate = plogis(estimate),
+         p.value = round(p.value,3))
 
-nfl_combine_summary %>% 
-  filter(side == "Offense") %>% 
+nfl_df %>% 
+  filter(side == "Defense") %>% 
+  mutate(drafted = ifelse(drafted == "Yes", 1, 0)) %>% 
   glm(drafted ~ conference + weight + forty + broad_jump + bench, family = "binomial", data = .) %>% 
   tidy() %>% 
-  mutate(estimate = plogis(estimate))
+  mutate(estimate = plogis(estimate),
+         p.value = round(p.value,3))
 
-nfl_combine_summary %>% 
-  filter(side == "Offense") %>% 
+nfl_df %>% 
+  filter(side == "Defense") %>% 
+  mutate(drafted = ifelse(drafted == "Yes", 1, 0)) %>%
   glm(drafted ~ position + weight + forty + broad_jump + bench, family = "binomial", data = .) %>% 
   tidy() %>% 
-  mutate(estimate = plogis(estimate))
+  mutate(estimate = plogis(estimate),
+         p.value = round(p.value,3))
 
+nfl_df %>% 
+  filter(side == "Defense") %>% 
+  mutate(drafted = ifelse(drafted == "Yes", 1, 0)) %>%
+  glm(drafted ~ position + conference + weight + forty + broad_jump + bench, family = "binomial", data = .) %>% 
+  tidy() %>% 
+  mutate(estimate = plogis(estimate),
+         p.value = round(p.value,3))
+
+
+#
 
 # Modeling: Prepocess ----
-# Data
-nfl_data <- nfl %>% 
-  select(position, conference, weight, height, forty, bench, broad_jump, drafted)
-nfl_data %>% 
-  ggplot(aes(drafted)) +
-  geom_bar()
-nfl_data$drafted %>% table %>% prop.table() %>% round(2)
-
 # Split
-nfl_split <- initial_split(nfl_data, prop = 0.80, strata = drafted)
+nfl_split <- initial_split(nfl_df, prop = 0.80, strata = drafted)
 nfl_train <- training(nfl_split)
 nfl_test <- testing(nfl_split)
-# - Validation Set
-nfl_val <- validation_split(nfl_train, prop = 0.75)
 # - K-Folds
 nfl_10fold <- vfold_cv(nfl_train, v = 10)
 
@@ -498,298 +555,194 @@ nfl_recipe <-
   recipe(drafted ~ position + conference + weight + forty + broad_jump + bench,
        data = nfl_train) %>% 
   step_other(position, threshold = 0.01) %>% 
+  step_normalize(all_numeric()) %>% 
   step_dummy(position, conference)
 
+nfl_recipe_simple <- 
+  recipe(drafted ~ position + conference + weight + forty + broad_jump + bench,
+         data = nfl_train) 
+
+# Model Data
+nfl_recipe %>% 
+  prep() %>% juice() %>% 
+  glimpse()
+
+# Control
+nfl_ctrl <- 
+  control_grid(event_level = "second",
+               allow_par = TRUE,
+               save_pred = TRUE,
+               verbose = TRUE)
+
+# Metrics
+nfl_metrics <- metric_set(roc_auc, sens, spec, recall, precision, f_meas)
+
+#
 # Modeling: Fit ----
 
+# Start Parallel Processing
+cl_3 <- makeCluster(2)
+registerDoParallel(cl_3)
+
 # Logistic Regression
-# - fit
-log_model <- 
-  logistic_reg() %>% 
-  set_engine("glm")
-
-log_wfow <- 
-  workflow() %>% 
-  add_model(log_model) %>% 
-  add_recipe(nfl_recipe) 
-
-log_final <- 
-  fit(log_wfow, data = nfl_train)
-
-# Regularized Regression
-# - tune
-log_reg_tune_spec <- 
+# - spec
+log_spec <- 
   logistic_reg(
-    penalty = tune(), 
+    penalty = tune(),
     mixture = tune()
-) %>% 
+  ) %>% 
   set_engine("glmnet") %>% 
   set_mode("classification")
-
-log_reg_grid <- 
-  grid_regular(
-    penalty(),
-    mixture(),
-    levels = 15
-  )
-# - fit
-log_reg_wflow <- 
+# - workflow
+log_wflow <- 
   workflow() %>% 
-  add_model(log_reg_tune_spec) %>% 
-  add_recipe(nfl_recipe)
-
-log_reg_resample <- 
-  log_reg_wflow %>% 
+  add_model(log_spec) %>% 
+  add_recipe(nfl_recipe) 
+# - hyperparameters
+log_grid <- 
+  log_spec %>% 
+  parameters() %>% 
+  grid_latin_hypercube(size = 20)
+# - tune
+log_tune <-
+  log_wflow %>% 
   tune_grid(
     resamples = nfl_10fold,
-    grid = log_reg_grid
+    grid = log_grid,
+    metrics = nfl_metrics,
+    control = nfl_ctrl
   )
-# - results
-log_reg_resample %>% 
-  collect_metrics() %>% 
-  filter(.metric == "roc_auc") %>% 
-  mutate(mixture = factor( round(mixture,3))) %>% 
-  ggplot(aes(penalty, mean, color = mixture)) +
-  geom_line(size = 1.5, alpha = 0.6) + 
-  theme_bw()
-log_reg_best <- 
-  log_reg_resample %>%
-  select_best("roc_auc")
-# - final
-log_reg_final <- 
-  log_reg_wflow %>% 
-  finalize_workflow(log_reg_best)
+# - visual
+log_tune %>% autoplot()
+log_best <- log_tune %>% select_best("f_meas")
+# - final fit
+log_wflow_FIANL <- 
+  log_wflow %>% 
+  finalize_workflow(log_best)
 
-# Decision Tree
-# - Tune
-dt_tune_spec <- 
-  decision_tree(
-    cost_complexity = tune(),
-    tree_depth = tune()
-) %>% 
-  set_engine("rpart") %>% 
-  set_mode("classification")
-
-tree_grid <- 
-  grid_regular(
-    cost_complexity(),
-    tree_depth(),
-    levels = 5
-)
-# - fit
-dt_wflow <- 
-  workflow() %>% 
-  add_model(dt_tune_spec) %>% 
-  add_formula(drafted ~ position + conference + weight + forty + broad_jump + bench)
-  
-dt_resample <- 
-  dt_wflow %>% 
-  tune_grid(
-    resamples = nfl_10fold,
-    grid = tree_grid
-  )
-# - results
-dt_resample %>% 
-  collect_metrics() %>% 
-  mutate(tree_depth = factor(tree_depth)) %>% 
-  ggplot(aes(cost_complexity, mean, color = tree_depth)) +
-  geom_line(size = 1.5, alpha = 0.6) + geom_point(size = 2) +
-  facet_wrap(~.metric, scales = "free", nrow = 2) +
-  theme_bw()
-dt_resample %>% show_best("roc_auc")
-dt_best <- dt_resample %>% select_best("roc_auc")
-#- final 
-dt_final <- 
-  dt_wflow %>% 
-  finalize_workflow(dt_best)
+log_FINAL <- 
+  log_wflow_FIANL %>% 
+  fit(nfl_train)
 
 # Random Forrest
-# - grid search
-rf_tune_spec <- 
+# - spec
+rf_spec <- 
   rand_forest(
     mtry = tune(),
-    trees = tune(),
+    trees = 1000,
     min_n = tune()
 ) %>% 
   set_engine("ranger") %>% 
   set_mode("classification")
-
-forrest_grid <- 
-  grid_regular(
-    mtry() %>% range_set(c(1,20)),
-    trees(), 
-    min_n(),
-    levels = 5
-  )
-# - fit
+# - workflow
 rf_wflow <- 
   workflow() %>% 
-  add_model(rf_tune_spec) %>% 
-  add_formula(drafted ~ position + conference + weight + forty + broad_jump + bench)
-
-rf_resample <- 
+  add_model(rf_spec) %>% 
+  add_recipe(nfl_recipe_simple)
+# - tune
+rf_tune <- 
   rf_wflow %>% 
   tune_grid(
     resamples = nfl_10fold,
-    grid = forrest_grid
+    grid = 10,
+    metrics = nfl_metrics,
+    control = nfl_ctrl
   )
 # - results
-rf_resample %>% 
-  collect_metrics() %>% 
-  filter(.metric == "roc_auc") %>% 
-  mutate(mtry = factor(mtry),
-         trees = factor(trees),
-         min_n = factor(min_n)) %>% 
-  ggplot(aes(mtry, mean, color = min_n)) +
-  geom_line(size = 1.5, alpha = 0.6) + geom_point(size = 2) +
-  facet_wrap(~trees, nrow = 1)
-rf_best <- rf_resample %>% select_best("roc_auc")  
-# - final
-rf_final <- 
+rf_tune %>% autoplot() + theme_bw()
+rf_best <- rf_tune %>% select_best("f_meas")
+# - final fit
+rf_wflow_FINAL <- 
   rf_wflow %>% 
   finalize_workflow(rf_best)
 
-# Support Vector Machine
-# - tune
-svm_recipe <- 
-  recipe(drafted ~ position + conference + weight + forty + broad_jump + bench, data = nfl_train) %>% 
-  step_other(position, threshold = 0.01) %>% 
-  step_dummy(position, conference) %>% 
-  step_normalize(weight, forty, broad_jump, bench)
+rf_FINAL <- 
+  rf_wflow_FINAL %>% 
+  fit(nfl_train)
 
-svm_spec <- 
-  svm_rbf(cost = tune(), rbf_sigma = tune()) %>% 
-  set_engine("kernlab") %>% 
-  set_mode("classification")
+# Stop Parallell Processing
+stopCluster(cl_3)
 
-svm_grid <- 
-  grid_regular(
-    cost(), rbf_sigma(),
-    levels = 6
-  )
-# - fit
-svm_wflow <- 
-  workflow() %>% 
-  add_model(svm_spec) %>% 
-  add_recipe(svm_recipe)
-
-svm_fit <- 
-  svm_wflow %>% 
-  tune_grid(resamples = nfl_val, grid = svm_grid)
-# - results
-svm_fit %>% 
-  collect_metrics() %>%
-  mutate(cost = factor(cost),
-         rbf_sigma = factor(rbf_sigma)) %>% 
-  ggplot(aes(cost, mean, color = rbf_sigma)) +
-  geom_point(size = 2)
-svm_best <- svm_fit %>% select_best("roc_auc")
-# - final
-svm_final <- 
-  svm_wflow %>% 
-  finalize_workflow(svm_best)
-#
 # Modeling: Diagnostics ----
 
 # Logistic Regression
-log_model_fit %>% tidy()
-log_fit %>% tidy()
-
 # - Predictions
-LOG_test_pred <- 
-  data_frame(LOG_Pred = predict(log_fit, new_data = nfl_test) %>% pull(),
-             LOG_Prob = predict(log_fit, new_data = nfl_test, type = "prob") %>% pull())
+log_Results <- 
+  tibble(LOG_Pred = predict(log_FINAL, new_data = nfl_test) %>% pull(),
+         LOG_Prob = predict(log_FINAL, new_data = nfl_test, type = "prob") %>% pull())
 # - Conf Matrix
-LOG_test_pred %>% 
-  mutate(Actual = nfl_test$drafted) %>% 
-  conf_mat(truth = Actual, estimate = LOG_Pred)
+log_Results %>% 
+  mutate(Actual = factor(nfl_test$drafted)) %>% 
+  conf_mat(truth = Actual, estimate = LOG_Pred) %>% 
+  autoplot(type = "heatmap") +
+  labs(title = " Logistic Regression")
 # - Metrics
-LOG_test_results <- 
-  data_frame(Model = "Logistic_Regression",
-             Accuracy = accuracy(LOG_test_pred, truth = nfl_test$drafted, estimate = LOG_Pred) %>% pull(.estimate) %>% round(3),
-             Detection_Rate = detection_prevalence(LOG_test_pred , truth = nfl_test$drafted, estimate = LOG_Pred, event_level = "second") %>% pull(.estimate) %>% round(3),
-             MCC = mcc(LOG_test_pred, truth = nfl_test$drafted, estimate = LOG_Pred, event_level = "second") %>% pull(.estimate) %>% round(3),
-             Sensitivity = sens(LOG_test_pred, truth = nfl_test$drafted, estimate = LOG_Pred, event_level = "second") %>% pull(.estimate) %>% round(3),
-             Specificity = spec(LOG_test_pred, truth = nfl_test$drafted, estimate = LOG_Pred, event_level = "second") %>% pull(.estimate) %>% round(3),
-             Precision = precision(LOG_test_pred, truth = nfl_test$drafted, estimate = LOG_Pred, event_level = "second") %>% pull(.estimate) %>% round(3),
-             Recall = recall(LOG_test_pred, truth = nfl_test$drafted, estimate = LOG_Pred, event_level = "second") %>% pull(.estimate) %>% round(3),
-             F1 = f_meas(LOG_test_pred, truth = nfl_test$drafted, estimate = LOG_Pred, event_level = "second") %>% pull(.estimate) %>% round(3),
-             PPV = ppv(LOG_test_pred, truth = nfl_test$drafted, estimate = LOG_Pred, event_level = "second") %>% pull(.estimate) %>% round(3),
-             NPV = npv(LOG_test_pred, truth = nfl_test$drafted, estimate = LOG_Pred, event_level = "second") %>% pull(.estimate) %>% round(3),
-             AUC = roc_auc(LOG_test_pred, nfl_test$drafted, LOG_Prob, event_level = "second") %>% pull(.estimate) %>% round(3))
-# - ROC Curve
-nfl_roc <- nfl_test_pred %>% 
-  roc_curve(Actual, Probability, event_level = "second")
-nfl_test_pred %>% 
-  roc_auc(Actual, Probability, event_level = "second")
-
-nfl_roc %>% autoplot()
-# - PR Curve
-nfl_pr <- nfl_test_pred %>% 
-  pr_curve(Actual, Probability, event_level = "second")
-
-nfl_pr %>% autoplot()
-# - Gain & Lift
-nfl_gain <- nfl_test_pred %>% 
-  gain_curve(Actual, Probability, event_level = "second")
-nfl_lift <- nfl_test_pred %>% 
-  lift_curve(Actual, Probability, event_level = "second")
-
-nfl_gain %>% autoplot()
-nfl_lift %>% autoplot()
-
-
-# Regularized Regression
-log_reg_fit %>% tidy()
-
-# - Predictions
-LOG_test_pred <- 
-  data_frame(LOG_Pred = predict(log_reg_fit, new_data = nfl_test) %>% pull(),
-             LOG_Prob = predict(log_fit, new_data = nfl_test, type = "prob") %>% pull())
-# - Conf Matrix
-LOG_test_pred %>% 
-  mutate(Actual = nfl_test$drafted) %>% 
-  conf_mat(truth = Actual, estimate = LOG_Pred)
-# - Metrics
-LOG_test_results <- 
-  data_frame(Model = "Logistic_Regression",
-             Accuracy = accuracy(LOG_test_pred, truth = nfl_test$drafted, estimate = LOG_Pred) %>% pull(.estimate) %>% round(3),
-             Detection_Rate = detection_prevalence(LOG_test_pred , truth = nfl_test$drafted, estimate = LOG_Pred, event_level = "second") %>% pull(.estimate) %>% round(3),
-             MCC = mcc(LOG_test_pred, truth = nfl_test$drafted, estimate = LOG_Pred, event_level = "second") %>% pull(.estimate) %>% round(3),
-             Sensitivity = sens(LOG_test_pred, truth = nfl_test$drafted, estimate = LOG_Pred, event_level = "second") %>% pull(.estimate) %>% round(3),
-             Specificity = spec(LOG_test_pred, truth = nfl_test$drafted, estimate = LOG_Pred, event_level = "second") %>% pull(.estimate) %>% round(3),
-             Precision = precision(LOG_test_pred, truth = nfl_test$drafted, estimate = LOG_Pred, event_level = "second") %>% pull(.estimate) %>% round(3),
-             Recall = recall(LOG_test_pred, truth = nfl_test$drafted, estimate = LOG_Pred, event_level = "second") %>% pull(.estimate) %>% round(3),
-             F1 = f_meas(LOG_test_pred, truth = nfl_test$drafted, estimate = LOG_Pred, event_level = "second") %>% pull(.estimate) %>% round(3),
-             PPV = ppv(LOG_test_pred, truth = nfl_test$drafted, estimate = LOG_Pred, event_level = "second") %>% pull(.estimate) %>% round(3),
-             NPV = npv(LOG_test_pred, truth = nfl_test$drafted, estimate = LOG_Pred, event_level = "second") %>% pull(.estimate) %>% round(3),
-             AUC = roc_auc(LOG_test_pred, nfl_test$drafted, LOG_Prob, event_level = "second") %>% pull(.estimate) %>% round(3))
+log_FINAL_Metrics <- 
+  tibble(Model = "Logistic_Regression",
+         Accuracy = accuracy(log_Results, truth = factor(nfl_test$drafted), estimate = LOG_Pred) %>% pull(.estimate) %>% round(3),
+         Detection_Rate = detection_prevalence(log_Results, truth = factor(nfl_test$drafted), estimate = LOG_Pred, event_level = "second") %>% pull(.estimate) %>% round(3),
+         Sensitivity = sens(log_Results, truth = factor(nfl_test$drafted), estimate = LOG_Pred, event_level = "second") %>% pull(.estimate) %>% round(3),
+         Specificity = spec(log_Results, truth = factor(nfl_test$drafted), estimate = LOG_Pred, event_level = "second") %>% pull(.estimate) %>% round(3),
+         Precision = precision(log_Results, truth = factor(nfl_test$drafted), estimate = LOG_Pred, event_level = "second") %>% pull(.estimate) %>% round(3),
+         Recall = recall(log_Results, truth = factor(nfl_test$drafted), estimate = LOG_Pred, event_level = "second") %>% pull(.estimate) %>% round(3),
+         F1 = f_meas(log_Results, truth = factor(nfl_test$drafted), estimate = LOG_Pred, event_level = "second") %>% pull(.estimate) %>% round(3),
+         PPV = ppv(log_Results, truth = factor(nfl_test$drafted), estimate = LOG_Pred, event_level = "second") %>% pull(.estimate) %>% round(3),
+         NPV = npv(log_Results, truth = factor(nfl_test$drafted), estimate = LOG_Pred, event_level = "second") %>% pull(.estimate) %>% round(3),
+         AUC = roc_auc(log_Results, factor(nfl_test$drafted), LOG_Prob, event_level = "second") %>% pull(.estimate) %>% round(3))
 
 
 # Random Forrest
+
 # - Predictions
-RF_test_pred <- 
-  data_frame(RF_Pred = predict(rf_fit, new_data = nfl_test) %>% pull(),
-             RF_Prob = predict(rf_fit, new_data = nfl_test, type = "prob") %>% pull())
+rf_Results <- 
+  data_frame(RF_Pred = predict(rf_FINAL, new_data = nfl_test) %>% pull(),
+             RF_Prob = predict(rf_FINAL, new_data = nfl_test, type = "prob") %>% pull())
 # - Conf Matrix
-RF_test_pred %>% 
-  mutate(Actual = nfl_test$drafted) %>% 
-  conf_mat(truth = Actual, estimate = RF_Pred)
+rf_Results %>% 
+  mutate(Actual = factor(nfl_test$drafted)) %>% 
+  conf_mat(truth = Actual, estimate = RF_Pred) %>% 
+  autoplot(type = "heatmap") +
+  labs(title = "Random Forrest")
 # - Metrics
-RF_test_results <- 
-  data_frame(Model = "Random_Forrest",
-             Accuracy = accuracy(RF_test_pred, truth = nfl_test$drafted, estimate = RF_Pred) %>% pull(.estimate) %>% round(3),
-             Detection_Rate = detection_prevalence(RF_test_pred , truth = nfl_test$drafted, estimate = RF_Pred, event_level = "second") %>% pull(.estimate) %>% round(3),
-             MCC = mcc(RF_test_pred, truth = nfl_test$drafted, estimate = RF_Pred, event_level = "second") %>% pull(.estimate) %>% round(3),
-             Sensitivity = sens(RF_test_pred, truth = nfl_test$drafted, estimate = RF_Pred, event_level = "second") %>% pull(.estimate) %>% round(3),
-             Specificity = spec(RF_test_pred, truth = nfl_test$drafted, estimate = RF_Pred, event_level = "second") %>% pull(.estimate) %>% round(3),
-             Precision = precision(RF_test_pred, truth = nfl_test$drafted, estimate = RF_Pred, event_level = "second") %>% pull(.estimate) %>% round(3),
-             Recall = recall(RF_test_pred, truth = nfl_test$drafted, estimate = RF_Pred, event_level = "second") %>% pull(.estimate) %>% round(3),
-             F1 = f_meas(RF_test_pred, truth = nfl_test$drafted, estimate = RF_Pred, event_level = "second") %>% pull(.estimate) %>% round(3),
-             PPV = ppv(RF_test_pred, truth = nfl_test$drafted, estimate = RF_Pred, event_level = "second") %>% pull(.estimate) %>% round(3),
-             NPV = npv(RF_test_pred, truth = nfl_test$drafted, estimate = RF_Pred, event_level = "second") %>% pull(.estimate) %>% round(3),
-             AUC = roc_auc(RF_test_pred, nfl_test$drafted, RF_Prob, event_level = "second") %>% pull(.estimate) %>% round(3))
+rf_FINAL_Metrics <- 
+  tibble(Model = "Random_Forest",
+         Accuracy = accuracy(rf_Results, truth = factor(nfl_test$drafted), estimate = RF_Pred) %>% pull(.estimate) %>% round(3),
+         Detection_Rate = detection_prevalence(rf_Results, truth = factor(nfl_test$drafted), estimate = RF_Pred, event_level = "second") %>% pull(.estimate) %>% round(3),
+         Sensitivity = sens(rf_Results, truth = factor(nfl_test$drafted), estimate = RF_Pred, event_level = "second") %>% pull(.estimate) %>% round(3),
+         Specificity = spec(rf_Results, truth = factor(nfl_test$drafted), estimate = RF_Pred, event_level = "second") %>% pull(.estimate) %>% round(3),
+         Precision = precision(rf_Results, truth = factor(nfl_test$drafted), estimate = RF_Pred, event_level = "second") %>% pull(.estimate) %>% round(3),
+         Recall = recall(rf_Results, truth = factor(nfl_test$drafted), estimate = RF_Pred, event_level = "second") %>% pull(.estimate) %>% round(3),
+         F1 = f_meas(rf_Results, truth = factor(nfl_test$drafted), estimate = RF_Pred, event_level = "second") %>% pull(.estimate) %>% round(3),
+         PPV = ppv(rf_Results, truth = factor(nfl_test$drafted), estimate = RF_Pred, event_level = "second") %>% pull(.estimate) %>% round(3),
+         NPV = npv(rf_Results, truth = factor(nfl_test$drafted), estimate = RF_Pred, event_level = "second") %>% pull(.estimate) %>% round(3),
+         AUC = roc_auc(rf_Results, factor(nfl_test$drafted), RF_Prob, event_level = "second") %>% pull(.estimate) %>% round(3))
 
 
-LOG_test_results %>% 
-  bind_rows(RF_test_results)
+# Summary
+log_FINAL_Metrics %>% 
+  bind_rows(rf_FINAL_Metrics)
+
+# ROC Curve
+# - Logistic Regression
+log_ROC <- log_Results %>%
+  mutate(Actual = factor(nfl_test$drafted)) %>% 
+  roc_curve(Actual, LOG_Prob, event_level = "second") %>% 
+  mutate(Model = "Logisitic Regression")
+# - Random Forest
+rf_ROC <- rf_Results %>%
+  mutate(Actual = factor(nfl_test$drafted)) %>% 
+  roc_curve(Actual, RF_Prob, event_level = "second") %>% 
+  mutate(Model = "Random Forrest")
+# - Plot
+log_ROC %>% 
+  bind_rows(rf_ROC) %>% 
+  mutate(specificity = 1 - specificity) %>% 
+  ggplot(aes(specificity, sensitivity, color = Model)) +
+  geom_line() + geom_abline(slope = 1, linetype = 2, alpha = 0.2) +
+  labs(
+    x = "1 - specificity"
+  ) + 
+  theme_bw() + 
+  theme(legend.position = "bottom")
+
+
