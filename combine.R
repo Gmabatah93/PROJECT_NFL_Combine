@@ -119,7 +119,7 @@ nfl_draft %>% skimr::skim()
 
 # Exploratory Data Analysis: Draft Summary ----
 
-# Target
+# Target: 
 nfl_draft %>% 
   count(drafted) %>% 
   ggplot(aes(drafted, n)) +
@@ -147,6 +147,7 @@ nfl_draft %>%
   mutate(side = fct_reorder(side, n)) %>% 
   ggplot(aes(side, n, fill = drafted)) +
   geom_col(position = "fill") +
+  geom_hline(yintercept = 0.66, color = "red") +
   scale_fill_manual(values = c("grey80","forestgreen"))
 
 # - By Position
@@ -164,6 +165,7 @@ nfl_draft %>%
   mutate(position = fct_reorder(position, n)) %>% 
   ggplot(aes(position, n, fill = drafted)) +
   geom_col(position = "fill") +
+  geom_hline(yintercept = 0.66, color = "red") +
   facet_wrap(~ side, nrow = 2) +
   scale_fill_manual(values = c("grey80","forestgreen"))
 # - By Conference
@@ -181,6 +183,7 @@ nfl_draft %>%
   mutate(conference = fct_reorder(conference, n)) %>% 
   ggplot(aes(conference, n, fill = drafted)) +
   geom_col(position = "fill") +
+  geom_hline(yintercept = 0.66, color = "red") +
   theme(axis.text.x = element_text(angle = 45, hjust = 1)) +
   scale_fill_manual(values = c("grey80","forestgreen"))
 
@@ -188,11 +191,11 @@ nfl_draft %>%
 nfl_draft %>% 
   ggplot() +
   geom_mosaic(aes(x = product(position), fill=conference)) +
-  theme(axis.text.y = element_blank()) +
-  facet_wrap(~drafted, nrow = 2) +
-  scale_fill_brewer(palette = "Spectral")
-  theme_mosaic()
-
+  theme(
+    axis.text.y = element_blank(),
+    axis.text.x = element_text(angle = 45, hjust = 1)
+  )
+  
 # Corrplot: Combine Stats
 nfl_draft %>% 
   select(height:shuttle) %>% cor %>% 
@@ -364,7 +367,8 @@ ggarrange(gg_Weight_Forty, gg_3cone_Shuttle, gg_Forty_BJump,
           ncol = 3, nrow = 2)
 
 # Categorical
-nfl_draft %>% 
+nfl_draft %>%
+  filter(side == "Offense") %>% 
   ggplot() +
   geom_mosaic(aes(x = product(position), fill = conference)) +
   theme(axis.text.y = element_blank()) +
@@ -374,14 +378,13 @@ nfl_draft %>%
     axis.text.y = element_blank(),
     axis.text.x = element_text(angle = 45, hjust = 1),
     legend.position = "bottom"
-    ) +
-  scale_fill_brewer(palette = "Spectral")
+    ) 
 
 #
 # Exploratory Data Analysis: PCA ----
 
 # PCA Object
-nfl_PCA <- nfl_df %>% 
+nfl_PCA <- nfl_draft %>% 
   select(height:shuttle) %>% 
   PCA(graph = FALSE)
 # - Graph
@@ -410,7 +413,7 @@ nfl_PCA %>%
                   arrowsize = 1, 
                   col.var = "grey25", alpha.var = "cos2",
                   geom.ind = "point", pointsize = 0.5,
-                  col.ind = nfl_df$drafted, 
+                  col.ind = nfl_draft$drafted, 
                   addEllipses = TRUE, ellispe.type = "norm",
                   palette = c("tomato", "forestgreen"),
                   legend.title = "Drafted")
@@ -421,7 +424,7 @@ nfl_PCA %>%
                   arrowsize = 1, 
                   col.var = "grey25", alpha.var = "cos2",
                   geom.ind = "point", pointsize = 0.5,
-                  col.ind = nfl_df$round, 
+                  col.ind = nfl_draft$round, 
                   addEllipses = TRUE, ellispe.type = "norm",
                   legend.title = "Round")
 
@@ -431,7 +434,7 @@ nfl_PCA %>%
                   arrowsize = 1, 
                   col.var = "grey25", alpha.var = "cos2",
                   geom.ind = "point", pointsize = 0.5,
-                  col.ind = nfl_df$conference, 
+                  col.ind = nfl_draft$conference, 
                   addEllipses = TRUE, ellispe.type = "norm",
                   legend.title = "Conference",
                   legend.position = "bottom")
@@ -442,7 +445,7 @@ nfl_PCA %>%
                   arrowsize = 1, 
                   col.var = "grey25", alpha.var = "cos2",
                   geom.ind = "point", pointsize = 0.5,
-                  col.ind = nfl_df$side, 
+                  col.ind = nfl_draft$side, 
                   addEllipses = TRUE, ellispe.type = "norm",
                   palette = c("blue","red"),
                   legend.title = "Side")
@@ -453,13 +456,13 @@ nfl_PCA%>%
                   arrowsize = 1, 
                   col.var = "grey25", alpha.var = "cos2",
                   geom.ind = "point", pointsize = 0.5,
-                  col.ind = nfl_df$position, 
+                  col.ind = nfl_draft$position, 
                   addEllipses = TRUE, ellispe.type = "norm",
                   legend.title = "Position")
 
 
 # New Dataset
-nfl_df <- nfl_df %>% 
+nfl_df <- nfl_draft %>% 
   select(side, position, conference, weight, forty, broad_jump, bench, drafted, round)
 
 #
@@ -818,8 +821,8 @@ nfl_metrics <- metric_set(roc_auc, sens, spec, recall, precision, f_meas)
 # Modeling: Fit ----
 
 # Start Parallel Processing
-cl_3 <- makeCluster(2)
-registerDoParallel(cl_3)
+cl_3 <- parallel::makeCluster(2)
+doParallel::registerDoParallel(cl_3)
 
 # Logistic Regression
 # - spec
@@ -898,7 +901,7 @@ rf_FINAL <-
   fit(nfl_train)
 
 # Stop Parallell Processing
-stopCluster(cl_3)
+parallel::stopCluster(cl_3)
 
 # Modeling: Diagnostics ----
 
