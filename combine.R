@@ -2,6 +2,7 @@ library(tidymodels)
 library(stringr)
 library(RColorBrewer)
 theme_set(theme_minimal())
+library(ggmosaic)
 library(ggpubr)
 library(forcats)
 library(FactoMineR)
@@ -128,7 +129,8 @@ nfl_draft %>%
   theme(
     plot.title = element_text(face = "bold", hjust = 0.5, size = 20),
     axis.text.y = element_blank(),
-    axis.title.y = element_blank()
+    axis.title.y = element_blank(),
+    legend.position = "bottom"
   ) + 
   scale_fill_manual(values = c("grey80", "forestgreen"))
 # - By Side
@@ -138,6 +140,13 @@ nfl_draft %>%
   mutate(side = fct_reorder(side, n)) %>% 
   ggplot(aes(side, n, fill = drafted)) +
   geom_col(position = "dodge") +
+  scale_fill_manual(values = c("grey80","forestgreen"))
+nfl_draft %>%
+  group_by(drafted) %>% 
+  count(side) %>% 
+  mutate(side = fct_reorder(side, n)) %>% 
+  ggplot(aes(side, n, fill = drafted)) +
+  geom_col(position = "fill") +
   scale_fill_manual(values = c("grey80","forestgreen"))
 
 # - By Position
@@ -149,6 +158,14 @@ nfl_draft %>%
   geom_col(position = "dodge") +
   facet_wrap(~ side, nrow = 2) +
   scale_fill_manual(values = c("grey80","forestgreen"))
+nfl_draft %>%
+  group_by(drafted, side) %>% 
+  count(position) %>% 
+  mutate(position = fct_reorder(position, n)) %>% 
+  ggplot(aes(position, n, fill = drafted)) +
+  geom_col(position = "fill") +
+  facet_wrap(~ side, nrow = 2) +
+  scale_fill_manual(values = c("grey80","forestgreen"))
 # - By Conference
 nfl_draft %>%
   group_by(drafted) %>% 
@@ -158,6 +175,23 @@ nfl_draft %>%
   geom_col(position = "dodge") +
   theme(axis.text.x = element_text(angle = 45, hjust = 1)) +
   scale_fill_manual(values = c("grey80","forestgreen"))
+nfl_draft %>%
+  group_by(drafted) %>% 
+  count(conference) %>% 
+  mutate(conference = fct_reorder(conference, n)) %>% 
+  ggplot(aes(conference, n, fill = drafted)) +
+  geom_col(position = "fill") +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1)) +
+  scale_fill_manual(values = c("grey80","forestgreen"))
+
+# CAtegorical
+nfl_draft %>% 
+  ggplot() +
+  geom_mosaic(aes(x = product(position), fill=conference)) +
+  theme(axis.text.y = element_blank()) +
+  facet_wrap(~drafted, nrow = 2) +
+  scale_fill_brewer(palette = "Spectral")
+  theme_mosaic()
 
 # Corrplot: Combine Stats
 nfl_draft %>% 
@@ -328,6 +362,21 @@ gg_Weight_3cone <- nfl_draft %>%
 ggarrange(gg_Weight_Forty, gg_3cone_Shuttle, gg_Forty_BJump, 
           gg_Forty_3cone, gg_Vertical_BJump, gg_Weight_3cone, 
           ncol = 3, nrow = 2)
+
+# Categorical
+nfl_draft %>% 
+  ggplot() +
+  geom_mosaic(aes(x = product(position), fill = conference)) +
+  theme(axis.text.y = element_blank()) +
+  facet_wrap(~round, nrow = 2) +
+  theme_bw() +
+  theme(
+    axis.text.y = element_blank(),
+    axis.text.x = element_text(angle = 45, hjust = 1),
+    legend.position = "bottom"
+    ) +
+  scale_fill_brewer(palette = "Spectral")
+
 #
 # Exploratory Data Analysis: PCA ----
 
