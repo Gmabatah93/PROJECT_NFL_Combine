@@ -21,6 +21,8 @@ workflowsets | 0.0.1
 doParallel | 1.0.16
 
 ### Business Requirement
+1. Develop a Model to predict if a player will be drafted
+2. For the players that got drafted develop a Model to predict if they will be drafted in the 1st Round.
 
 ### Data Collection
 **(raw)**
@@ -40,3 +42,16 @@ broad_jump | dbl | how far can a player jump. From a balanced stance, the player
 three_cone | dbl | primarily run to evaluate the agility, quickness and fluidity of movement _(seconds)_
 shuttle | dbl | The shuttle (20yards), much like the 3-cone drill, test speed and acceleration. The only difference is that players are running laterally instead of forming a right angle.  _(seconds)_
 drafted | chr | What NFL team drafted player / Round / Pick / Year
+
+# Exploratory Data Analysis
+<img src="Images/EDA_Drafted.PNG" width="300">
+
+**Note**:
+
+<img src="Images/EDA_Side.PNG" width="500">
+
+**Note**:
+
+<img src="Images/EDA_Position.PNG" width="500">
+
+**Note**:
