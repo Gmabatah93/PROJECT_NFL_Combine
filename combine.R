@@ -125,49 +125,111 @@ nfl_draft %>%
   ggplot(aes(drafted, n)) +
   geom_col(aes(fill = drafted)) +
   geom_label(aes(label = n)) +
-  labs(title = "Drafted ?") +
   theme(
-    plot.title = element_text(face = "bold", hjust = 0.5, size = 20),
     axis.text.y = element_blank(),
     axis.title.y = element_blank(),
-    legend.position = "bottom"
+    axis.title.x = element_blank(),
+    axis.text.x = element_blank(),
+    legend.position = "top",
+    legend.title = element_text(face = "bold", size = 15)
   ) + 
   scale_fill_manual(values = c("grey80", "forestgreen"))
 # - By Side
-nfl_draft %>%
+gg_draft_Side <- nfl_draft %>%
   group_by(drafted) %>% 
   count(side) %>% 
   mutate(side = fct_reorder(side, n)) %>% 
   ggplot(aes(side, n, fill = drafted)) +
   geom_col(position = "dodge") +
+  geom_label(aes(label = n),
+             position = position_dodge(width = 1),
+             color = "white", alpha = 0.2
+            ) +
+  labs(title = "Side") +
+  theme(
+    plot.title = element_text(size = 20, hjust = 0.5),
+    axis.title = element_blank(),
+    axis.text = element_blank(),
+    legend.position = "none"
+  ) +
   scale_fill_manual(values = c("grey80","forestgreen"))
-nfl_draft %>%
+gg_draft_Side_prop <- nfl_draft %>%
   group_by(drafted) %>% 
   count(side) %>% 
   mutate(side = fct_reorder(side, n)) %>% 
   ggplot(aes(side, n, fill = drafted)) +
-  geom_col(position = "fill") +
-  geom_hline(yintercept = 0.66, color = "red") +
+  geom_col(position = "fill") + geom_hline(yintercept = 0.66, color = "red") +
+  theme(
+    axis.title.y = element_blank(),
+    axis.text.y = element_text(size = 12),
+    axis.title.x = element_blank(),
+    axis.text.x = element_text(face = "bold", size = 20),
+    legend.position = "bottom"
+  ) +
+  scale_y_continuous(labels = scales::percent_format()) +
   scale_fill_manual(values = c("grey80","forestgreen"))
 
+ggarrange(gg_draft_Side, gg_draft_Side_prop, 
+          ncol = 1)
 # - By Position
-nfl_draft %>%
+gg_draft_Position <- nfl_draft %>%
   group_by(drafted, side) %>% 
   count(position) %>% 
+  ungroup() %>% 
   mutate(position = fct_reorder(position, n)) %>% 
   ggplot(aes(position, n, fill = drafted)) +
   geom_col(position = "dodge") +
-  facet_wrap(~ side, nrow = 2) +
+  labs(title = "Position") +
+  theme(
+    plot.title = element_text(hjust = 0.5, face = "bold", size = 20),
+    axis.title.y = element_blank(),
+    axis.title.x = element_blank(),
+    legend.position = "none"
+  ) +
   scale_fill_manual(values = c("grey80","forestgreen"))
-nfl_draft %>%
+
+gg_draft_position_Offense_prop <- nfl_draft %>%
+  filter(side == "Offense") %>% 
   group_by(drafted, side) %>% 
   count(position) %>% 
   mutate(position = fct_reorder(position, n)) %>% 
   ggplot(aes(position, n, fill = drafted)) +
-  geom_col(position = "fill") +
-  geom_hline(yintercept = 0.66, color = "red") +
-  facet_wrap(~ side, nrow = 2) +
+  geom_col(position = "fill") + geom_hline(yintercept = 0.66, color = "red") +
+  labs(title = "Offense") +
+  theme(
+    plot.title = element_text(hjust = 0.5, face = "bold", size = 20),
+    axis.title.y = element_blank(),
+    axis.text.y = element_text(size = 12),
+    axis.title.x = element_blank(),
+    axis.text.x = element_text(),
+    legend.position = "none"
+  ) +
+  scale_y_continuous(labels = scales::percent_format()) +
   scale_fill_manual(values = c("grey80","forestgreen"))
+gg_draft_position_Defense_prop <- nfl_draft %>%
+  filter(side == "Defense") %>% 
+  group_by(drafted, side) %>% 
+  count(position) %>% 
+  mutate(position = fct_reorder(position, n)) %>% 
+  ggplot(aes(position, n, fill = drafted)) +
+  geom_col(position = "fill") + geom_hline(yintercept = 0.66, color = "red") +
+  labs(title = "Defense") +
+  theme(
+    plot.title = element_text(hjust = 0.5, face = "bold", size = 20),
+    axis.title.y = element_blank(),
+    axis.text.y = element_blank(),
+    axis.title.x = element_blank(),
+    axis.text.x = element_text(),
+    legend.position = "none"
+  ) +
+  scale_y_continuous(labels = scales::percent_format()) +
+  scale_fill_manual(values = c("grey80","forestgreen"))
+gg_draft_Position_prop <- ggarrange(gg_draft_position_Offense_prop, gg_draft_position_Defense_prop,
+          nrow = 1)
+
+ggarrange(gg_draft_Position, gg_draft_Position_prop, 
+          ncol = 1)
+
 # - By Conference
 nfl_draft %>%
   group_by(drafted) %>% 
@@ -175,7 +237,13 @@ nfl_draft %>%
   mutate(conference = fct_reorder(conference, n)) %>% 
   ggplot(aes(conference, n, fill = drafted)) +
   geom_col(position = "dodge") +
-  theme(axis.text.x = element_text(angle = 45, hjust = 1)) +
+  labs(title = "Conference") +
+  theme(
+    plot.title = element_text(hjust = 0.5, face = "bold", size = 20),
+    axis.title = element_blank(),
+    axis.text.x = element_text(angle = 45, hjust = 1),
+    legend.position = "none"
+  ) +
   scale_fill_manual(values = c("grey80","forestgreen"))
 nfl_draft %>%
   group_by(drafted) %>% 
@@ -184,18 +252,15 @@ nfl_draft %>%
   ggplot(aes(conference, n, fill = drafted)) +
   geom_col(position = "fill") +
   geom_hline(yintercept = 0.66, color = "red") +
-  theme(axis.text.x = element_text(angle = 45, hjust = 1)) +
+  theme(
+    axis.title = element_blank(),
+    axis.text.y = element_text(size = 12),
+    axis.text.x = element_text(angle = 45, hjust = 1, face = "bold"),
+    legend.position = "none"
+  ) +
+  scale_y_continuous(labels = scales::percent_format()) +
   scale_fill_manual(values = c("grey80","forestgreen"))
 
-# CAtegorical
-nfl_draft %>% 
-  ggplot() +
-  geom_mosaic(aes(x = product(position), fill=conference)) +
-  theme(
-    axis.text.y = element_blank(),
-    axis.text.x = element_text(angle = 45, hjust = 1)
-  )
-  
 # Corrplot: Combine Stats
 nfl_draft %>% 
   select(height:shuttle) %>% cor %>% 
