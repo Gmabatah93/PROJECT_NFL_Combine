@@ -44,14 +44,49 @@ shuttle | dbl | The shuttle (20yards), much like the 3-cone drill, test speed an
 drafted | chr | What NFL team drafted player / Round / Pick / Year
 
 # Exploratory Data Analysis
-<img src="Images/EDA_Drafted.PNG" width="300">
+<img src="Images/EDA_Drafted.PNG" width="800">
 
 **Note**:
 
-<img src="Images/EDA_Side.PNG" width="500">
+<img src="Images/EDA_Side.PNG" width="1000">
 
 **Note**:
 
-<img src="Images/EDA_Position.PNG" width="500">
+<img src="Images/EDA_Position.PNG" width="1000">
+
+**Note**:
+
+<img src="Images/EDA_Conference.PNG" width="1000">
+
+**Note**:
+
+
+<img src="Images/EDA_round.PNG" width="800">
+
+**Note**:
+
+<img src="Images/EDA_round_Side.PNG" width="1000">
+
+**Note**:
+
+<img src="Images/EDA_round_Position.PNG" width="1000">
+
+**Note**:
+
+<img src="Images/EDA_round_Conference.PNG" width="1000">
+
+**Note**:
+
+
+
+<img src="Images/Corr_Combine.PNG" width="1000">
+
+**Note**:
+
+<img src="Images/Corr_Sig.PNG" width="1000">
+
+**Note**:
+
+<img src="Images/Corr_round_Sig.PNG" width="1000">
 
 **Note**:

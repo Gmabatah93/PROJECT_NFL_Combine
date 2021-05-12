@@ -231,7 +231,7 @@ ggarrange(gg_draft_Position, gg_draft_Position_prop,
           ncol = 1)
 
 # - By Conference
-nfl_draft %>%
+gg_draft_conference <- nfl_draft %>%
   group_by(drafted) %>% 
   count(conference) %>% 
   mutate(conference = fct_reorder(conference, n)) %>% 
@@ -241,11 +241,11 @@ nfl_draft %>%
   theme(
     plot.title = element_text(hjust = 0.5, face = "bold", size = 20),
     axis.title = element_blank(),
-    axis.text.x = element_text(angle = 45, hjust = 1),
+    axis.text.x = element_blank(),
     legend.position = "none"
   ) +
   scale_fill_manual(values = c("grey80","forestgreen"))
-nfl_draft %>%
+gg_draft_conference_prop <- nfl_draft %>%
   group_by(drafted) %>% 
   count(conference) %>% 
   mutate(conference = fct_reorder(conference, n)) %>% 
@@ -261,189 +261,309 @@ nfl_draft %>%
   scale_y_continuous(labels = scales::percent_format()) +
   scale_fill_manual(values = c("grey80","forestgreen"))
 
-# Corrplot: Combine Stats
-nfl_draft %>% 
-  select(height:shuttle) %>% cor %>% 
-  corrplot::corrplot(method = "number", type = "upper")
-# - Weight ~ Forty: 89
-gg_Weight_Forty <- nfl_draft %>% 
-  ggplot(aes(weight, forty, color = drafted)) +
-  geom_point(alpha = 0.3) +
-  theme(
-    plot.title = element_text(face = "bold", hjust = 0.5, size = 12),
-    legend.position = "bottom"
-  ) +
-scale_color_manual(values = c("grey80","forestgreen"))
-# - Three Cone ~ Shuttle: 85
-gg_3cone_Shuttle <- nfl_draft %>% 
-  ggplot(aes(three_cone, shuttle, color = drafted)) +
-  geom_point(alpha = 0.3) +
-  theme(
-    plot.title = element_text(face = "bold", hjust = 0.5, size = 12),
-    legend.position = "none"
-  ) +
-  scale_color_manual(values = c("grey80","forestgreen"))
-# - Forty ~ Broad Jump: -84
-gg_Forty_BJump <- nfl_draft %>% 
-  ggplot(aes(forty, broad_jump, color = drafted)) +
-  geom_point(alpha = 0.3) +
-  theme(
-    plot.title = element_text(face = "bold", hjust = 0.5, size = 12),
-    legend.position = "none"
-  ) +
-  scale_color_manual(values = c("grey80","forestgreen"))
-# - Forty ~ Three Cone: 83
-gg_Forty_3cone <- nfl_draft %>% 
-  ggplot(aes(forty, three_cone, color = drafted)) +
-  geom_point(alpha = 0.3) +
-  theme(
-    plot.title = element_text(face = "bold", hjust = 0.5, size = 12),
-    legend.position = "none"
-  ) +
-  scale_color_manual(values = c("grey80","forestgreen"))
-# - Vertical ~ Broad Jump: 82
-gg_Vertical_BJump <- nfl_draft %>% 
-  ggplot(aes(vertical, broad_jump, color = drafted)) +
-  geom_point(alpha = 0.3) +
-  theme(
-    plot.title = element_text(face = "bold", hjust = 0.5, size = 12),
-    legend.position = "bottom"
-  ) +
-  scale_color_manual(values = c("grey80","forestgreen"))
-# - Weight ~ Three Cone: 81
-gg_Weight_3cone <- nfl_draft %>% 
-  ggplot(aes(weight, three_cone, color = drafted)) +
-  geom_point(alpha = 0.3) +
-  theme(
-    plot.title = element_text(face = "bold", hjust = 0.5, size = 12),
-    legend.position = "none"
-  ) +
-  scale_color_manual(values = c("grey80","forestgreen"))
+ggarrange(gg_draft_conference, gg_draft_conference_prop,
+          ncol = 1)
 
-# Multiplot
-ggarrange(gg_Weight_Forty, gg_3cone_Shuttle, gg_Forty_BJump, 
-          gg_Forty_3cone, gg_Vertical_BJump, gg_Weight_3cone, 
-          ncol = 3, nrow = 2)
 #
-# Exploratory Data Analysis: Round Summary ----
+# Exploratory Data Analysis: ROund Summary ----
 
-# Target
+# Target: 
 nfl_draft %>% 
   count(round) %>% 
   ggplot(aes(round, n)) +
   geom_col(aes(fill = round)) +
   geom_label(aes(label = n)) +
-  labs(title = "1st Round ?") +
   theme(
-    plot.title = element_text(face = "bold", hjust = 0.5, size = 20),
     axis.text.y = element_blank(),
-    axis.title.y = element_blank()
+    axis.title.y = element_blank(),
+    axis.title.x = element_blank(),
+    axis.text.x = element_blank(),
+    legend.position = "top",
+    legend.title = element_text(face = "bold", size = 15)
   ) + 
-  scale_fill_manual(values = c("forestgreen","grey80"))
+  scale_fill_manual(values = c("goldenrod4","grey80"))
 # - By Side
-nfl_draft %>%
+gg_round_Side <- nfl_draft %>%
   group_by(round) %>% 
   count(side) %>% 
   mutate(side = fct_reorder(side, n)) %>% 
   ggplot(aes(side, n, fill = round)) +
   geom_col(position = "dodge") +
-  scale_fill_manual(values = c("forestgreen","grey80"))
+  geom_label(aes(label = n),
+             position = position_dodge(width = 1),
+             color = "white", alpha = 0.6
+  ) +
+  labs(title = "Side") +
+  theme(
+    plot.title = element_text(size = 20, hjust = 0.5),
+    axis.title = element_blank(),
+    axis.text = element_blank(),
+    legend.position = "none"
+  ) +
+  scale_fill_manual(values = c("goldenrod4","grey80"))
+gg_round_Side_prop <- nfl_draft %>%
+  group_by(round) %>% 
+  count(side) %>% 
+  mutate(side = fct_reorder(side, n),
+         round = factor(round, levels = c("Not 1st","1st"))) %>% 
+  ggplot(aes(side, n, fill = round)) +
+  geom_col(position = "fill") + geom_hline(yintercept = 0.08, color = "red") +
+  theme(
+    axis.title.y = element_blank(),
+    axis.text.y = element_text(size = 12),
+    axis.title.x = element_blank(),
+    axis.text.x = element_text(face = "bold", size = 20),
+    legend.position = "bottom"
+  ) +
+  scale_y_continuous(labels = scales::percent_format()) +
+  scale_fill_manual(values = c("grey80", "goldenrod4"))
+
+ggarrange(gg_round_Side, gg_round_Side_prop, 
+          ncol = 1)
 # - By Position
-nfl_draft %>%
+gg_round_Position <- nfl_draft %>%
   group_by(round, side) %>% 
   count(position) %>% 
+  ungroup() %>% 
   mutate(position = fct_reorder(position, n)) %>% 
   ggplot(aes(position, n, fill = round)) +
   geom_col(position = "dodge") +
-  facet_wrap(~ side, nrow = 2) +
-  scale_fill_manual(values = c("forestgreen","grey80"))
+  labs(title = "Position") +
+  theme(
+    plot.title = element_text(hjust = 0.5, face = "bold", size = 20),
+    axis.title.y = element_blank(),
+    axis.title.x = element_blank(),
+    legend.position = "none"
+  ) +
+  scale_fill_manual(values = c("goldenrod4","grey80"))
+
+gg_round_position_Offense_prop <- nfl_draft %>%
+  filter(side == "Offense") %>% 
+  group_by(round, side) %>% 
+  count(position) %>% 
+  mutate(position = fct_reorder(position, n),
+         round = factor(round, levels = c("Not 1st","1st"))) %>% 
+  ggplot(aes(position, n, fill = round)) +
+  geom_col(position = "fill") + geom_hline(yintercept = 0.08, color = "red") +
+  labs(title = "Offense") +
+  theme(
+    plot.title = element_text(hjust = 0.5, face = "bold", size = 20),
+    axis.title.y = element_blank(),
+    axis.text.y = element_text(size = 12),
+    axis.title.x = element_blank(),
+    axis.text.x = element_text(),
+    legend.position = "none"
+  ) +
+  scale_y_continuous(labels = scales::percent_format()) +
+  scale_fill_manual(values = c("grey80","goldenrod4"))
+gg_round_position_Defense_prop <- nfl_draft %>%
+  filter(side == "Defense") %>% 
+  group_by(round, side) %>% 
+  count(position) %>% 
+  mutate(position = fct_reorder(position, n),
+         round = factor(round, levels = c("Not 1st","1st"))) %>% 
+  ggplot(aes(position, n, fill = round)) +
+  geom_col(position = "fill") + geom_hline(yintercept = 0.08, color = "red") +
+  labs(title = "Defense") +
+  theme(
+    plot.title = element_text(hjust = 0.5, face = "bold", size = 20),
+    axis.title.y = element_blank(),
+    axis.text.y = element_blank(),
+    axis.title.x = element_blank(),
+    axis.text.x = element_text(),
+    legend.position = "none"
+  ) +
+  scale_y_continuous(labels = scales::percent_format()) +
+  scale_fill_manual(values = c("grey80","goldenrod4"))
+
+gg_round_Position_prop <- ggarrange(gg_round_position_Offense_prop, gg_round_position_Defense_prop,
+                                    nrow = 1)
+
+ggarrange(gg_round_Position, gg_round_Position_prop, 
+          ncol = 1)
+
 # - By Conference
-nfl_draft %>%
+gg_round_conference <- nfl_draft %>%
   group_by(round) %>% 
   count(conference) %>% 
   mutate(conference = fct_reorder(conference, n)) %>% 
   ggplot(aes(conference, n, fill = round)) +
   geom_col(position = "dodge") +
-  theme(axis.text.x = element_text(angle = 45, hjust = 1)) +
-  scale_fill_manual(values = c("forestgreen", "grey80"))
+  labs(title = "Conference") +
+  theme(
+    plot.title = element_text(hjust = 0.5, face = "bold", size = 20),
+    axis.title = element_blank(),
+    axis.text.x = element_blank(),
+    legend.position = "none"
+  ) +
+  scale_fill_manual(values = c("goldenrod4","grey80"))
+gg_round_conference_prop <- nfl_draft %>%
+  group_by(round) %>% 
+  count(conference) %>% 
+  mutate(conference = fct_reorder(conference, n),
+         round = factor(round, levels = c("Not 1st", "1st"))) %>% 
+  ggplot(aes(conference, n, fill = round)) +
+  geom_col(position = "fill") +
+  geom_hline(yintercept = 0.08, color = "red") +
+  theme(
+    axis.title = element_blank(),
+    axis.text.y = element_text(size = 12),
+    axis.text.x = element_text(angle = 90, hjust = 1, face = "bold"),
+    legend.position = "none"
+  ) +
+  scale_y_continuous(labels = scales::percent_format()) +
+  scale_fill_manual(values = c("grey80","goldenrod4"))
 
-# Corrplot: Combine Stats
+ggarrange(gg_round_conference, gg_round_conference_prop,
+          ncol = 1)
+
+
+# EDA Corrplot ----
+
+# Combine Stats
 nfl_draft %>% 
   select(height:shuttle) %>% cor %>% 
-  corrplot::corrplot(method = "number", type = "upper")
+  ggcorrplot::ggcorrplot(type = "lower", 
+                         lab = TRUE, lab_col = "gray10",
+                         colors = c("darksalmon","white","royalblue4"),
+                         tl.cex = 10,
+                         title = "Combine Stats: Correlation") +
+  theme(plot.title = element_text(hjust = 0.5, face = "bold", size = 20))
+
+# Drafted
 # - Weight ~ Forty: 89
-gg_Weight_Forty <- nfl_draft %>% 
+gg_drafted_Weight_Forty <- nfl_draft %>% 
+  ggplot(aes(weight, forty, color = drafted)) +
+  geom_point(alpha = 0.3) +
+  theme(
+    plot.title = element_text(face = "bold", hjust = 0.5, size = 12),
+    axis.title = element_text(face = "bold", size = 14),
+    legend.position = "none"
+  ) +
+  scale_color_manual(values = c("grey80","forestgreen"))
+# - Three Cone ~ Shuttle: 85
+gg_drafted_3cone_Shuttle <- nfl_draft %>% 
+  ggplot(aes(three_cone, shuttle, color = drafted)) +
+  geom_point(alpha = 0.3) +
+  theme(
+    plot.title = element_text(face = "bold", hjust = 0.5, size = 12),
+    axis.title = element_text(face = "bold", size = 14),
+    legend.position = "none"
+  ) +
+  scale_color_manual(values = c("grey80","forestgreen"))
+# - Forty ~ Broad Jump: -84
+gg_drafted_Forty_BJump <- nfl_draft %>% 
+  ggplot(aes(forty, broad_jump, color = drafted)) +
+  geom_point(alpha = 0.3) +
+  theme(
+    plot.title = element_text(face = "bold", hjust = 0.5, size = 12),
+    axis.title = element_text(face = "bold", size = 14),
+    legend.position = "none"
+  ) +
+  scale_color_manual(values = c("grey80","forestgreen"))
+# - Forty ~ Three Cone: 83
+gg_drafted_Forty_3cone <- nfl_draft %>% 
+  ggplot(aes(forty, three_cone, color = drafted)) +
+  geom_point(alpha = 0.3) +
+  theme(
+    plot.title = element_text(face = "bold", hjust = 0.5, size = 12),
+    axis.title = element_text(face = "bold", size = 14),
+    legend.position = "none"
+  ) +
+  scale_color_manual(values = c("grey80","forestgreen"))
+# - Vertical ~ Broad Jump: 82
+gg_drafted_Vertical_BJump <- nfl_draft %>% 
+  ggplot(aes(vertical, broad_jump, color = drafted)) +
+  geom_point(alpha = 0.3) +
+  theme(
+    plot.title = element_text(face = "bold", hjust = 0.5, size = 12),
+    axis.title = element_text(face = "bold", size = 14),
+    legend.position = "none"
+  ) +
+  scale_color_manual(values = c("grey80","forestgreen"))
+# - Weight ~ Three Cone: 81
+gg_drafted_Weight_3cone <- nfl_draft %>% 
+  ggplot(aes(weight, three_cone, color = drafted)) +
+  geom_point(alpha = 0.3) +
+  theme(
+    plot.title = element_text(face = "bold", hjust = 0.5, size = 12),
+    axis.title = element_text(face = "bold", size = 14),
+    legend.position = "none"
+  ) +
+  scale_color_manual(values = c("grey80","forestgreen"))
+
+# Multiplot
+ggarrange(gg_drafted_Weight_Forty, gg_drafted_3cone_Shuttle, gg_drafted_Forty_BJump, 
+          gg_drafted_Forty_3cone, gg_drafted_Vertical_BJump, gg_drafted_Weight_3cone, 
+          ncol = 3, nrow = 2)
+
+# Round
+# - Weight ~ Forty: 89
+gg_round_Weight_Forty <- nfl_draft %>% 
   ggplot(aes(weight, forty, color = round)) +
   geom_point(alpha = 0.3) +
   theme(
     plot.title = element_text(face = "bold", hjust = 0.5, size = 12),
-    legend.position = "bottom"
+    axis.title = element_text(face = "bold", size = 14),
+    legend.position = "none"
   ) +
-  scale_color_manual(values = c("forestgreen","grey80"))
+  scale_color_manual(values = c("goldenrod4", "grey80"))
 # - Three Cone ~ Shuttle: 85
-gg_3cone_Shuttle <- nfl_draft %>% 
+gg_round_3cone_Shuttle <- nfl_draft %>% 
   ggplot(aes(three_cone, shuttle, color = round)) +
   geom_point(alpha = 0.3) +
   theme(
     plot.title = element_text(face = "bold", hjust = 0.5, size = 12),
+    axis.title = element_text(face = "bold", size = 14),
     legend.position = "none"
   ) +
-  scale_color_manual(values = c("forestgreen","grey80"))
+  scale_color_manual(values = c("goldenrod4", "grey80"))
 # - Forty ~ Broad Jump: -84
-gg_Forty_BJump <- nfl_draft %>% 
+gg_round_Forty_BJump <- nfl_draft %>% 
   ggplot(aes(forty, broad_jump, color = round)) +
   geom_point(alpha = 0.3) +
   theme(
     plot.title = element_text(face = "bold", hjust = 0.5, size = 12),
+    axis.title = element_text(face = "bold", size = 14),
     legend.position = "none"
   ) +
-  scale_color_manual(values = c("forestgreen","grey80"))
+  scale_color_manual(values = c("goldenrod4", "grey80"))
 # - Forty ~ Three Cone: 83
-gg_Forty_3cone <- nfl_draft %>% 
+gg_round_Forty_3cone <- nfl_draft %>% 
   ggplot(aes(forty, three_cone, color = round)) +
   geom_point(alpha = 0.3) +
   theme(
     plot.title = element_text(face = "bold", hjust = 0.5, size = 12),
+    axis.title = element_text(face = "bold", size = 14),
     legend.position = "none"
   ) +
-  scale_color_manual(values = c("forestgreen","grey80"))
+  scale_color_manual(values = c("goldenrod4", "grey80"))
 # - Vertical ~ Broad Jump: 82
-gg_Vertical_BJump <- nfl_draft %>% 
+gg_round_Vertical_BJump <- nfl_draft %>% 
   ggplot(aes(vertical, broad_jump, color = round)) +
   geom_point(alpha = 0.3) +
   theme(
     plot.title = element_text(face = "bold", hjust = 0.5, size = 12),
-    legend.position = "bottom"
+    axis.title = element_text(face = "bold", size = 14),
+    legend.position = "none"
   ) +
-  scale_color_manual(values = c("forestgreen","grey80"))
+  scale_color_manual(values = c("goldenrod4", "grey80"))
 # - Weight ~ Three Cone: 81
-gg_Weight_3cone <- nfl_draft %>% 
+gg_round_Weight_3cone <- nfl_draft %>% 
   ggplot(aes(weight, three_cone, color = round)) +
   geom_point(alpha = 0.3) +
   theme(
     plot.title = element_text(face = "bold", hjust = 0.5, size = 12),
+    axis.title = element_text(face = "bold", size = 14),
     legend.position = "none"
   ) +
-  scale_color_manual(values = c("forestgreen","grey80"))
+  scale_color_manual(values = c("goldenrod4","grey80"))
 
 # Multiplot
-ggarrange(gg_Weight_Forty, gg_3cone_Shuttle, gg_Forty_BJump, 
-          gg_Forty_3cone, gg_Vertical_BJump, gg_Weight_3cone, 
+ggarrange(gg_round_Weight_Forty, gg_round_3cone_Shuttle, gg_round_Forty_BJump, 
+          gg_round_Forty_3cone, gg_round_Vertical_BJump, gg_round_Weight_3cone, 
           ncol = 3, nrow = 2)
 
-# Categorical
-nfl_draft %>%
-  filter(side == "Offense") %>% 
-  ggplot() +
-  geom_mosaic(aes(x = product(position), fill = conference)) +
-  theme(axis.text.y = element_blank()) +
-  facet_wrap(~round, nrow = 2) +
-  theme_bw() +
-  theme(
-    axis.text.y = element_blank(),
-    axis.text.x = element_text(angle = 45, hjust = 1),
-    legend.position = "bottom"
-    ) 
 
 #
 # Exploratory Data Analysis: PCA ----
