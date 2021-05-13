@@ -91,6 +91,11 @@ drafted | chr | What NFL team drafted player / Round / Pick / Year
 
 **Note**:
 
+<img src="Images/PCA_Biplot_drafted_round.PNG" width="700">
+<img src="Images/PCA_Biplot_Side.PNG" width="700">
+
+**Note**:
+
 <p float="left">
   <img src="Images/PCA_PC1.PNG" width="400" />
   <img src="Images/PCA_PC2.PNG" width="400" />
