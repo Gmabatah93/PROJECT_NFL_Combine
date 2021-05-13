@@ -44,49 +44,44 @@ shuttle | dbl | The shuttle (20yards), much like the 3-cone drill, test speed an
 drafted | chr | What NFL team drafted player / Round / Pick / Year
 
 # Exploratory Data Analysis
-<img src="Images/EDA_Drafted.PNG" width="800">
+
+## Summary
+<p float="left">
+  <img src="Images/EDA_Drafted.PNG" width="400" />
+  <img src="Images/EDA_round.PNG" width="400" />
+</p>
 
 **Note**:
 
-<img src="Images/EDA_Side.PNG" width="1000">
+<p float="left">
+  <img src="Images/EDA_Side.PNG" width="400" />
+  <img src="Images/EDA_round_Side.PNG" width="400" />
+</p>
 
 **Note**:
 
-<img src="Images/EDA_Position.PNG" width="1000">
+<p float="left">
+  <img src="Images/EDA_Position.PNG" width="400" />
+  <img src="Images/EDA_round_Position.PNG" width="400" />
+</p>
 
 **Note**:
 
-<img src="Images/EDA_Conference.PNG" width="1000">
+<p float="left">
+  <img src="Images/EDA_Conference.PNG" width="400" />
+  <img src="Images/EDA_round_Conference.PNG" width="400" />
+</p>
 
 **Note**:
 
-
-<img src="Images/EDA_round.PNG" width="800">
-
-**Note**:
-
-<img src="Images/EDA_round_Side.PNG" width="1000">
+## Correlation
+<img src="Images/Corr_Combine.PNG" width="600">
 
 **Note**:
 
-<img src="Images/EDA_round_Position.PNG" width="1000">
-
-**Note**:
-
-<img src="Images/EDA_round_Conference.PNG" width="1000">
-
-**Note**:
-
-
-
-<img src="Images/Corr_Combine.PNG" width="1000">
-
-**Note**:
-
-<img src="Images/Corr_Sig.PNG" width="1000">
-
-**Note**:
-
-<img src="Images/Corr_round_Sig.PNG" width="1000">
+<p float="left">
+  <img src="Images/Corr_Sig.PNG" width="400" />
+  <img src="Images/Corr_round_Sig.PNG" width="400" />
+</p>
 
 **Note**:
