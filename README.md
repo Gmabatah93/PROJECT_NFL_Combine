@@ -75,13 +75,13 @@ drafted | chr | What NFL team drafted player / Round / Pick / Year
 **Note**:
 
 ## Correlation
-<img src="Images/Corr_Combine.PNG" width="600">
+<img src="Images/Corr_Combine.PNG" width="400">
 
 **Note**:
 
 <p float="left">
-  <img src="Images/Corr_Sig.PNG" width="400" />
-  <img src="Images/Corr_round_Sig.PNG" width="400" />
+  <img src="Images/Corr_Sig.PNG" width="700" />
+  <img src="Images/Corr_round_Sig.PNG" width="700" />
 </p>
 
 **Note**:
