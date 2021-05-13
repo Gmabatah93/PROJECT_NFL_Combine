@@ -100,3 +100,44 @@ drafted | chr | What NFL team drafted player / Round / Pick / Year
   <img src="Images/PCA_PC1.PNG" width="400" />
   <img src="Images/PCA_PC2.PNG" width="400" />
 </p>
+
+## Combine Summary
+
+### Weight
+<img src="Images/Combine_Weight.PNG" width="700">
+
+**Note:**
+
+<img src="Images/Combine_Weight_draft_round.PNG" width="  1000">
+
+**Note:**
+
+<img src="Images/Combine_Weight_conference.PNG" width="  1000">
+
+**Note:**
+
+### Forty
+<img src="Images/Combine_40.PNG" width="  1000">
+
+**Note:**
+
+<img src="Images/Combine_40_Position.PNG" width="  1000">
+
+**Note:**
+
+<img src="Images/Combine_40_Conference.PNG" width="  1000">
+
+**Note:**
+
+### Bench
+<img src="Images/Combine_Bench.PNG" width="  700">
+
+**Note:**
+
+<img src="Images/Combine_Bench_Position.PNG" width="  1000">
+
+**Note:**
+
+<img src="Images/Combine_Bench_Conference.PNG" width="  1000">
+
+**Note:**
