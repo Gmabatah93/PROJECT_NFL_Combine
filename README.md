@@ -85,3 +85,13 @@ drafted | chr | What NFL team drafted player / Round / Pick / Year
 </p>
 
 **Note**:
+
+## Principal Component Analysis
+<img src="Images/PCA_Biplot.PNG" width="700">
+
+**Note**:
+
+<p float="left">
+  <img src="Images/PCA_PC1.PNG" width="500" />
+  <img src="Images/PCA_PC2.PNG" width="500" />
+</p>
