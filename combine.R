@@ -624,7 +624,7 @@ nfl_draft_simple %>%
 # STATS: 
 
 # Summary
-nfl_df %>% 
+nfl_draft_simple %>% 
   filter(side == "Offense") %>% 
   summarise(Avg_Weight = mean(weight),
             Avg_Forty = mean(forty),
@@ -632,16 +632,16 @@ nfl_df %>%
             Avg_Bench = mean(bench))
 
 # By Conference
-nfl_offense_stat_Conference <- nfl_df %>% 
+nfl_offense_stat_Conference <- nfl_draft_simple %>% 
   filter(side == "Offense") %>% 
-  group_by(conference, drafted, round) %>% 
+  group_by(conference, drafted) %>% 
   summarise(Weight = mean(weight),
             Forty = mean(forty),
             BroadJump = mean(broad_jump),
             Bench = mean(bench)) %>% 
   gather(Weight, Forty, BroadJump, Bench,
          key = "Measure", value = "Stat")
-# - drafted
+# - plot
 gg_Offense_Conference_drafted <- nfl_offense_stat_Conference %>% 
   ggplot(aes(conference, Stat, fill = drafted)) +
   geom_col(position = "dodge") +
@@ -650,36 +650,24 @@ gg_Offense_Conference_drafted <- nfl_offense_stat_Conference %>%
   theme_bw() + theme(
     plot.title = element_text(hjust = 0.5, size = 12),
     axis.title = element_blank(),
-    axis.text.x = element_text(angle = 90, hjust = 1)
+    axis.text.x = element_text(angle = 90, hjust = 1),
+    legend.position = "none"
   ) +
   scale_fill_manual(values = c("grey80","forestgreen"))
-# - round
-gg_Offense_Conference_round <- nfl_offense_stat_Conference %>% 
-  mutate(round = factor(round, levels = c("Not 1st", "1st"))) %>% 
-  ggplot(aes(conference, Stat, fill = round)) +
-  geom_col(position = "dodge") +
-  facet_wrap(~Measure, scales = "free_y") +
-  labs(title = "Offense-Conference: Stats") +
-  theme_bw() + theme(
-    plot.title = element_text(hjust = 0.5, size = 12),
-    axis.title = element_blank(),
-    axis.text.x = element_text(angle = 90, hjust = 1)
-  ) +
-  scale_fill_manual(values = c("grey80", "goldenrod4"))
+# - visual
+gg_Offense_Conference_drafted
 
-ggarrange(gg_Offense_Conference_drafted, gg_Offense_Conference_round,
-          nrow = 1)
 # By Position
-nfl_offense_stat_Position <- nfl_df %>% 
+nfl_offense_stat_Position <- nfl_draft_simple %>% 
   filter(side == "Offense") %>% 
-  group_by(position, drafted, round) %>% 
+  group_by(position, drafted) %>% 
   summarise(Weight = mean(weight),
             Forty = mean(forty),
             BroadJump = mean(broad_jump),
             Bench = mean(bench)) %>% 
   gather(Weight, Forty, BroadJump, Bench,
          key = "Measure", value = "Stat")
-# - drafted
+# - plot
 gg_Offense_Position_drafted <-  nfl_offense_stat_Position %>% 
   ggplot(aes(position, Stat, fill = drafted)) +
   geom_col(position = "dodge") +
@@ -687,25 +675,12 @@ gg_Offense_Position_drafted <-  nfl_offense_stat_Position %>%
   labs(title = "Offense-Position: Stats") +
   theme_bw() + theme(
     plot.title = element_text(hjust = 0.5, size = 12),
-    axis.title = element_blank()
+    axis.title = element_blank(),
+    legend.position = "none"
   ) +
   scale_fill_manual(values = c("grey80","forestgreen"))
-# - round
-gg_Offense_Position_round <- nfl_offense_stat_Position %>% 
-  mutate(round = factor(round, levels = c("Not 1st", "1st"))) %>% 
-  ggplot(aes(position, Stat, fill = round)) +
-  geom_col(position = "dodge") +
-  facet_wrap(~Measure, scales = "free_y") +
-  labs(title = "Offense-Position: Stats") +
-  theme_bw() + theme(
-    plot.title = element_text(hjust = 0.5, size = 12),
-    axis.title = element_blank()
-  ) +
-  scale_fill_manual(values = c("grey80", "goldenrod4"))
-
-ggarrange(gg_Offense_Position_drafted, gg_Offense_Position_round,
-          nrow = 1)
-
+# - visual
+gg_Offense_Position_drafted
 
 # Statistical Test
 nfl_df %>% 
@@ -743,7 +718,7 @@ nfl_df %>%
 
 #
 # Exploratory Data Analysis: Defense ----
-nfl_df %>% 
+nfl_draft_simple %>% 
   filter(side == "Defense") %>% 
   count(drafted)
 # - note: 874 drafted
@@ -751,7 +726,7 @@ nfl_df %>%
 # STATS: 
 
 # Summary
-nfl_df %>% 
+nfl_draft_simple %>% 
   filter(side == "Defense") %>% 
   summarise(Avg_Weight = mean(weight),
             Avg_Forty = mean(forty),
@@ -759,9 +734,9 @@ nfl_df %>%
             Avg_Bench = mean(bench))
 
 # By Conference
-nfl_defense_stat_Conference <- nfl_df %>% 
+nfl_defense_stat_Conference <- nfl_draft_simple %>% 
   filter(side == "Defense") %>% 
-  group_by(conference, drafted, round) %>% 
+  group_by(conference, drafted) %>% 
   summarise(Weight = mean(weight),
             Forty = mean(forty),
             BroadJump = mean(broad_jump),
@@ -777,29 +752,17 @@ gg_Defense_Conference_drafted <- nfl_defense_stat_Conference %>%
   theme_bw() + theme(
     plot.title = element_text(hjust = 0.5, size = 12),
     axis.title = element_blank(),
-    axis.text.x = element_text(angle = 90, hjust = 1)
+    axis.text.x = element_text(angle = 90, hjust = 1),
+    legend.position = "none"
   ) +
   scale_fill_manual(values = c("grey80","forestgreen"))
-# - round
-gg_Defense_Conference_round <- nfl_defense_stat_Conference %>%
-  mutate(round = factor(round, levels = c("Not 1st", "1st"))) %>% 
-  ggplot(aes(conference, Stat, fill = round)) +
-  geom_col(position = "dodge") +
-  facet_wrap(~Measure, scales = "free_y") +
-  labs(title = "Defense-Conference: Stats") +
-  theme_bw() + theme(
-    plot.title = element_text(hjust = 0.5, size = 12),
-    axis.title = element_blank(),
-    axis.text.x = element_text(angle = 90, hjust = 1)
-  ) +
-  scale_fill_manual(values = c("grey80", "goldenrod4"))
 # - visual
-ggarrange(gg_Defense_Conference_drafted, gg_Defense_Conference_round, nrow = 1)
+gg_Defense_Conference_drafted
 
 # By Position
-nfl_defense_stat_Position <- nfl_df %>% 
+nfl_defense_stat_Position <- nfl_draft_simple %>% 
   filter(side == "Defense") %>% 
-  group_by(position, drafted, round) %>% 
+  group_by(position, drafted) %>% 
   summarise(Weight = mean(weight),
             Forty = mean(forty),
             BroadJump = mean(broad_jump),
@@ -814,23 +777,12 @@ gg_Defense_Position_drafted <- nfl_defense_stat_Position %>%
   labs(title = "Defense-Position: Stats") +
   theme_bw() + theme(
     plot.title = element_text(hjust = 0.5, size = 12),
-    axis.title = element_blank()
+    axis.title = element_blank(),
+    legend.position = "none"
   ) +
   scale_fill_manual(values = c("grey80","forestgreen"))
-# - round
-gg_Defense_Position_round <- nfl_defense_stat_Position %>% 
-  mutate(round = factor(round, levels = c("Not 1st", "1st"))) %>% 
-  ggplot(aes(position, Stat, fill = round)) +
-  geom_col(position = "dodge") +
-  facet_wrap(~Measure, scales = "free_y") +
-  labs(title = "Defense-Position: Stats") +
-  theme_bw() + theme(
-    plot.title = element_text(hjust = 0.5, size = 12),
-    axis.title = element_blank()
-  ) +
-  scale_fill_manual(values = c("grey80", "goldenrod4"))
 # - visual
-ggarrange(gg_Defense_Position_drafted, gg_Defense_Position_round, nrow = 1)
+gg_Defense_Position_drafted
 
 # Statistical Test
 nfl_df %>% 

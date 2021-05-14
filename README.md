@@ -46,24 +46,24 @@ drafted | chr | What NFL team drafted player / Round / Pick / Year
 # Exploratory Data Analysis
 
 ## Summary
-<img src="Images/draft.PNG" width="400">
+<img src="Images/draft.PNG" width="700">
 
 **Note (Target)**: **_65%_** of players in this dataset was **_Drafted_**
 
-<img src="Images/draft_Side.PNG" width="400">
+<img src="Images/draft_Side.PNG" width="700">
 
-<img src="Images/draft_Position.PNG" width="400">
+<img src="Images/draft_Position.PNG" width="700">
 
 **Note (Position)**:
 
-<img src="Images/draft_Conference.PNG" width="400" />
+<img src="Images/draft_Conference.PNG" width="700" />
 
 **Note (Conference)**:
 
 ## Correlation
-<img src="Images/Combine_Corr.PNG" width="500">
+<img src="Images/Combine_Corr.PNG" width="700">
 
-<img src="Images/Combine_sig.PNG" width="500">
+<img src="Images/Combine_sig.PNG" width="700">
 
 **Note (Correlation)**:
 
