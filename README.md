@@ -46,116 +46,70 @@ drafted | chr | What NFL team drafted player / Round / Pick / Year
 # Exploratory Data Analysis
 
 ## Summary
-<p float="left">
-  <img src="Images/EDA_Drafted.PNG" width="400" />
-  <img src="Images/EDA_round.PNG" width="400" />
-</p>
+<img src="Images/draft.PNG" width="400">
 
-**Note**:
+**Note (Target)**: **_65%_** of players in this dataset was **_Drafted_**
 
-<p float="left">
-  <img src="Images/EDA_Side.PNG" width="400" />
-  <img src="Images/EDA_round_Side.PNG" width="400" />
-</p>
+<img src="Images/draft_Side.PNG" width="400">
 
-**Note**:
+<img src="Images/draft_Position.PNG" width="400">
 
-<p float="left">
-  <img src="Images/EDA_Position.PNG" width="400" />
-  <img src="Images/EDA_round_Position.PNG" width="400" />
-</p>
+**Note (Position)**:
 
-**Note**:
+<img src="Images/draft_Conference.PNG" width="400" />
 
-<p float="left">
-  <img src="Images/EDA_Conference.PNG" width="400" />
-  <img src="Images/EDA_round_Conference.PNG" width="400" />
-</p>
-
-**Note**:
+**Note (Conference)**:
 
 ## Correlation
-<img src="Images/Corr_Combine.PNG" width="400">
+<img src="Images/Combine_Corr.PNG" width="500">
 
-**Note**:
+<img src="Images/Combine_sig.PNG" width="500">
 
-<p float="left">
-  <img src="Images/Corr_Sig.PNG" width="700" />
-  <img src="Images/Corr_round_Sig.PNG" width="700" />
-</p>
-
-**Note**:
+**Note (Correlation)**:
 
 ## Principal Component Analysis
-<img src="Images/PCA_Biplot.PNG" width="700">
+<img src="Images/Combine_PCA.PNG" width="700">
+<img src="Images/Combine_PCA_draft.PNG" width="700">
+<img src="Images/Combine_PCA_Eig.PNG" width="600">
 
-**Note**:
-
-<img src="Images/PCA_Biplot_drafted_round.PNG" width="700">
-<img src="Images/PCA_Biplot_Side.PNG" width="700">
-
-**Note**:
-
-<p float="left">
-  <img src="Images/PCA_PC1.PNG" width="400" />
-  <img src="Images/PCA_PC2.PNG" width="400" />
-</p>
+**Note (PCA)**:
 
 ## Combine Summary
 
 ### Weight
 <img src="Images/Combine_Weight.PNG" width="700">
+<img src="Images/Combine_Weight_Position_draft.PNG" width="  700">
+<img src="Images/Combine_Weight_Conference_draft.PNG" width="  700">
 
-**Note:**
-
-<img src="Images/Combine_Weight_draft_round.PNG" width="  1000">
-
-**Note:**
-
-<img src="Images/Combine_Weight_conference.PNG" width="  1000">
-
-**Note:**
+**Note (Weight)**
 
 ### Forty
-<img src="Images/Combine_40.PNG" width="  1000">
+<img src="Images/Combine_40.PNG" width="  700">
+<img src="Images/Combine_40_Position.PNG" width="  700">
+<img src="Images/Combine_40_Conference.PNG" width="  700">
 
-**Note:**
-
-<img src="Images/Combine_40_Position.PNG" width="  1000">
-
-**Note:**
-
-<img src="Images/Combine_40_Conference.PNG" width="  1000">
-
-**Note:**
+**Note (Forty):**
 
 ### Bench
 <img src="Images/Combine_Bench.PNG" width="  700">
-
-**Note:**
-
-<img src="Images/Combine_Bench_Position.PNG" width="  1000">
-
-**Note:**
-
-<img src="Images/Combine_Bench_Conference.PNG" width="  1000">
-
-**Note:**
+<img src="Images/Combine_Bench_Position.PNG" width="  700">
+<img src="Images/Combine_Bench_Conference.PNG" width="  700">
+**Note (Bench):**
 
 ## Offense Summary
-<img src="Images/Offense_Conference.PNG" width="  1000">
+<img src="Images/Offense_Position_draft.PNG" width="  700">
 
-**Note:**
+**Note (Offense-Position):**
 
-<img src="Images/Offense_Position.PNG" width="  1000">
+<img src="Images/Offense_Conference_draft.PNG" width="  700">
 
-**Note:**
+**Note (Offense-Conference):**
 
 ## Defense Summary
-<img src="Images/Defense_Conference.PNG" width="  1000">
+<img src="Images/Defense_Position_draft.PNG" width="  700">
 
-**Note:**
+**Note (Defense-Position):**
 
-<img src="Images/Defense_Position.PNG" width="  1000">
+<img src="Images/Defense_Conference_draft.PNG" width="  700">
 
-**Note:**
+**Note (Defense-Conference):**
