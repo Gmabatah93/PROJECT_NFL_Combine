@@ -101,6 +101,24 @@ drafted | chr | What NFL team drafted player / Round / Pick / Year
   <img src="Images/PCA_PC2.PNG" width="400" />
 </p>
 
+## Offense Summary
+<img src="Images/Offense_Conference.PNG" width="  1000">
+
+**Note:**
+
+<img src="Images/Offense_Position.PNG" width="  1000">
+
+**Note:**
+
+## Defense Summary
+<img src="Images/Defense_Conference.PNG" width="  1000">
+
+**Note:**
+
+<img src="Images/Defense_Position.PNG" width="  1000">
+
+**Note:**
+
 ## Combine Summary
 
 ### Weight
