@@ -48,31 +48,44 @@ drafted | chr | What NFL team drafted player / Round / Pick / Year
 ## Summary
 <img src="Images/draft.PNG" width="700">
 
-**Note (Target)**: **_65%_** of players in this dataset was **_Drafted_**
+**Note (Target)**: **_65%_** of players in this dataset was Drafted
 
 <img src="Images/draft_Side.PNG" width="700">
 
 <img src="Images/draft_Position.PNG" width="700">
 
-**Note (Position)**:
+**Note (Position)**: There are _1459_ Defensive and _1426_ Offensive players in this dataset
+- Of the _1459_ Defensive players **70%** was Drafted. Of the _1426_ Offensive players **61%** was Drafted.
+- Top 3 Offensive Positions Drafted: **_OT | WR | RB_**
+- Top 3 Defensive Positions Drafted: **_CB | DE | OLB_**
 
 <img src="Images/draft_Conference.PNG" width="700" />
 
-**Note (Conference)**:
+**Note (Conference)**: The majority of players Drafted came from the **_[ SEC | ACC | Big 10 ]_** Conferences
 
 ## Correlation
 <img src="Images/Combine_Corr.PNG" width="700">
 
 <img src="Images/Combine_sig.PNG" width="700">
 
-**Note (Correlation)**:
+**Note (Correlation)**: Alot of the Combine metrics are **_Highly_** Corelated
 
 ## Principal Component Analysis
-<img src="Images/Combine_PCA.PNG" width="700">
-<img src="Images/Combine_PCA_draft.PNG" width="700">
+<p float="left">
+  <img src="Images/Combine_PCA.PNG" width="500">
+  <img src="Images/Combine_PCA_draft.PNG" width="500">
+</p>
+
 <img src="Images/Combine_PCA_Eig.PNG" width="600">
 
 **Note (PCA)**:
+- **PC1**: Represents Agility/Explosiveness
+  + Agility: forty | three_cone | shuttle
+    + generally if your fast in one your fast in the others
+  + Explosiveness: vertical | broad_jump
+    + generally if you can jump well vertically you can jump well horizontally
+- **PC2**: Represents overall strength
+
 
 ## Combine Summary
 
@@ -94,22 +107,12 @@ drafted | chr | What NFL team drafted player / Round / Pick / Year
 <img src="Images/Combine_Bench.PNG" width="  700">
 <img src="Images/Combine_Bench_Position.PNG" width="  700">
 <img src="Images/Combine_Bench_Conference.PNG" width="  700">
+
 **Note (Bench):**
 
-## Offense Summary
-<img src="Images/Offense_Position_draft.PNG" width="  700">
+### Broad Jump
+<img src="Images/Combine_Jump.PNG" width="  700">
+<img src="Images/Combine_Jump_Position.PNG" width="  700">
+<img src="Images/Combine_Jump_Conference.PNG" width="  700">
 
-**Note (Offense-Position):**
-
-<img src="Images/Offense_Conference_draft.PNG" width="  700">
-
-**Note (Offense-Conference):**
-
-## Defense Summary
-<img src="Images/Defense_Position_draft.PNG" width="  700">
-
-**Note (Defense-Position):**
-
-<img src="Images/Defense_Conference_draft.PNG" width="  700">
-
-**Note (Defense-Conference):**
+**Note (Jump):**

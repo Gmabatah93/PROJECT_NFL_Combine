@@ -613,6 +613,73 @@ gg_Combine_Bench_Conference_draft <- nfl_draft_simple %>%
 # -- visual
 gg_Combine_Bench_Conference_draft
 
+# Combine Data: Broad Jump
+# - mean
+nfl_mean_jump <- nfl_draft_simple$broad_jump %>% mean
+# - plot
+gg_Combine_Jump_draft <- nfl_draft_simple %>% 
+  ggplot(aes(broad_jump)) +
+  geom_histogram(bins = 50, alpha = 0.3) + 
+  geom_vline(xintercept = nfl_mean_jump, color = "red") +
+  labs(title = "Combine: Broad Jump") +
+  theme(plot.title = element_text(hjust = 0.3, face = "bold", size = 20),
+        axis.title = element_blank())
+gg_Combine_Jump_Position_draft <- nfl_draft_simple %>% 
+  ggplot(aes(broad_jump, fill = side)) +
+  geom_density(alpha = 0.1) +
+  scale_fill_manual(values = c("blue","red")) +
+  theme(axis.title = element_blank(),
+        axis.text.y = element_blank(),
+        legend.position = "bottom")
+# - visual
+ggarrange(gg_Combine_Jump_draft, gg_Combine_Jump_Position_draft, ncol = 1)
+
+# - By Side
+gg_Combine_Jump_Offense_draft <- nfl_draft_simple %>% 
+  filter(side == "Offense") %>% 
+  ggplot(aes(position, broad_jump, fill = drafted)) +
+  geom_boxplot() + geom_hline(yintercept = nfl_mean_jump, color = "red") +
+  geom_jitter(alpha = 0.09) +
+  labs(title = "Offense") +
+  theme(plot.title = element_text(hjust = 0.5, face = "bold", size = 18),
+        axis.title.y = element_text(color = "red"),
+        axis.title.x = element_blank(),
+        legend.position = "none") +
+  ylim(c(80,140)) +
+  scale_fill_manual(values = c("gray80", "forestgreen"))
+gg_Combine_Jump_Defense_draft <- nfl_draft_simple %>% 
+  filter(side == "Defense") %>% 
+  ggplot(aes(position, broad_jump, fill = drafted)) +
+  geom_boxplot() + geom_hline(yintercept = nfl_mean_jump, color = "darkred") +
+  geom_jitter(alpha = 0.09) +
+  labs(title = "Defense") +
+  theme(plot.title = element_text(hjust = 0.5, face = "bold", size = 18),
+        axis.title = element_blank(),
+        axis.text.y = element_blank()) +
+  ylim(c(80,140)) +
+  scale_fill_manual(values = c("gray80", "forestgreen"))
+# -- visual
+ggarrange(gg_Combine_Jump_Offense_draft, gg_Combine_Jump_Defense_draft, nrow = 1)  
+
+# - By Conference
+gg_Combine_Jump_Conference_draft <- nfl_draft_simple %>%
+  mutate(cond = case_when(
+    conference %in% c("Division I-A (SEC)", "Division I-A (ACC)", "Division I-A (Big 10)", "Division I-A (Big 12)", "Division I-A (Pac-12)") ~ "Elite",
+    conference %in% c("Division I-A (American)", "Division I-A (Sunbelt)", "Division I-A (Mountain West)", "Division I-A (MAC)","Division I-A (Conference USA)") ~ "Division I-A",
+    conference %in% c("Division I-AA") ~ "Division I-AA",
+    conference %in% c("Division II & III") ~ "Division II & III"
+  )) %>% 
+  ggplot(aes(conference, broad_jump, fill = cond)) +
+  geom_boxplot() + geom_hline(yintercept = nfl_mean_jump, color = "red") +
+  labs(title = "Conference") +
+  theme(plot.title = element_text(face = "bold", hjust = 0.5, size = 15),
+        axis.text.x = element_text(angle = 45, hjust = 1),
+        axis.title.y = element_text(colour = "red"),
+        axis.title.x = element_blank()) +
+  scale_fill_brewer(palette = "YlGnBu")
+# -- visual
+gg_Combine_Jump_Conference_draft
+
 
 
 # "DRAFT": Exploratory Data Analysis - Offense ----
@@ -822,7 +889,7 @@ nfl_df %>%
 
 # Modeling: Prepocess ----
 # Split
-nfl_split <- initial_split(nfl_df, prop = 0.80, strata = drafted)
+nfl_split <- initial_split(nfl_draft_simple, prop = 0.80, strata = drafted)
 nfl_train <- training(nfl_split)
 nfl_test <- testing(nfl_split)
 # - K-Folds
@@ -922,7 +989,7 @@ rf_tune <-
   rf_wflow %>% 
   tune_grid(
     resamples = nfl_10fold,
-    grid = 10,
+    grid = 15,
     metrics = nfl_metrics,
     control = nfl_ctrl
   )
