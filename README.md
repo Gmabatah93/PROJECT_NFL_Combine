@@ -38,7 +38,7 @@ weight | dbl | weight of player _(lbs)_
 forty | dbl | how fast player runs 40yards _(seconds)_
 vertical | dbl | how high player jumps from a still position _(inches)_
 bench | dbl | how many times player can lift 225lbs
-broad_jump | dbl | how far can a player jump. From a balanced stance, the player explodes forward as far as he can and must land without moving _(cm)_
+broad_jump | dbl | how far can a player jump. From a balanced stance, the player explodes forward as far as he can and must land without moving _(inches)_
 three_cone | dbl | primarily run to evaluate the agility, quickness and fluidity of movement _(seconds)_
 shuttle | dbl | The shuttle (20yards), much like the 3-cone drill, test speed and acceleration. The only difference is that players are running laterally instead of forming a right angle.  _(seconds)_
 drafted | chr | What NFL team drafted player / Round / Pick / Year
@@ -94,25 +94,65 @@ drafted | chr | What NFL team drafted player / Round / Pick / Year
 <img src="Images/Combine_Weight_Position_draft.PNG" width="  700">
 <img src="Images/Combine_Weight_Conference_draft.PNG" width="  700">
 
-**Note (Weight)**
+**Note (Weight)**: Average weight for players in this dataset is **_252lbs_**
+- Offense: **_262lbs_**
+  + Average weight for **OT** is **_315lbs_** for both drafted and non drafted players
+  + Average weight for **WR** is **_204lbs_** for both drafted and non drafted players
+  + Average weight for **RB** is **_215lbs_** for both drafted and non drafted players
+- Defense: **_242lbs_**
+  + Average weight for **CB** is **_193lbs_** for both drafted and non drafted players
+  + Average weight for **DE** is **_268lbs_** for both drafted and non drafted players
+  + Average weight for **OLB** is around **_240lbs_** for both drafted and non drafted players
+- Conference: Averages
+  + Elite = **_253lbs_** | Division I-A = **_246lbs_** | Division I-AA = **_252_** | Division II & II = **_266lbs_**
 
 ### Forty
 <img src="Images/Combine_40.PNG" width="  700">
 <img src="Images/Combine_40_Position.PNG" width="  700">
 <img src="Images/Combine_40_Conference.PNG" width="  700">
 
-**Note (Forty):**
+**Note (Forty):** Average forty for players in this dataset is **_4.81secs_**
+- Offense: **_4.72secs_**
+  + Average forty for **OT**: Drafted = **_5.21_** | Not Drafted = **_5.34_**
+  + Average forty for **WR**: Drafted = **_4.47_** | Not Drafted = **_4.55_**
+  + Average forty for **RB**: Drafted = **_4.52_** | Not Drafted = **_4.61_**
+- Defense: **_4.90secs_**
+  + Average forty for **CB**: Drafted = **_4.47_** | Not Drafted = **_4.54_**
+  + Average forty for **DE**: Drafted = **_4.80_** | Not Drafted = **_4.89_**
+  + Average forty for **OLB**: Drafted = **_4.65_** | Not Drafted = **_4.74_**
+- Conference: Averages
+  + Elite = **_4.81secs_** | Division I-A = **_4.78secs_** | Division I-AA = **_4.82secs_** | Division II & II = **_4.89secs_**
 
 ### Bench
 <img src="Images/Combine_Bench.PNG" width="  700">
 <img src="Images/Combine_Bench_Position.PNG" width="  700">
 <img src="Images/Combine_Bench_Conference.PNG" width="  700">
 
-**Note (Bench):**
+**Note (Bench):** Average bench for players in this dataset is **_21reps_**
+- Offense: **_21reps_**
+  + Average bench for **OT**: Drafted = **_25reps_** | Not Drafted = **_23reps_**
+  + Average bench for **WR** was **_14reps_** for both drafted and non drafted players
+  + Average bench for **RB**: Drafted = **_20reps_** | Not Drafted = **_19reps_**
+- Defense: **_21reps_**
+  + Average bench for **CB**: Drafted = **_15reps_** | Not Drafted = **_13reps_**
+  + Average bench for **DE**: Drafted = **_24reps_** | Not Drafted = **_23reps_**
+  + Average bench for **OLB**: Drafted = **_23reps_** | Not Drafted = **_21reps_**
+- Conference: Averages
+  + Elite = **_21reps_** | Division I-A = **_21reps_** | Division I-AA = **_21reps_** | Division II & II = **_23reps_**
 
 ### Broad Jump
 <img src="Images/Combine_Jump.PNG" width="  700">
 <img src="Images/Combine_Jump_Position.PNG" width="  700">
 <img src="Images/Combine_Jump_Conference.PNG" width="  700">
 
-**Note (Jump):**
+**Note (Jump):** Average broad jump for players in this dataset is **_113inches**
+- Offense: **_110inches_**
+  + Average broad jump for **OT**: Drafted = **_103inches_** | Not Drafted = **_100inches_**
+  + Average broad jump for **WR**: Drafted = **_121inches_** | Not Drafted = **_119inches_**
+  + Average broad jump for **RB**: Drafted = **_119inches_** | Not Drafted = **_117inches_**
+- Defense: **_116inches_**
+  + Average broad jump for **CB**: Drafted = **_122inches_** | Not Drafted = **_120inches_**
+  + Average broad jump for **DE**: Drafted = **_115inches_** | Not Drafted = **_113inches_**
+  + Average broad jump for **OLB**: Drafted = **_118inches_** | Not Drafted = **_115inches_**
+- Conference: Averages
+  + Elite = **_113inches_** | Division I-A = **_114inches_** | Division I-AA = **_113inches_** | Division II & II = **_112inches_**
