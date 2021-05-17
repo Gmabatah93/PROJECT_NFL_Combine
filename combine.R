@@ -902,13 +902,16 @@ nfl_recipe <-
   step_other(position, threshold = 0.01) %>% 
   step_normalize(all_numeric()) %>% 
   step_dummy(position, conference)
+# - model data
+nfl_recipe %>% 
+  prep() %>% juice() %>% 
+  glimpse()
 
 nfl_recipe_simple <- 
   recipe(drafted ~ position + conference + weight + forty + broad_jump + bench,
          data = nfl_train) 
-
-# Model Data
-nfl_recipe %>% 
+# - model data
+nfl_recipe_simple %>% 
   prep() %>% juice() %>% 
   glimpse()
 
@@ -929,8 +932,8 @@ nfl_metrics <- metric_set(roc_auc, sens, spec, recall, precision, f_meas)
 cl_3 <- parallel::makeCluster(2)
 doParallel::registerDoParallel(cl_3)
 
-# Logistic Regression
-# - spec
+# LOGISTIC REGRESSION
+# Spec
 log_spec <- 
   logistic_reg(
     penalty = tune(),
@@ -938,28 +941,176 @@ log_spec <-
   ) %>% 
   set_engine("glmnet") %>% 
   set_mode("classification")
-# - workflow
+# Workflow
 log_wflow <- 
   workflow() %>% 
   add_model(log_spec) %>% 
   add_recipe(nfl_recipe) 
-# - hyperparameters
-log_grid <- 
+
+
+# Hyperparameters
+log_spec %>%  parameters() %>% pull_dials_object("penalty")
+log_spec %>%  parameters() %>% pull_dials_object("mixture")
+# - Random Grid
+set.seed(101)
+log_grid_random <- 
   log_spec %>% 
-  parameters() %>% 
-  grid_latin_hypercube(size = 20)
-# - tune
-log_tune <-
+  parameters(penalty(trans = NULL)) %>% 
+  grid_random(size = 50)
+# -- plot
+gg_Log_Grid_random <- log_grid_random %>% 
+  ggplot(aes(penalty, mixture)) +
+  geom_point(shape = 1, size = 4, color = "grey60") +
+  labs(title = "Random Grid",
+       subtitle = "Logistic Regression") +
+  theme_bw() +
+  theme(plot.title = element_text(hjust = 0.4, face = "bold", size = 15),
+        plot.subtitle = element_text(hjust = 0.4, color = "darkolivegreen"),
+        axis.title = element_text(face = "bold", color = "cyan4"))
+# - Latin Hypercube
+set.seed(101)
+log_grid_latin <- 
+  log_spec %>% 
+  parameters(penalty(trans = NULL)) %>% 
+  grid_latin_hypercube(size = 50)
+# -- plot
+gg_Log_Grid_latin <- log_grid_latin %>% 
+  ggplot(aes(penalty, mixture)) +
+  geom_point(shape = 1, size = 4, color = "grey60") +
+  labs(title = "Latin Grid",
+       subtitle = "Logistic Regression") +
+  theme_bw() +
+  theme(plot.title = element_text(hjust = 0.4, face = "bold", size = 15),
+        plot.subtitle = element_text(hjust = 0.4, color = "darkolivegreen"),
+        axis.title = element_text(face = "bold", color = "cyan4"))
+# - Custom Grid
+log_grid_custom <- 
+  crossing(
+    penalty = seq(0.001, 0.1, 0.005),
+    mixture = c(0, 0.5, 1)
+  )
+# -- plot
+gg_Log_Grid_custom <- log_grid_custom %>% 
+  ggplot(aes(penalty, mixture)) +
+  geom_point(shape = 1, size = 4, color = "grey60") +
+  labs(title = "Custom Grid",
+       subtitle = "Logistic Regression") +
+  theme_bw() +
+  theme(plot.title = element_text(hjust = 0.4, face = "bold", size = 15),
+        plot.subtitle = element_text(hjust = 0.4, color = "darkolivegreen"),
+        axis.title = element_text(face = "bold", color = "cyan4"))
+
+# Visual
+ggarrange(gg_Log_Grid_random, gg_Log_Grid_latin, gg_Log_Grid_custom, nrow = 1)
+
+# Tune
+# - Random Grid
+log_tune_random <-
   log_wflow %>% 
   tune_grid(
     resamples = nfl_10fold,
-    grid = log_grid,
+    grid = log_grid_random,
     metrics = nfl_metrics,
     control = nfl_ctrl
   )
-# - visual
-log_tune %>% autoplot()
-log_best <- log_tune %>% select_best("f_meas")
+# -- plot
+gg_Log_tune_random <- log_tune_random %>% 
+  collect_metrics() %>% 
+  filter(.metric == "f_meas") %>%
+  mutate(mixture = case_when(
+    mixture >= 0   & mixture < 0.2 ~ "[0 - 0.2)",
+    mixture >= 0.2 & mixture < 0.4 ~ "[0.2 - 0.4)",
+    mixture >= 0.4 & mixture < 0.6 ~ "[0.4 - 0.6)",
+    mixture >= 0.6 & mixture < 0.8 ~ "[0.6 - 0.8)",
+    mixture >= 0.8 & mixture <= 1  ~ "[0.8 - 1]",
+  ) %>% factor) %>% 
+  ggplot(aes(penalty, mean)) +
+  geom_line(aes(color = mixture)) + geom_point() +
+  labs(title = "Evaluation: Random Grid",
+       subtitle = "Logistic Regression",
+       y = "F Score") +
+  scale_y_continuous(labels = scales::percent_format(accuracy = 0.1)) +
+  theme_bw() +
+  theme(plot.title = element_text(face = "bold"),
+        axis.title.y = element_text(color = "tomato"),
+        axis.title.x = element_text(face = "bold", color = "cyan4"), 
+        legend.title = element_text(face = "bold", color = "cyan4"),
+        legend.text = element_text(size = 7),
+        legend.position = "bottom")
+
+# - Latin Grid
+log_tune_latin <-
+  log_wflow %>% 
+  tune_grid(
+    resamples = nfl_10fold,
+    grid = log_grid_latin,
+    metrics = nfl_metrics,
+    control = nfl_ctrl
+  )
+# -- plot
+gg_Log_tune_latin <- log_tune_latin %>% 
+  collect_metrics() %>% 
+  filter(.metric == "f_meas") %>%
+  mutate(mixture = case_when(
+    mixture >= 0   & mixture < 0.2 ~ "[0 - 0.2)",
+    mixture >= 0.2 & mixture < 0.4 ~ "[0.2 - 0.4)",
+    mixture >= 0.4 & mixture < 0.6 ~ "[0.4 - 0.6)",
+    mixture >= 0.6 & mixture < 0.8 ~ "[0.6 - 0.8)",
+    mixture >= 0.8 & mixture <= 1  ~ "[0.8 - 1]",
+  ) %>% factor) %>% 
+  ggplot(aes(penalty, mean)) +
+  geom_line(aes(color = mixture)) + geom_point() +
+  labs(title = "Evaluation: Latin Grid",
+       subtitle = "Logistic Regression",
+       y = "F Score") +
+  scale_y_continuous(labels = scales::percent_format(accuracy = 0.1)) +
+  theme_bw() +
+  theme(plot.title = element_text(face = "bold"),
+        axis.title.y = element_text(color = "tomato"),
+        axis.title.x = element_text(face = "bold", color = "cyan4"), 
+        legend.title = element_text(face = "bold", color = "cyan4"),
+        legend.text = element_text(size = 7),
+        legend.position = "bottom")
+
+
+# - Custom Grid
+log_tune_custom <-
+  log_wflow %>% 
+  tune_grid(
+    resamples = nfl_10fold,
+    grid = log_grid_custom,
+    metrics = nfl_metrics,
+    control = nfl_ctrl
+  )
+# -- plot
+gg_Log_tune_custom <- log_tune_custom %>% 
+  collect_metrics() %>% 
+  filter(.metric == "f_meas") %>%
+  mutate(mixture = factor(mixture)) %>% 
+  ggplot(aes(penalty, mean)) +
+  geom_line(aes(color = mixture)) + geom_point() +
+  labs(title = "Evaluation: Custom Grid",
+       subtitle = "Logistic Regression",
+       y = "F Score") +
+  scale_y_continuous(labels = scales::percent_format(accuracy = 0.1)) +
+  theme_bw() +
+  theme(plot.title = element_text(face = "bold"),
+        axis.title.y = element_text(color = "tomato"),
+        axis.title.x = element_text(face = "bold", color = "cyan4"), 
+        legend.title = element_text(face = "bold", color = "cyan4"),
+        legend.position = "bottom")
+
+
+
+# Visual
+ggarrange(gg_Log_tune_random, gg_Log_tune_latin, gg_Log_tune_custom, nrow = 1)
+
+
+
+
+
+
+
 # - final fit
 log_wflow_FIANL <- 
   log_wflow %>% 
@@ -968,6 +1119,8 @@ log_wflow_FIANL <-
 log_FINAL <- 
   log_wflow_FIANL %>% 
   fit(nfl_train)
+
+
 
 # Random Forrest
 # - spec
@@ -984,17 +1137,38 @@ rf_wflow <-
   workflow() %>% 
   add_model(rf_spec) %>% 
   add_recipe(nfl_recipe_simple)
-# - tune
-rf_tune <- 
+# - hyperparameters
+rf_spec %>%  parameters() %>% pull_dials_object("min_n")
+rf_spec %>%  parameters() %>% pull_dials_object("mtry")
+# -- Regular Custom Grid
+rf_grid_custom <- 
+  crossing(
+    min_n = seq(1,40,2),
+    mtry = c(1,2,5,8)
+  )
+# --tune
+rf_tune_custom <- 
   rf_wflow %>% 
   tune_grid(
     resamples = nfl_10fold,
-    grid = 15,
+    grid = rf_grid_custom,
     metrics = nfl_metrics,
     control = nfl_ctrl
   )
 # - results
-rf_tune %>% autoplot() + theme_bw()
+rf_tune_custom %>% 
+  collect_metrics() %>% 
+  filter(.metric == "f_meas") %>% 
+  mutate(mtry = factor(mtry)) %>% 
+  ggplot(aes(min_n, mean)) +
+  geom_line(aes(color = mtry)) + geom_point() +
+  labs(title = "Random Forrest: Custom Grid",
+       y = "F Score") +
+  scale_y_continuous(labels = scales::percent_format(accuracy = 0.1)) +
+  theme_bw() +
+  theme(plot.title = element_text(face = "bold"),
+        axis.title.y = element_text(color = "tomato"))
+
 rf_best <- rf_tune %>% select_best("f_meas")
 # - final fit
 rf_wflow_FINAL <- 

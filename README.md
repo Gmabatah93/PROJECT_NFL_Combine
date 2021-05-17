@@ -156,3 +156,40 @@ drafted | chr | What NFL team drafted player / Round / Pick / Year
   + Average broad jump for **OLB**: Drafted = **_118inches_** | Not Drafted = **_115inches_**
 - Conference: Averages
   + Elite = **_113inches_** | Division I-A = **_114inches_** | Division I-AA = **_113inches_** | Division II & II = **_112inches_**
+
+# Modeling
+
+## Preprocess
+
+### Split
+- **Train**: 80% stratified by drafted feature
+- **Test**: 20% stratified by drafted feature
+- **Validation**: 10 fold cross-validation using the training set
+
+### Logistic Regression
+- **Bin**: Infrequent position into "Other" category   
+- **Normalize**: All numeric variables
+- **Dummy**: All categorical variables
+
+#### Model Data
+<img src="Images/Model_Log.PNG" width="  700">
+
+### Random Forrest
+_no preprocess_
+
+#### Model Data
+<img src="Images/Model_RF.PNG" width="  700">
+
+### Control
+- **Parallel Processing**
+
+### Metrics
+ - [ROC | Sensitivity | Specificity | Precision | F1]
+
+## Fit
+
+### Logistic Regression
+
+#### Tune
+- **Penalty**
+- **Mixture**
