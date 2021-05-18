@@ -195,24 +195,43 @@ _no preprocess_
 ### Logistic Regression
 
 #### Tune
-<img src="Images/tune_log_grid.PNG" width="  700">
-<img src="Images/tune_log_fit_Acc.PNG" width="  700">
-<img src="Images/tune_log_fit_Sens.PNG" width="  700">
-<img src="Images/tune_log_fit_Prec.PNG" width="  700">
-<img src="Images/tune_log_fit_F.PNG" width="  700">
+<img src="Images/tune_log_grid.PNG" width="  500">
+<img src="Images/tune_log_fit_Acc.PNG" width="  500">
 
-### Best
+**Best**
+
 Grid | Metric | Penalty | Mixture | Stat
 --- | --- | --- | --- | ---
 Random | Accuracy | -4.1e4 | 0.851 | 0.71
 Latin  | Accuracy | -1.4e8 | 0.516 | 0.71
 Custom | Accuracy | 0.006 | 1 | 0.7
+
+<img src="Images/tune_log_fit_Sens.PNG" width="  500">
+
+**Best**
+
+Grid | Metric | Penalty | Mixture | Stat
+--- | --- | --- | --- | ---
 Random | Sensitivity | 0.136 | 0.955 | 1
 Latin  | Sensitivity | 0.712 | 0.854 | 1
 Custom | Sensitivity | 0.096 | 0.5 | 1
+
+<img src="Images/tune_log_fit_Prec.PNG" width="  500">
+
+**Best**
+
+Grid | Metric | Penalty | Mixture | Stat
+--- | --- | --- | --- | ---
 Random | Precision | -4.28e9 | 0.98 | 0.73
 Latin  | Precision | -6.54e7 | 0.572 | 0.73
 Custom | Precision | 0.001 | 1 | 0.73
+
+<img src="Images/tune_log_fit_F.PNG" width="  500">
+
+**Best**
+
+Grid | Metric | Penalty | Mixture | Stat
+--- | --- | --- | --- | ---
 Random | F Score | -3.92e4 | 0.961 | 0.8
 Latin  | F Score | .00957 | 0.984 | 0.8
 Custom | F Score | 0.016 | 1 | 0.8
@@ -220,24 +239,43 @@ Custom | F Score | 0.016 | 1 | 0.8
 ### Random Forest
 
 ### Tune
-<img src="Images/tune_rf_grid.PNG" width="  700">
-<img src="Images/tune_rf_Acc.PNG" width="  700">
-<img src="Images/tune_rf_Sens.PNG" width="  700">
-<img src="Images/tune_rf_Prec.PNG" width="  700">
-<img src="Images/tune_rf_F.PNG" width="  700">
+<img src="Images/tune_rf_grid.PNG" width="  500">
+<img src="Images/tune_rf_Acc.PNG" width="  500">
 
-### Best
+**Best**
+
 Grid | Metric | mtry | min_n | Stat
 --- | --- | --- | --- | ---
 Random | Accuracy | 3 | 38 | 0.71
 Latin  | Accuracy | 2 | 21 | 0.71
 Custom | Accuracy | 2 | 3 | 0.71
+
+<img src="Images/tune_rf_Sens.PNG" width="  500">
+
+**Best**
+
+Grid | Metric | mtry | min_n | Stat
+--- | --- | --- | --- | ---
 Random | Sensitivity | 1 | 26 | 0.90
 Latin  | Sensitivity | 1 | 32 | 0.90
 Custom | Sensitivity | 1 | 1 | 0.89
+
+<img src="Images/tune_rf_Prec.PNG" width="  500">
+
+**Best**
+
+Grid | Metric | mtry | min_n | Stat
+--- | --- | --- | --- | ---
 Random | Precision | 7 | 17 | 0.74
 Latin  | Precision | 3 | 12 | 0.739
 Custom | Precision | 4 | 5 | 0.741
+
+<img src="Images/tune_rf_F.PNG" width="  500">
+
+**Best**
+
+Grid | Metric | mtry | min_n | Stat
+--- | --- | --- | --- | ---
 Random | F Score | 1 | 19 | 0.80
 Latin  | F Score | 1 | 19 | 0.80
 Custom | F Score | 1 | 1 | 0.80
