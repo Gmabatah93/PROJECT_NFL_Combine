@@ -205,14 +205,14 @@ _no preprocess_
 Grid | Metric | Penalty | Mixture | Stat
 --- | --- | --- | --- | ---
 Random | Accuracy | -4.28e9 | 0.98 | 0.71
-       | Sensitivity | 0.136 | 0.955 | 1
-       | Precision | -4.28e9 | 0.98 | 0.73
-       | F Score | -3.92e4 | 0.961 | 0.8
+ | Sensitivity | 0.136 | 0.955 | 1
+ | Precision | -4.28e9 | 0.98 | 0.73
+ | F Score | -3.92e4 | 0.961 | 0.8
 Latin  | Accuracy | -1.4e8 | 0.516 | .71
-       | Sensitivity | 0.712 | 0.854 | 1
-       | Precision | -6.54e7 | 0.572 | 0.73
-       | F Score | .00957 | 0.984 | 0.8
+ | Sensitivity | 0.712 | 0.854 | 1
+ | Precision | -6.54e7 | 0.572 | 0.73
+ | F Score | .00957 | 0.984 | 0.8
 Custom | Accuracy | 0.006 | 1 | 0.7
-       | Sensitivity | 0.096 | 0.5 | 1
-       | Precision | 0.001 | 1 | 0.727
-       | F Score | 0.016 | 1 | 0.8
+ | Sensitivity | 0.096 | 0.5 | 1
+ | Precision | 0.001 | 1 | 0.727
+ | F Score | 0.016 | 1 | 0.8
