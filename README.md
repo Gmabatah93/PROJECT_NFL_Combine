@@ -304,10 +304,10 @@ Custom | F Score | 1 | 1 | 0.80
 ## Logistic Regression
 
 ### Confusion Matrix
-<img src="Images/CM_log.PNG" width="  700">
+<img src="Images/CM_Log.PNG" width="  700">
 
 ### ROC Curve
-<img src="Images/ROC_log.PNG" width="  700">
+<img src="Images/ROC_Log.PNG" width="  700">
 
 ### Metrics
 Optimization | AUC | Accuracy | Sensitivity | Specificity | Precision | F1 | PPV | NPV
