@@ -1041,7 +1041,8 @@ gg_Log_tune_random_Acc <- log_tune_random %>%
         legend.text = element_text(size = 7),
         legend.position = "bottom")
 # - best: Accuracy
-log_tune_random %>% show_best(metric = "accuracy") %>% top_n(1)
+log_tune_random %>% show_best(metric = "accuracy")
+log_best_Acc <- log_tune_random %>% select_best(metric = "accuracy")
 # - plot: Sensitivity
 gg_Log_tune_random_Sens <- log_tune_random %>% 
   collect_metrics() %>% 
@@ -1344,17 +1345,65 @@ ggarrange(gg_Log_tune_random_Prec, gg_Log_tune_latin_Prec, gg_Log_tune_custom_Pr
 ggarrange(gg_Log_tune_random_F, gg_Log_tune_latin_F, gg_Log_tune_custom_F, nrow = 1)
 
 
+# SA
+# - control
+nfl_ctrl_SA <- finetune::control_sim_anneal(no_improve = 10,
+                                            event_level = "second",
+                                            parallel_over = "everything",
+                                            verbose = TRUE)
+nfl_metric_Acc <- metric_set(accuracy)
+nfl_metric_F <- metric_set(f_meas)
 
-
-
-
-# - final fit
-log_wflow_FIANL <- 
+# Start Grid
+# - Accuracy
+log_SA_params_Acc <- 
   log_wflow %>% 
-  finalize_workflow(log_best)
+  parameters() %>% 
+  update(
+    penalty = penalty(range = c(0,0.006), trans = NULL),
+    mixture = mixture(range = c(0.5,1), trans = NULL)
+  ) 
+
+log_SA_grid_Acc <- 
+  log_wflow %>% 
+  parameters() %>% 
+  update(
+    penalty = penalty(range = c(0,0.006), trans = NULL),
+    mixture = mixture(range = c(0.5,1), trans = NULL)
+  ) %>% 
+  grid_regular(levels = 2)
+  
+log_SA_initial_Acc <- 
+  log_wflow %>% 
+  tune_grid(
+    resamples = nfl_10fold,
+    grid = log_SA_grid,
+    metrics = nfl_metrics
+  )
+
+# Refit
+# - Accuracy
+set.seed(101)
+log_tune_SA_Acc <- 
+  log_wflow %>% 
+  finetune::tune_sim_anneal(
+    resamples = nfl_10fold,
+    metrics = nfl_metric_Acc,
+    initial = log_SA_initial,
+    param_info = log_SA_params,
+    iter = 50,
+    control = nfl_ctrl_SA
+  )
+
+# FINAL fit
+
+# - Accuracy
+log_wflow_Acc_FINAL <- 
+  log_wflow %>% 
+  finalize_workflow(log_best_Acc)
 
 log_FINAL <- 
-  log_wflow_FIANL %>% 
+  log_wflow_Acc_FINAL %>% 
   fit(nfl_train)
 
 # Modeling: Fit - Random Forest ----
