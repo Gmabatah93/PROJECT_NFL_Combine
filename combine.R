@@ -923,16 +923,17 @@ nfl_ctrl <-
                verbose = TRUE)
 
 # Metrics
-nfl_metrics <- metric_set(roc_auc, sens, spec, recall, precision, f_meas)
+nfl_metrics <- metric_set(roc_auc, accuracy, sens, spec, recall, precision, f_meas)
 
 #
-# Modeling: Fit ----
+# Modeling: Fit - Logistic Regression ----
 
 # Start Parallel Processing
 cl_3 <- parallel::makeCluster(2)
 doParallel::registerDoParallel(cl_3)
 
 # LOGISTIC REGRESSION
+
 # Spec
 log_spec <- 
   logistic_reg(
@@ -946,7 +947,6 @@ log_wflow <-
   workflow() %>% 
   add_model(log_spec) %>% 
   add_recipe(nfl_recipe) 
-
 
 # Hyperparameters
 log_spec %>%  parameters() %>% pull_dials_object("penalty")
@@ -1003,8 +1003,10 @@ gg_Log_Grid_custom <- log_grid_custom %>%
 # Visual
 ggarrange(gg_Log_Grid_random, gg_Log_Grid_latin, gg_Log_Grid_custom, nrow = 1)
 
-# Tune
-# - Random Grid
+
+# TUNE
+
+# Random Grid
 log_tune_random <-
   log_wflow %>% 
   tune_grid(
@@ -1013,8 +1015,89 @@ log_tune_random <-
     metrics = nfl_metrics,
     control = nfl_ctrl
   )
-# -- plot
-gg_Log_tune_random <- log_tune_random %>% 
+# - plot: Accuracy
+gg_Log_tune_random_Acc <- log_tune_random %>% 
+  collect_metrics() %>% 
+  filter(.metric == "accuracy") %>%
+  mutate(mixture = case_when(
+    mixture >= 0   & mixture < 0.2 ~ "[0 - 0.2)",
+    mixture >= 0.2 & mixture < 0.4 ~ "[0.2 - 0.4)",
+    mixture >= 0.4 & mixture < 0.6 ~ "[0.4 - 0.6)",
+    mixture >= 0.6 & mixture < 0.8 ~ "[0.6 - 0.8)",
+    mixture >= 0.8 & mixture <= 1  ~ "[0.8 - 1]",
+  ) %>% factor) %>% 
+  ggplot(aes(penalty, mean)) +
+  geom_line(aes(color = mixture)) + geom_point() +
+  labs(title = "Evaluation: Random Grid",
+       subtitle = "Logistic Regression",
+       y = "Accuracy") +
+  scale_y_continuous(labels = scales::percent_format(accuracy = 0.1)) +
+  theme_bw() +
+  theme(plot.title = element_text(hjust = 0.4, face = "bold", size = 15),
+        plot.subtitle = element_text(hjust = 0.4, color = "darkolivegreen"),
+        axis.title.y = element_text(color = "tomato"),
+        axis.title.x = element_text(face = "bold", color = "cyan4"), 
+        legend.title = element_text(face = "bold", color = "cyan4"),
+        legend.text = element_text(size = 7),
+        legend.position = "bottom")
+# - best: Accuracy
+log_tune_random %>% show_best(metric = "accuracy") %>% top_n(1)
+# - plot: Sensitivity
+gg_Log_tune_random_Sens <- log_tune_random %>% 
+  collect_metrics() %>% 
+  filter(.metric == "sens") %>%
+  mutate(mixture = case_when(
+    mixture >= 0   & mixture < 0.2 ~ "[0 - 0.2)",
+    mixture >= 0.2 & mixture < 0.4 ~ "[0.2 - 0.4)",
+    mixture >= 0.4 & mixture < 0.6 ~ "[0.4 - 0.6)",
+    mixture >= 0.6 & mixture < 0.8 ~ "[0.6 - 0.8)",
+    mixture >= 0.8 & mixture <= 1  ~ "[0.8 - 1]",
+  ) %>% factor) %>% 
+  ggplot(aes(penalty, mean)) +
+  geom_line(aes(color = mixture)) + geom_point() +
+  labs(title = "Evaluation: Random Grid",
+       subtitle = "Logistic Regression",
+       y = "Sensitivity") +
+  scale_y_continuous(labels = scales::percent_format(accuracy = 0.1)) +
+  theme_bw() +
+  theme(plot.title = element_text(hjust = 0.4, face = "bold", size = 15),
+        plot.subtitle = element_text(hjust = 0.4, color = "darkolivegreen"),
+        axis.title.y = element_text(color = "tomato"),
+        axis.title.x = element_text(face = "bold", color = "cyan4"), 
+        legend.title = element_text(face = "bold", color = "cyan4"),
+        legend.text = element_text(size = 7),
+        legend.position = "bottom")
+# - best: Sensitivity
+log_tune_random %>% show_best(metric = "sens") %>% top_n(1)
+# - plot: Precision
+gg_Log_tune_random_Prec <- log_tune_random %>% 
+  collect_metrics() %>% 
+  filter(.metric == "precision") %>%
+  mutate(mixture = case_when(
+    mixture >= 0   & mixture < 0.2 ~ "[0 - 0.2)",
+    mixture >= 0.2 & mixture < 0.4 ~ "[0.2 - 0.4)",
+    mixture >= 0.4 & mixture < 0.6 ~ "[0.4 - 0.6)",
+    mixture >= 0.6 & mixture < 0.8 ~ "[0.6 - 0.8)",
+    mixture >= 0.8 & mixture <= 1  ~ "[0.8 - 1]",
+  ) %>% factor) %>% 
+  ggplot(aes(penalty, mean)) +
+  geom_line(aes(color = mixture)) + geom_point() +
+  labs(title = "Evaluation: Random Grid",
+       subtitle = "Logistic Regression",
+       y = "Precision") +
+  scale_y_continuous(labels = scales::percent_format(accuracy = 0.1)) +
+  theme_bw() +
+  theme(plot.title = element_text(hjust = 0.4, face = "bold", size = 15),
+        plot.subtitle = element_text(hjust = 0.4, color = "darkolivegreen"),
+        axis.title.y = element_text(color = "tomato"),
+        axis.title.x = element_text(face = "bold", color = "cyan4"), 
+        legend.title = element_text(face = "bold", color = "cyan4"),
+        legend.text = element_text(size = 7),
+        legend.position = "bottom")
+# - best: Precision
+log_tune_random %>% show_best(metric = "precision") %>% top_n(1)
+# -- plot: F Score
+gg_Log_tune_random_F <- log_tune_random %>% 
   collect_metrics() %>% 
   filter(.metric == "f_meas") %>%
   mutate(mixture = case_when(
@@ -1031,14 +1114,18 @@ gg_Log_tune_random <- log_tune_random %>%
        y = "F Score") +
   scale_y_continuous(labels = scales::percent_format(accuracy = 0.1)) +
   theme_bw() +
-  theme(plot.title = element_text(face = "bold"),
+  theme(plot.title = element_text(hjust = 0.4, face = "bold", size = 15),
+        plot.subtitle = element_text(hjust = 0.4, color = "darkolivegreen"),
         axis.title.y = element_text(color = "tomato"),
         axis.title.x = element_text(face = "bold", color = "cyan4"), 
         legend.title = element_text(face = "bold", color = "cyan4"),
         legend.text = element_text(size = 7),
         legend.position = "bottom")
+# - best: F Score
+log_tune_random %>% show_best(metric = "f_meas") %>% top_n(1)
 
-# - Latin Grid
+
+# Latin Grid
 log_tune_latin <-
   log_wflow %>% 
   tune_grid(
@@ -1047,8 +1134,89 @@ log_tune_latin <-
     metrics = nfl_metrics,
     control = nfl_ctrl
   )
-# -- plot
-gg_Log_tune_latin <- log_tune_latin %>% 
+# -  plot: Accuracy
+gg_Log_tune_latin_Acc <- log_tune_latin %>% 
+  collect_metrics() %>% 
+  filter(.metric == "accuracy") %>%
+  mutate(mixture = case_when(
+    mixture >= 0   & mixture < 0.2 ~ "[0 - 0.2)",
+    mixture >= 0.2 & mixture < 0.4 ~ "[0.2 - 0.4)",
+    mixture >= 0.4 & mixture < 0.6 ~ "[0.4 - 0.6)",
+    mixture >= 0.6 & mixture < 0.8 ~ "[0.6 - 0.8)",
+    mixture >= 0.8 & mixture <= 1  ~ "[0.8 - 1]",
+  ) %>% factor) %>% 
+  ggplot(aes(penalty, mean)) +
+  geom_line(aes(color = mixture)) + geom_point() +
+  labs(title = "Evaluation: Latin Grid",
+       subtitle = "Logistic Regression",
+       y = "Accuracy") +
+  scale_y_continuous(labels = scales::percent_format(accuracy = 0.1)) +
+  theme_bw() +
+  theme(plot.title = element_text(hjust = 0.4, face = "bold", size = 15),
+        plot.subtitle = element_text(hjust = 0.4, color = "darkolivegreen"),
+        axis.title.y = element_text(color = "tomato"),
+        axis.title.x = element_text(face = "bold", color = "cyan4"), 
+        legend.title = element_text(face = "bold", color = "cyan4"),
+        legend.text = element_text(size = 7),
+        legend.position = "bottom")
+# - best: Accuracy
+log_tune_latin %>% show_best(metric = "accuracy") %>% top_n(1)
+# - plot: Sens
+gg_Log_tune_latin_Sens <- log_tune_latin %>% 
+  collect_metrics() %>% 
+  filter(.metric == "sens") %>%
+  mutate(mixture = case_when(
+    mixture >= 0   & mixture < 0.2 ~ "[0 - 0.2)",
+    mixture >= 0.2 & mixture < 0.4 ~ "[0.2 - 0.4)",
+    mixture >= 0.4 & mixture < 0.6 ~ "[0.4 - 0.6)",
+    mixture >= 0.6 & mixture < 0.8 ~ "[0.6 - 0.8)",
+    mixture >= 0.8 & mixture <= 1  ~ "[0.8 - 1]",
+  ) %>% factor) %>% 
+  ggplot(aes(penalty, mean)) +
+  geom_line(aes(color = mixture)) + geom_point() +
+  labs(title = "Evaluation: Latin Grid",
+       subtitle = "Logistic Regression",
+       y = "Sensitivity") +
+  scale_y_continuous(labels = scales::percent_format(accuracy = 0.1)) +
+  theme_bw() +
+  theme(plot.title = element_text(hjust = 0.4, face = "bold", size = 15),
+        plot.subtitle = element_text(hjust = 0.4, color = "darkolivegreen"),
+        axis.title.y = element_text(color = "tomato"),
+        axis.title.x = element_text(face = "bold", color = "cyan4"), 
+        legend.title = element_text(face = "bold", color = "cyan4"),
+        legend.text = element_text(size = 7),
+        legend.position = "bottom")
+# - best: Sensitivity
+log_tune_latin %>% show_best(metric = "sens") %>% top_n(1)
+# -- plot: Precision
+gg_Log_tune_latin_Prec <- log_tune_latin %>% 
+  collect_metrics() %>% 
+  filter(.metric == "precision") %>%
+  mutate(mixture = case_when(
+    mixture >= 0   & mixture < 0.2 ~ "[0 - 0.2)",
+    mixture >= 0.2 & mixture < 0.4 ~ "[0.2 - 0.4)",
+    mixture >= 0.4 & mixture < 0.6 ~ "[0.4 - 0.6)",
+    mixture >= 0.6 & mixture < 0.8 ~ "[0.6 - 0.8)",
+    mixture >= 0.8 & mixture <= 1  ~ "[0.8 - 1]",
+  ) %>% factor) %>% 
+  ggplot(aes(penalty, mean)) +
+  geom_line(aes(color = mixture)) + geom_point() +
+  labs(title = "Evaluation: Latin Grid",
+       subtitle = "Logistic Regression",
+       y = "Precision") +
+  scale_y_continuous(labels = scales::percent_format(accuracy = 0.1)) +
+  theme_bw() +
+  theme(plot.title = element_text(hjust = 0.4, face = "bold", size = 15),
+        plot.subtitle = element_text(hjust = 0.4, color = "darkolivegreen"),
+        axis.title.y = element_text(color = "tomato"),
+        axis.title.x = element_text(face = "bold", color = "cyan4"), 
+        legend.title = element_text(face = "bold", color = "cyan4"),
+        legend.text = element_text(size = 7),
+        legend.position = "bottom")
+# - best: Precision
+log_tune_latin %>% show_best(metric = "precision") %>% top_n(1)
+# -- plot: F Score
+gg_Log_tune_latin_F <- log_tune_latin %>% 
   collect_metrics() %>% 
   filter(.metric == "f_meas") %>%
   mutate(mixture = case_when(
@@ -1065,15 +1233,17 @@ gg_Log_tune_latin <- log_tune_latin %>%
        y = "F Score") +
   scale_y_continuous(labels = scales::percent_format(accuracy = 0.1)) +
   theme_bw() +
-  theme(plot.title = element_text(face = "bold"),
+  theme(plot.title = element_text(hjust = 0.4, face = "bold", size = 15),
+        plot.subtitle = element_text(hjust = 0.4, color = "darkolivegreen"),
         axis.title.y = element_text(color = "tomato"),
         axis.title.x = element_text(face = "bold", color = "cyan4"), 
         legend.title = element_text(face = "bold", color = "cyan4"),
         legend.text = element_text(size = 7),
         legend.position = "bottom")
+# - best: F Score
+log_tune_latin %>% show_best(metric = "f_meas") %>% top_n(1)
 
-
-# - Custom Grid
+# Custom Grid
 log_tune_custom <-
   log_wflow %>% 
   tune_grid(
@@ -1082,8 +1252,68 @@ log_tune_custom <-
     metrics = nfl_metrics,
     control = nfl_ctrl
   )
-# -- plot
-gg_Log_tune_custom <- log_tune_custom %>% 
+# - plot: Accuracy
+gg_Log_tune_custom_Acc <- log_tune_custom %>% 
+  collect_metrics() %>% 
+  filter(.metric == "accuracy") %>%
+  mutate(mixture = factor(mixture)) %>% 
+  ggplot(aes(penalty, mean)) +
+  geom_line(aes(color = mixture)) + geom_point() +
+  labs(title = "Evaluation: Custom Grid",
+       subtitle = "Logistic Regression",
+       y = "Accuracy") +
+  scale_y_continuous(labels = scales::percent_format(accuracy = 0.1)) +
+  theme_bw() +
+  theme(plot.title = element_text(hjust = 0.4, face = "bold", size = 15),
+        plot.subtitle = element_text(hjust = 0.4, color = "darkolivegreen"),
+        axis.title.y = element_text(color = "tomato"),
+        axis.title.x = element_text(face = "bold", color = "cyan4"), 
+        legend.title = element_text(face = "bold", color = "cyan4"),
+        legend.position = "bottom")
+# - best: Accuracy
+log_tune_custom %>% show_best(metric = "accuracy") %>% top_n(1)
+# - plot: Sensitivity
+gg_Log_tune_custom_Sens <- log_tune_custom %>% 
+  collect_metrics() %>% 
+  filter(.metric == "sens") %>%
+  mutate(mixture = factor(mixture)) %>% 
+  ggplot(aes(penalty, mean)) +
+  geom_line(aes(color = mixture)) + geom_point() +
+  labs(title = "Evaluation: Custom Grid",
+       subtitle = "Logistic Regression",
+       y = "Sensitivity") +
+  scale_y_continuous(labels = scales::percent_format(accuracy = 0.1)) +
+  theme_bw() +
+  theme(plot.title = element_text(hjust = 0.4, face = "bold", size = 15),
+        plot.subtitle = element_text(hjust = 0.4, color = "darkolivegreen"),
+        axis.title.y = element_text(color = "tomato"),
+        axis.title.x = element_text(face = "bold", color = "cyan4"), 
+        legend.title = element_text(face = "bold", color = "cyan4"),
+        legend.position = "bottom")
+# - best: Sensitivity
+log_tune_custom %>% show_best(metric = "sens") %>% top_n(1)
+# - plot: Precision
+gg_Log_tune_custom_Prec <- log_tune_custom %>% 
+  collect_metrics() %>% 
+  filter(.metric == "precision") %>%
+  mutate(mixture = factor(mixture)) %>% 
+  ggplot(aes(penalty, mean)) +
+  geom_line(aes(color = mixture)) + geom_point() +
+  labs(title = "Evaluation: Custom Grid",
+       subtitle = "Logistic Regression",
+       y = "Precision") +
+  scale_y_continuous(labels = scales::percent_format(accuracy = 0.1)) +
+  theme_bw() +
+  theme(plot.title = element_text(hjust = 0.4, face = "bold", size = 15),
+        plot.subtitle = element_text(hjust = 0.4, color = "darkolivegreen"),
+        axis.title.y = element_text(color = "tomato"),
+        axis.title.x = element_text(face = "bold", color = "cyan4"), 
+        legend.title = element_text(face = "bold", color = "cyan4"),
+        legend.position = "bottom")
+# - best: Precision
+log_tune_custom %>% show_best(metric = "precision") %>% top_n(1)
+# - plot: F Score
+gg_Log_tune_custom_F <- log_tune_custom %>% 
   collect_metrics() %>% 
   filter(.metric == "f_meas") %>%
   mutate(mixture = factor(mixture)) %>% 
@@ -1094,17 +1324,24 @@ gg_Log_tune_custom <- log_tune_custom %>%
        y = "F Score") +
   scale_y_continuous(labels = scales::percent_format(accuracy = 0.1)) +
   theme_bw() +
-  theme(plot.title = element_text(face = "bold"),
+  theme(plot.title = element_text(hjust = 0.4, face = "bold", size = 15),
+        plot.subtitle = element_text(hjust = 0.4, color = "darkolivegreen"),
         axis.title.y = element_text(color = "tomato"),
         axis.title.x = element_text(face = "bold", color = "cyan4"), 
         legend.title = element_text(face = "bold", color = "cyan4"),
         legend.position = "bottom")
-
-
+# - best: F Score
+log_tune_custom %>% show_best(metric = "f_meas") %>% top_n(1)
 
 # Visual
-ggarrange(gg_Log_tune_random, gg_Log_tune_latin, gg_Log_tune_custom, nrow = 1)
-
+# - Accuracy
+ggarrange(gg_Log_tune_random_Acc, gg_Log_tune_latin_Acc, gg_Log_tune_custom_Acc, nrow = 1)
+# - Sensitiviy
+ggarrange(gg_Log_tune_random_Sens, gg_Log_tune_latin_Sens, gg_Log_tune_custom_Sens, nrow = 1)
+# - Precision
+ggarrange(gg_Log_tune_random_Prec, gg_Log_tune_latin_Prec, gg_Log_tune_custom_Prec, nrow = 1)
+# - F Score
+ggarrange(gg_Log_tune_random_F, gg_Log_tune_latin_F, gg_Log_tune_custom_F, nrow = 1)
 
 
 
@@ -1120,10 +1357,10 @@ log_FINAL <-
   log_wflow_FIANL %>% 
   fit(nfl_train)
 
+# Modeling: Fit - Random Forest ----
 
-
-# Random Forrest
-# - spec
+# RANDOM FORREST
+# Spec
 rf_spec <- 
   rand_forest(
     mtry = tune(),
@@ -1132,22 +1369,240 @@ rf_spec <-
 ) %>% 
   set_engine("ranger") %>% 
   set_mode("classification")
-# - workflow
+# Workflow
 rf_wflow <- 
   workflow() %>% 
   add_model(rf_spec) %>% 
   add_recipe(nfl_recipe_simple)
-# - hyperparameters
+
+# Hyperparameters
 rf_spec %>%  parameters() %>% pull_dials_object("min_n")
-rf_spec %>%  parameters() %>% pull_dials_object("mtry")
-# -- Regular Custom Grid
+rf_spec %>%  parameters() %>% update(mtry = mtry(c(1,8))) %>%  pull_dials_object("mtry")
+# - Random Grid
+set.seed(101)
+rf_grid_random <- 
+  rf_spec %>% 
+  parameters(penalty(trans = NULL)) %>% 
+  update(mtry = mtry(c(1,8))) %>% 
+  grid_random(size = 50)
+# -- plot
+gg_RF_Grid_random <- rf_grid_random %>% 
+  ggplot(aes(min_n, mtry)) +
+  geom_point(shape = 1, size = 4, color = "grey60") +
+  labs(title = "Random Grid",
+       subtitle = "Random Forrest") +
+  theme_bw() +
+  theme(plot.title = element_text(hjust = 0.4, face = "bold", size = 15),
+        plot.subtitle = element_text(hjust = 0.4, color = "darkolivegreen"),
+        axis.title = element_text(face = "bold", color = "cyan4"))
+# - Latin Hypercube
+set.seed(101)
+rf_grid_latin <- 
+  rf_spec %>% 
+  parameters(penalty(trans = NULL)) %>% 
+  update(mtry = mtry(c(1,8))) %>% 
+  grid_latin_hypercube(size = 50)
+# -- plot
+gg_RF_Grid_latin <- rf_grid_latin %>% 
+  ggplot(aes(min_n, mtry)) +
+  geom_point(shape = 1, size = 4, color = "grey60") +
+  labs(title = "Latin Grid",
+       subtitle = "Random Forrest") +
+  theme_bw() +
+  theme(plot.title = element_text(hjust = 0.4, face = "bold", size = 15),
+        plot.subtitle = element_text(hjust = 0.4, color = "darkolivegreen"),
+        axis.title = element_text(face = "bold", color = "cyan4"))
+# - Custom Grid
 rf_grid_custom <- 
   crossing(
-    min_n = seq(1,40,2),
-    mtry = c(1,2,5,8)
+    min_n = seq(1, 10, 2),
+    mtry = 1:8
   )
-# --tune
-rf_tune_custom <- 
+# -- plot
+gg_RF_Grid_custom <- rf_grid_custom %>% 
+  ggplot(aes(min_n, mtry)) +
+  geom_point(shape = 1, size = 4, color = "grey60") +
+  labs(title = "Custom Grid",
+       subtitle = "Random Forrest") +
+  theme_bw() +
+  theme(plot.title = element_text(hjust = 0.4, face = "bold", size = 15),
+        plot.subtitle = element_text(hjust = 0.4, color = "darkolivegreen"),
+        axis.title = element_text(face = "bold", color = "cyan4"))
+
+# Visual
+ggarrange(gg_RF_Grid_random, gg_RF_Grid_latin, gg_RF_Grid_custom, nrow = 1)
+
+
+
+# TUNE: 
+
+# Random
+rf_tune_random <-
+  rf_wflow %>% 
+  tune_grid(
+    resamples = nfl_10fold,
+    grid = rf_grid_random,
+    metrics = nfl_metrics,
+    control = nfl_ctrl
+  )
+# - plot: Accuracy
+gg_RF_tune_random_Acc <- rf_tune_random %>% 
+  collect_metrics() %>% 
+  filter(.metric == "accuracy") %>%
+  mutate(mtry = factor(mtry)) %>% 
+  ggplot(aes(min_n, mean)) +
+  geom_line(aes(color = mtry)) + geom_point() +
+  labs(title = "Evaluation: Random Grid",
+       subtitle = "Random Forrest",
+       y = "Accuracy") +
+  scale_y_continuous(labels = scales::percent_format(accuracy = 0.1)) +
+  theme_bw() +
+  theme(plot.title = element_text(face = "bold"),
+        axis.title.y = element_text(color = "tomato"),
+        axis.title.x = element_text(face = "bold", color = "cyan4"), 
+        legend.title = element_text(face = "bold", color = "cyan4"),
+        legend.text = element_text(size = 7),
+        legend.position = "bottom")
+# - plot: Sensitivity
+gg_RF_tune_random_Sens <- rf_tune_random %>% 
+  collect_metrics() %>% 
+  filter(.metric == "sens") %>%
+  mutate(mtry = factor(mtry)) %>% 
+  ggplot(aes(min_n, mean)) +
+  geom_line(aes(color = mtry)) + geom_point() +
+  labs(title = "Evaluation: Random Grid",
+       subtitle = "Random Forrest",
+       y = "Sensitivity") +
+  scale_y_continuous(labels = scales::percent_format(accuracy = 0.1)) +
+  theme_bw() +
+  theme(plot.title = element_text(face = "bold"),
+        axis.title.y = element_text(color = "tomato"),
+        axis.title.x = element_text(face = "bold", color = "cyan4"), 
+        legend.title = element_text(face = "bold", color = "cyan4"),
+        legend.text = element_text(size = 7),
+        legend.position = "bottom")
+# - plot: Precision
+gg_RF_tune_random_Prec <- rf_tune_random %>% 
+  collect_metrics() %>% 
+  filter(.metric == "precision") %>%
+  mutate(mtry = factor(mtry)) %>% 
+  ggplot(aes(min_n, mean)) +
+  geom_line(aes(color = mtry)) + geom_point() +
+  labs(title = "Evaluation: Random Grid",
+       subtitle = "Random Forrest",
+       y = "Precision") +
+  scale_y_continuous(labels = scales::percent_format(accuracy = 0.1)) +
+  theme_bw() +
+  theme(plot.title = element_text(face = "bold"),
+        axis.title.y = element_text(color = "tomato"),
+        axis.title.x = element_text(face = "bold", color = "cyan4"), 
+        legend.title = element_text(face = "bold", color = "cyan4"),
+        legend.text = element_text(size = 7),
+        legend.position = "bottom")
+# - plot: F Score
+gg_RF_tune_random_F <- rf_tune_random %>% 
+  collect_metrics() %>% 
+  filter(.metric == "f_meas") %>%
+  mutate(mtry = factor(mtry)) %>% 
+  ggplot(aes(min_n, mean)) +
+  geom_line(aes(color = mtry)) + geom_point() +
+  labs(title = "Evaluation: Random Grid",
+       subtitle = "Random Forrest",
+       y = "F Score") +
+  scale_y_continuous(labels = scales::percent_format(accuracy = 0.1)) +
+  theme_bw() +
+  theme(plot.title = element_text(face = "bold"),
+        axis.title.y = element_text(color = "tomato"),
+        axis.title.x = element_text(face = "bold", color = "cyan4"), 
+        legend.title = element_text(face = "bold", color = "cyan4"),
+        legend.text = element_text(size = 7),
+        legend.position = "bottom")
+
+
+# Latin
+rf_tune_latin <-
+  rf_wflow %>% 
+  tune_grid(
+    resamples = nfl_10fold,
+    grid = rf_grid_latin,
+    metrics = nfl_metrics,
+    control = nfl_ctrl
+  )
+# - plot: Accuracy
+gg_RF_tune_latin_Acc <- rf_tune_latin %>% 
+  collect_metrics() %>% 
+  filter(.metric == "accuracy") %>%
+  mutate(mtry = factor(mtry)) %>% 
+  ggplot(aes(min_n, mean)) +
+  geom_line(aes(color = mtry)) + geom_point() +
+  labs(title = "Evaluation: Latin Grid",
+       subtitle = "Random Forrest",
+       y = "Accuracy") +
+  scale_y_continuous(labels = scales::percent_format(accuracy = 0.1)) +
+  theme_bw() +
+  theme(plot.title = element_text(face = "bold"),
+        axis.title.y = element_text(color = "tomato"),
+        axis.title.x = element_text(face = "bold", color = "cyan4"), 
+        legend.title = element_text(face = "bold", color = "cyan4"),
+        legend.text = element_text(size = 7),
+        legend.position = "bottom")
+# - plot: Sensitivity
+gg_RF_tune_latin_Sens <- rf_tune_latin %>% 
+  collect_metrics() %>% 
+  filter(.metric == "sens") %>%
+  mutate(mtry = factor(mtry)) %>% 
+  ggplot(aes(min_n, mean)) +
+  geom_line(aes(color = mtry)) + geom_point() +
+  labs(title = "Evaluation: Latin Grid",
+       subtitle = "Random Forrest",
+       y = "Sensitivity") +
+  scale_y_continuous(labels = scales::percent_format(accuracy = 0.1)) +
+  theme_bw() +
+  theme(plot.title = element_text(face = "bold"),
+        axis.title.y = element_text(color = "tomato"),
+        axis.title.x = element_text(face = "bold", color = "cyan4"), 
+        legend.title = element_text(face = "bold", color = "cyan4"),
+        legend.text = element_text(size = 7),
+        legend.position = "bottom")
+# - plot: Precision
+gg_RF_tune_latin_Prec <- rf_tune_latin %>% 
+  collect_metrics() %>% 
+  filter(.metric == "precision") %>%
+  mutate(mtry = factor(mtry)) %>% 
+  ggplot(aes(min_n, mean)) +
+  geom_line(aes(color = mtry)) + geom_point() +
+  labs(title = "Evaluation: Latin Grid",
+       subtitle = "Random Forrest",
+       y = "Precision") +
+  scale_y_continuous(labels = scales::percent_format(accuracy = 0.1)) +
+  theme_bw() +
+  theme(plot.title = element_text(face = "bold"),
+        axis.title.y = element_text(color = "tomato"),
+        axis.title.x = element_text(face = "bold", color = "cyan4"), 
+        legend.title = element_text(face = "bold", color = "cyan4"),
+        legend.text = element_text(size = 7),
+        legend.position = "bottom")
+# - plot: F Score
+gg_RF_tune_latin_F <- rf_tune_latin %>% 
+  collect_metrics() %>% 
+  filter(.metric == "f_meas") %>%
+  mutate(mtry = factor(mtry)) %>% 
+  ggplot(aes(min_n, mean)) +
+  geom_line(aes(color = mtry)) + geom_point() +
+  labs(title = "Evaluation: Latin Grid",
+       subtitle = "Random Forrest",
+       y = "F Score") +
+  scale_y_continuous(labels = scales::percent_format(accuracy = 0.1)) +
+  theme_bw() +
+  theme(plot.title = element_text(face = "bold"),
+        axis.title.y = element_text(color = "tomato"),
+        axis.title.x = element_text(face = "bold", color = "cyan4"), 
+        legend.title = element_text(face = "bold", color = "cyan4"),
+        legend.text = element_text(size = 7),
+        legend.position = "bottom")
+
+# Custom
+rf_tune_custom <-
   rf_wflow %>% 
   tune_grid(
     resamples = nfl_10fold,
@@ -1155,29 +1610,89 @@ rf_tune_custom <-
     metrics = nfl_metrics,
     control = nfl_ctrl
   )
-# - results
-rf_tune_custom %>% 
+# - plot: Accuracy
+gg_RF_tune_custom_Acc <- rf_tune_custom %>% 
   collect_metrics() %>% 
-  filter(.metric == "f_meas") %>% 
+  filter(.metric == "accuracy") %>%
   mutate(mtry = factor(mtry)) %>% 
   ggplot(aes(min_n, mean)) +
   geom_line(aes(color = mtry)) + geom_point() +
-  labs(title = "Random Forrest: Custom Grid",
+  labs(title = "Evaluation: Custom Grid",
+       subtitle = "Random Forrest",
+       y = "Accuracy") +
+  scale_y_continuous(labels = scales::percent_format(accuracy = 0.1)) +
+  theme_bw() +
+  theme(plot.title = element_text(face = "bold"),
+        axis.title.y = element_text(color = "tomato"),
+        axis.title.x = element_text(face = "bold", color = "cyan4"), 
+        legend.title = element_text(face = "bold", color = "cyan4"),
+        legend.text = element_text(size = 7),
+        legend.position = "bottom")
+# - plot: Sensitivity
+gg_RF_tune_custom_Sens <- rf_tune_custom %>% 
+  collect_metrics() %>% 
+  filter(.metric == "sens") %>%
+  mutate(mtry = factor(mtry)) %>% 
+  ggplot(aes(min_n, mean)) +
+  geom_line(aes(color = mtry)) + geom_point() +
+  labs(title = "Evaluation: Custom Grid",
+       subtitle = "Random Forrest",
+       y = "Sensitivity") +
+  scale_y_continuous(labels = scales::percent_format(accuracy = 0.1)) +
+  theme_bw() +
+  theme(plot.title = element_text(face = "bold"),
+        axis.title.y = element_text(color = "tomato"),
+        axis.title.x = element_text(face = "bold", color = "cyan4"), 
+        legend.title = element_text(face = "bold", color = "cyan4"),
+        legend.text = element_text(size = 7),
+        legend.position = "bottom")
+# - plot: Precision
+gg_RF_tune_custom_Prec <- rf_tune_custom %>% 
+  collect_metrics() %>% 
+  filter(.metric == "precision") %>%
+  mutate(mtry = factor(mtry)) %>% 
+  ggplot(aes(min_n, mean)) +
+  geom_line(aes(color = mtry)) + geom_point() +
+  labs(title = "Evaluation: Custom Grid",
+       subtitle = "Random Forrest",
+       y = "Precision") +
+  scale_y_continuous(labels = scales::percent_format(accuracy = 0.1)) +
+  theme_bw() +
+  theme(plot.title = element_text(face = "bold"),
+        axis.title.y = element_text(color = "tomato"),
+        axis.title.x = element_text(face = "bold", color = "cyan4"), 
+        legend.title = element_text(face = "bold", color = "cyan4"),
+        legend.text = element_text(size = 7),
+        legend.position = "bottom")
+# - plot: F Score
+gg_RF_tune_custom_F <- rf_tune_custom %>% 
+  collect_metrics() %>% 
+  filter(.metric == "f_meas") %>%
+  mutate(mtry = factor(mtry)) %>% 
+  ggplot(aes(min_n, mean)) +
+  geom_line(aes(color = mtry)) + geom_point() +
+  labs(title = "Evaluation: Custom Grid",
+       subtitle = "Random Forrest",
        y = "F Score") +
   scale_y_continuous(labels = scales::percent_format(accuracy = 0.1)) +
   theme_bw() +
   theme(plot.title = element_text(face = "bold"),
-        axis.title.y = element_text(color = "tomato"))
+        axis.title.y = element_text(color = "tomato"),
+        axis.title.x = element_text(face = "bold", color = "cyan4"), 
+        legend.title = element_text(face = "bold", color = "cyan4"),
+        legend.text = element_text(size = 7),
+        legend.position = "bottom")
 
-rf_best <- rf_tune %>% select_best("f_meas")
-# - final fit
-rf_wflow_FINAL <- 
-  rf_wflow %>% 
-  finalize_workflow(rf_best)
 
-rf_FINAL <- 
-  rf_wflow_FINAL %>% 
-  fit(nfl_train)
+# Visuals
+# - Accuracy
+ggarrange(gg_RF_tune_random_Acc, gg_RF_tune_latin_Acc, gg_RF_tune_custom_Acc, nrow = 1)
+# - Sensitivity
+ggarrange(gg_RF_tune_random_Sens, gg_RF_tune_latin_Sens, gg_RF_tune_custom_Sens, nrow = 1)
+# - Precision
+ggarrange(gg_RF_tune_random_Prec, gg_RF_tune_latin_Prec, gg_RF_tune_custom_Prec, nrow = 1)
+# - F Score
+ggarrange(gg_RF_tune_random_F, gg_RF_tune_latin_F, gg_RF_tune_custom_F, nrow = 1)
 
 # Stop Parallell Processing
 parallel::stopCluster(cl_3)
