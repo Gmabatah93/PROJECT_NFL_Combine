@@ -195,10 +195,10 @@ _no preprocess_
 ### Logistic Regression
 
 #### Tune
-<img src="Images/tune_log_grid.PNG" width="  500">
+<img src="Images/tune_log_grid.PNG" width="  600">
 
 #### Accuracy
-<img src="Images/tune_log_fit_Acc.PNG" width="  500">
+<img src="Images/tune_log_fit_Acc.PNG" width="  600">
 
 **Best**
 
@@ -210,7 +210,7 @@ Custom | Accuracy | 0.006 | 1 | 0.7
 
 #### Sensitivity
 
-<img src="Images/tune_log_fit_Sens.PNG" width="  500">
+<img src="Images/tune_log_fit_Sens.PNG" width="  600">
 
 **Best**
 
@@ -222,7 +222,7 @@ Custom | Sensitivity | 0.096 | 0.5 | 1
 
 #### Precision
 
-<img src="Images/tune_log_fit_Prec.PNG" width="  500">
+<img src="Images/tune_log_fit_Prec.PNG" width="  600">
 
 **Best**
 
@@ -234,7 +234,7 @@ Custom | Precision | 0.001 | 1 | 0.73
 
 #### F Score
 
-<img src="Images/tune_log_fit_F.PNG" width="  500">
+<img src="Images/tune_log_fit_F.PNG" width="  600">
 
 **Best**
 
@@ -247,11 +247,11 @@ Custom | F Score | 0.016 | 1 | 0.8
 ### Random Forest
 
 #### Tune
-<img src="Images/tune_rf_grid.PNG" width="  500">
+<img src="Images/tune_rf_grid.PNG" width="  600">
 
 #### Accuracy
 
-<img src="Images/tune_rf_Acc.PNG" width="  500">
+<img src="Images/tune_rf_Acc.PNG" width="  600">
 
 **Best**
 
@@ -263,7 +263,7 @@ Custom | Accuracy | 2 | 3 | 0.71
 
 #### Sensitivity
 
-<img src="Images/tune_rf_Sens.PNG" width="  500">
+<img src="Images/tune_rf_Sens.PNG" width="  600">
 
 **Best**
 
@@ -275,7 +275,7 @@ Custom | Sensitivity | 1 | 1 | 0.89
 
 #### Precision
 
-<img src="Images/tune_rf_Prec.PNG" width="  500">
+<img src="Images/tune_rf_Prec.PNG" width="  600">
 
 **Best**
 
@@ -287,7 +287,7 @@ Custom | Precision | 4 | 5 | 0.741
 
 #### F Score
 
-<img src="Images/tune_rf_F.PNG" width="  500">
+<img src="Images/tune_rf_F.PNG" width="  600">
 
 **Best**
 
