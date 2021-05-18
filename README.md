@@ -296,3 +296,39 @@ Grid | Metric | mtry | min_n | Stat
 Random | F Score | 1 | 19 | 0.80
 Latin  | F Score | 1 | 19 | 0.80
 Custom | F Score | 1 | 1 | 0.80
+
+---
+
+# Diagnostic
+
+## Logistic Regression
+
+### Confusion Matrix
+<img src="Images/CM_log.PNG" width="  700">
+
+### ROC Curve
+<img src="Images/ROC_log.PNG" width="  700">
+
+### Metrics
+Optimization | AUC | Accuracy | Sensitivity | Specificity | Precision | F1 | PPV | NPV
+--- | --- | --- | --- | --- | --- | --- | --- | ---
+Accuracy | 0.698 | 0.714 | 0.865 | 0.427 | 0.741 | 0.798 | 0.741 | 0.625
+Sensitivity | 0.639 | 0.655 | 1 | 0 | 0.655 | 0.791 | 0.655 | NaN
+Precision | 0.698 | 0.714 | 0.865 | 0.427 | 0.741 | 0.798 | 0.741 | 0.625
+F Score | 0.698 | 0.696 | 0.912 | 0.288 | 0.708 | 0.797 | 0.708 | 0.633
+
+## Random Forrest
+
+### Confusion Matrix
+<img src="Images/CM_RF.PNG" width="  700">
+
+### ROC Curve
+<img src="Images/ROC_RF.PNG" width="  700">
+
+### Metrics
+Optimization | AUC | Accuracy | Sensitivity | Specificity | Precision | F1 | PPV | NPV
+--- | --- | --- | --- | --- | --- | --- | --- | ---
+Accuracy | 0.673 | 0.681 | 0.836 | 0.387 | 0.721 | 0.774 | 0.721 | 0.554
+Sensitivity | 0.674 | 0.684 | 0.857 | 0.357 | 0.716 | 0.78 | 0.716 | 0.568
+Precision | 0.675 | 0.672 | 0.814 | 0.402 | 0.721 | 0.765 | 0.721 | 0.533
+F Score | 0.672 | 0.686 | 0.859 | 0.357 | 0.717 | 0.782 | 0.717 | 0.573
