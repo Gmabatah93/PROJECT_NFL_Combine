@@ -1689,6 +1689,7 @@ ggarrange(gg_RF_tune_custom_Acc, gg_RF_tune_custom_PC_2_Acc, gg_RF_tune_custom_P
 rf_tune_custom %>% show_best("accuracy")
 rf_tune_custom_pca_2 %>% show_best("accuracy")
 rf_tune_custom_pca_4 %>% show_best("accuracy")
+rf_best_Acc <- rf_tune_custom %>% select_best("accuracy")
 
 # - plot: F Score
 # - normal
@@ -1754,6 +1755,7 @@ ggarrange(gg_RF_tune_custom_F, gg_RF_tune_custom_pca_2_F, gg_RF_tune_custom_pca_
 rf_tune_custom %>% show_best("f_meas")
 rf_tune_custom_pca_2 %>% show_best("f_meas")
 rf_tune_custom_pca_4 %>% show_best("f_meas")
+rf_best_F <- rf_tune_custom %>% select_best("f_meas")
 
 
 # FINAL Fit
@@ -1761,7 +1763,7 @@ rf_tune_custom_pca_4 %>% show_best("f_meas")
 # - Accuracy
 rf_wflow_FINAL_Acc <- 
   rf_wflow %>% 
-  finalize_workflow(rf_best_Acc_custom)
+  finalize_workflow(rf_best_Acc)
 
 rf_FINAL_Acc <- 
   rf_wflow_FINAL_Acc %>% 
@@ -1770,7 +1772,7 @@ rf_FINAL_Acc <-
 # - F Score
 rf_wflow_FINAL_F <- 
   rf_wflow %>% 
-  finalize_workflow(rf_best_F_custom)
+  finalize_workflow(rf_best_F)
 
 rf_FINAL_F <- 
   rf_wflow_FINAL_F %>% 
@@ -1882,20 +1884,16 @@ log_FINAL_Metrics <- log_FINAL_Metrics %>%
 
 # Predictions
 rf_Results <- 
-  tibble(RF_Acc_Pred = predict(rf_FINAL_Acc, new_data = nfl_test) %>% pull(),
+  tibble(drafted = nfl_test$drafted,
+         RF_Acc_Pred = predict(rf_FINAL_Acc, new_data = nfl_test) %>% pull(),
          RF_Acc_Prob = predict(rf_FINAL_Acc, new_data = nfl_test, type = "prob") %>% pull(),
-         RF_Sens_Pred = predict(rf_FINAL_Sens, new_data = nfl_test) %>% pull(),
-         RF_Sens_Prob = predict(rf_FINAL_Sens, new_data = nfl_test, type = "prob") %>% pull(),
-         RF_Prec_Pred = predict(rf_FINAL_Prec, new_data = nfl_test) %>% pull(),
-         RF_Prec_Prob = predict(rf_FINAL_Prec, new_data = nfl_test, type = "prob") %>% pull(),
          RF_F_Pred = predict(rf_FINAL_F, new_data = nfl_test) %>% pull(),
          RF_F_Prob = predict(rf_FINAL_F, new_data = nfl_test, type = "prob") %>% pull())
 
 # Conf Matrix
 # - Accuracy
-rf_CM_Acc <- rf_Results %>% 
-  mutate(Actual = factor(nfl_test$drafted)) %>% 
-  conf_mat(truth = Actual, estimate = RF_Acc_Pred) %>% 
+rf_CM_Acc <- rf_Results %>%  
+  conf_mat(truth = drafted, estimate = RF_Acc_Pred) %>% 
   autoplot(type = "heatmap") +
   labs(title = "Accuracy") +
   theme_bw() +
@@ -1903,68 +1901,33 @@ rf_CM_Acc <- rf_Results %>%
         axis.title.y = element_text(color = "tomato"),
         axis.title.x = element_text(face = "bold", color = "cyan4"), 
         legend.position = "none")
-# - Sensitivity
-rf_CM_Sens <- rf_Results %>% 
-  mutate(Actual = factor(nfl_test$drafted)) %>% 
-  conf_mat(truth = Actual, estimate = RF_Sens_Pred) %>% 
-  autoplot(type = "heatmap") +
-  labs(title = "Sensitivity") +
-  theme_bw() +
-  theme(plot.title = element_text(hjust = 0.4, color = "darkolivegreen", face = "bold"),
-        axis.title.y = element_blank(),
-        axis.title.x = element_text(face = "bold", color = "cyan4"), 
-        legend.position = "none")
-# - Precision
-rf_CM_Prec <- rf_Results %>% 
-  mutate(Actual = factor(nfl_test$drafted)) %>% 
-  conf_mat(truth = Actual, estimate = RF_Prec_Pred) %>% 
-  autoplot(type = "heatmap") +
-  labs(title = "Precision") +
-  theme_bw() +
-  theme(plot.title = element_text(hjust = 0.4, color = "darkolivegreen", face = "bold"),
-        axis.title.y = element_blank(),
-        axis.title.x = element_text(face = "bold", color = "cyan4"), 
-        legend.position = "none")
 # - F Score
-rf_CM_F <- rf_Results %>% 
-  mutate(Actual = factor(nfl_test$drafted)) %>% 
-  conf_mat(truth = Actual, estimate = RF_F_Pred) %>% 
+rf_CM_F <- rf_Results %>%  
+  conf_mat(truth = drafted, estimate = RF_F_Pred) %>% 
   autoplot(type = "heatmap") +
   labs(title = "F Score") +
   theme_bw() +
   theme(plot.title = element_text(hjust = 0.4, color = "darkolivegreen", face = "bold"),
-        axis.title.y = element_blank(),
+        axis.title.y = element_text(color = "tomato"),
         axis.title.x = element_text(face = "bold", color = "cyan4"), 
         legend.position = "none")
 
 # - Visual
-ggarrange(rf_CM_Acc, rf_CM_Sens, rf_CM_Prec, rf_CM_F, nrow = 1)
+ggarrange(rf_CM_Acc, rf_CM_F, nrow = 1)
 
 # ROC Curve
 # - Accuracy
 rf_ROC_Acc <- rf_Results %>%
-  mutate(Actual = factor(nfl_test$drafted)) %>% 
-  roc_curve(Actual, RF_Acc_Prob, event_level = "second") %>% 
+  roc_curve(drafted, RF_Acc_Prob, event_level = "second") %>% 
   mutate(Model = "Accuracy")
-# - Sensitivity
-rf_ROC_Sens <- rf_Results %>%
-  mutate(Actual = factor(nfl_test$drafted)) %>% 
-  roc_curve(Actual, RF_Sens_Prob, event_level = "second") %>% 
-  mutate(Model = "Sensitivity")
-# - Precision
-rf_ROC_Prec <- rf_Results %>%
-  mutate(Actual = factor(nfl_test$drafted)) %>% 
-  roc_curve(Actual, RF_Prec_Prob, event_level = "second") %>% 
-  mutate(Model = "Precision")
-# - Sensitivity
+# - F Score
 rf_ROC_F <- rf_Results %>%
-  mutate(Actual = factor(nfl_test$drafted)) %>% 
-  roc_curve(Actual, RF_F_Prob, event_level = "second") %>% 
+  roc_curve(drafted, RF_F_Prob, event_level = "second") %>% 
   mutate(Model = "F Score")
 
 # - Visual
 rf_ROC_Acc %>% 
-  bind_rows(rf_ROC_Sens, rf_ROC_Prec, rf_ROC_F) %>% 
+  bind_rows(rf_ROC_F) %>% 
   mutate(specificity = 1 - specificity) %>% 
   ggplot(aes(specificity, sensitivity, color = Model)) +
   geom_line() + geom_abline(slope = 1, linetype = 2, alpha = 0.2) +
@@ -1983,63 +1946,28 @@ rf_ROC_Acc %>%
 rf_FINAL_Metrics <-
   # - Accuracy
   tibble(Model = "Random_Forrest_Acc",
-         Accuracy = accuracy(rf_Results, truth = factor(nfl_test$drafted), estimate = RF_Acc_Pred) %>% pull(.estimate) %>% round(3),
-         Detection_Rate = detection_prevalence(rf_Results, truth = factor(nfl_test$drafted), estimate = RF_Acc_Pred, event_level = "second") %>% pull(.estimate) %>% round(3),
-         Sensitivity = sens(rf_Results, truth = factor(nfl_test$drafted), estimate = RF_Acc_Pred, event_level = "second") %>% pull(.estimate) %>% round(3),
-         Specificity = spec(rf_Results, truth = factor(nfl_test$drafted), estimate = RF_Acc_Pred, event_level = "second") %>% pull(.estimate) %>% round(3),
-         Precision = precision(rf_Results, truth = factor(nfl_test$drafted), estimate = RF_Acc_Pred, event_level = "second") %>% pull(.estimate) %>% round(3),
-         Recall = recall(rf_Results, truth = factor(nfl_test$drafted), estimate = RF_Acc_Pred, event_level = "second") %>% pull(.estimate) %>% round(3),
-         F1 = f_meas(rf_Results, truth = factor(nfl_test$drafted), estimate = RF_Acc_Pred, event_level = "second") %>% pull(.estimate) %>% round(3),
-         PPV = ppv(rf_Results, truth = factor(nfl_test$drafted), estimate = RF_Acc_Pred, event_level = "second") %>% pull(.estimate) %>% round(3),
-         NPV = npv(rf_Results, truth = factor(nfl_test$drafted), estimate = RF_Acc_Pred, event_level = "second") %>% pull(.estimate) %>% round(3),
-         AUC = roc_auc(rf_Results, factor(nfl_test$drafted), RF_Acc_Prob, event_level = "second") %>% pull(.estimate) %>% round(3))
-# - Sensitvity
-rf_FINAL_Metrics <- rf_FINAL_Metrics %>% 
-  bind_rows(
-    tibble(
-      Model = "Random_Forrest_Sens",
-      Accuracy = accuracy(rf_Results, truth = factor(nfl_test$drafted), estimate = RF_Sens_Pred) %>% pull(.estimate) %>% round(3),
-      Detection_Rate = detection_prevalence(rf_Results, truth = factor(nfl_test$drafted), estimate = RF_Sens_Pred, event_level = "second") %>% pull(.estimate) %>% round(3),
-      Sensitivity = sens(rf_Results, truth = factor(nfl_test$drafted), estimate = RF_Sens_Pred, event_level = "second") %>% pull(.estimate) %>% round(3),
-      Specificity = spec(rf_Results, truth = factor(nfl_test$drafted), estimate = RF_Sens_Pred, event_level = "second") %>% pull(.estimate) %>% round(3),
-      Precision = precision(rf_Results, truth = factor(nfl_test$drafted), estimate = RF_Sens_Pred, event_level = "second") %>% pull(.estimate) %>% round(3),
-      Recall = recall(rf_Results, truth = factor(nfl_test$drafted), estimate = RF_Sens_Pred, event_level = "second") %>% pull(.estimate) %>% round(3),
-      F1 = f_meas(rf_Results, truth = factor(nfl_test$drafted), estimate = RF_Sens_Pred, event_level = "second") %>% pull(.estimate) %>% round(3),
-      PPV = ppv(rf_Results, truth = factor(nfl_test$drafted), estimate = RF_Sens_Pred, event_level = "second") %>% pull(.estimate) %>% round(3),
-      NPV = npv(rf_Results, truth = factor(nfl_test$drafted), estimate = RF_Sens_Pred, event_level = "second") %>% pull(.estimate) %>% round(3),
-      AUC = roc_auc(rf_Results, factor(nfl_test$drafted), RF_Sens_Prob, event_level = "second") %>% pull(.estimate) %>% round(3))
-  )
-# - Precision
-rf_FINAL_Metrics <- rf_FINAL_Metrics %>% 
-  bind_rows(
-    tibble(
-      Model = "Random_Forrest_Prec",
-      Accuracy = accuracy(rf_Results, truth = factor(nfl_test$drafted), estimate = RF_Prec_Pred) %>% pull(.estimate) %>% round(3),
-      Detection_Rate = detection_prevalence(rf_Results, truth = factor(nfl_test$drafted), estimate = RF_Prec_Pred, event_level = "second") %>% pull(.estimate) %>% round(3),
-      Sensitivity = sens(rf_Results, truth = factor(nfl_test$drafted), estimate = RF_Prec_Pred, event_level = "second") %>% pull(.estimate) %>% round(3),
-      Specificity = spec(rf_Results, truth = factor(nfl_test$drafted), estimate = RF_Prec_Pred, event_level = "second") %>% pull(.estimate) %>% round(3),
-      Precision = precision(rf_Results, truth = factor(nfl_test$drafted), estimate = RF_Prec_Pred, event_level = "second") %>% pull(.estimate) %>% round(3),
-      Recall = recall(rf_Results, truth = factor(nfl_test$drafted), estimate = RF_Prec_Pred, event_level = "second") %>% pull(.estimate) %>% round(3),
-      F1 = f_meas(rf_Results, truth = factor(nfl_test$drafted), estimate = RF_Prec_Pred, event_level = "second") %>% pull(.estimate) %>% round(3),
-      PPV = ppv(rf_Results, truth = factor(nfl_test$drafted), estimate = RF_Prec_Pred, event_level = "second") %>% pull(.estimate) %>% round(3),
-      NPV = npv(rf_Results, truth = factor(nfl_test$drafted), estimate = RF_Prec_Pred, event_level = "second") %>% pull(.estimate) %>% round(3),
-      AUC = roc_auc(rf_Results, factor(nfl_test$drafted), RF_Prec_Prob, event_level = "second") %>% pull(.estimate) %>% round(3))
-  )
+         Accuracy = accuracy(rf_Results, truth = drafted, estimate = RF_Acc_Pred) %>% pull(.estimate) %>% round(3),
+         Sensitivity = sens(rf_Results, truth = drafted, estimate = RF_Acc_Pred) %>% pull(.estimate) %>% round(3),
+         Specificity = spec(rf_Results, truth = drafted, estimate = RF_Acc_Pred) %>% pull(.estimate) %>% round(3),
+         Precision = precision(rf_Results, truth = drafted, estimate = RF_Acc_Pred) %>% pull(.estimate) %>% round(3),
+         Recall = recall(rf_Results, truth = drafted, estimate = RF_Acc_Pred) %>% pull(.estimate) %>% round(3),
+         F1 = f_meas(rf_Results, truth = drafted, estimate = RF_Acc_Pred) %>% pull(.estimate) %>% round(3),
+         PPV = ppv(rf_Results, truth = drafted, estimate = RF_Acc_Pred) %>% pull(.estimate) %>% round(3),
+         NPV = npv(rf_Results, truth = drafted, estimate = RF_Acc_Pred) %>% pull(.estimate) %>% round(3),
+         AUC = roc_auc(rf_Results, drafted, RF_Acc_Prob, event_level = "second") %>% pull(.estimate) %>% round(3))
 # - F Score
 rf_FINAL_Metrics <- rf_FINAL_Metrics %>% 
   bind_rows(
-    tibble(
-      Model = "Random_Forrest_F",
-      Accuracy = accuracy(rf_Results, truth = factor(nfl_test$drafted), estimate = RF_F_Pred) %>% pull(.estimate) %>% round(3),
-      Detection_Rate = detection_prevalence(rf_Results, truth = factor(nfl_test$drafted), estimate = RF_F_Pred, event_level = "second") %>% pull(.estimate) %>% round(3),
-      Sensitivity = sens(rf_Results, truth = factor(nfl_test$drafted), estimate = RF_F_Pred, event_level = "second") %>% pull(.estimate) %>% round(3),
-      Specificity = spec(rf_Results, truth = factor(nfl_test$drafted), estimate = RF_F_Pred, event_level = "second") %>% pull(.estimate) %>% round(3),
-      Precision = precision(rf_Results, truth = factor(nfl_test$drafted), estimate = RF_F_Pred, event_level = "second") %>% pull(.estimate) %>% round(3),
-      Recall = recall(rf_Results, truth = factor(nfl_test$drafted), estimate = RF_F_Pred, event_level = "second") %>% pull(.estimate) %>% round(3),
-      F1 = f_meas(rf_Results, truth = factor(nfl_test$drafted), estimate = RF_F_Pred, event_level = "second") %>% pull(.estimate) %>% round(3),
-      PPV = ppv(rf_Results, truth = factor(nfl_test$drafted), estimate = RF_F_Pred, event_level = "second") %>% pull(.estimate) %>% round(3),
-      NPV = npv(rf_Results, truth = factor(nfl_test$drafted), estimate = RF_F_Pred, event_level = "second") %>% pull(.estimate) %>% round(3),
-      AUC = roc_auc(rf_Results, factor(nfl_test$drafted), RF_F_Prob, event_level = "second") %>% pull(.estimate) %>% round(3))
+    tibble(Model = "Random_Forrest_F",
+           Accuracy = accuracy(rf_Results, truth = drafted, estimate = RF_F_Pred) %>% pull(.estimate) %>% round(3),
+           Sensitivity = sens(rf_Results, truth = drafted, estimate = RF_F_Pred) %>% pull(.estimate) %>% round(3),
+           Specificity = spec(rf_Results, truth = drafted, estimate = RF_F_Pred) %>% pull(.estimate) %>% round(3),
+           Precision = precision(rf_Results, truth = drafted, estimate = RF_F_Pred) %>% pull(.estimate) %>% round(3),
+           Recall = recall(rf_Results, truth = drafted, estimate = RF_F_Pred) %>% pull(.estimate) %>% round(3),
+           F1 = f_meas(rf_Results, truth = drafted, estimate = RF_F_Pred) %>% pull(.estimate) %>% round(3),
+           PPV = ppv(rf_Results, truth = drafted, estimate = RF_F_Pred) %>% pull(.estimate) %>% round(3),
+           NPV = npv(rf_Results, truth = drafted, estimate = RF_F_Pred) %>% pull(.estimate) %>% round(3),
+           AUC = roc_auc(rf_Results, drafted, RF_F_Prob, event_level = "second") %>% pull(.estimate) %>% round(3))
   )
 
 
@@ -2200,3 +2128,147 @@ log_Metrics_Thres <- log_Metrics_Thres %>%
 
 log_FINAL_Metrics %>% 
   bind_rows(log_Metrics_Thres)
+
+# Modeling: Refit: Probabiliy Threshold - Random Forrest ----
+
+# Accuracy
+rf_thres_Acc <- rf_Results %>% 
+  mutate(drafted = relevel(drafted, ref = "No")) %>%
+  threshold_perf(drafted, RF_Acc_Prob, threshold = seq(0.2, 1, by = 0.05)) 
+
+rf_thres_Acc <- rf_thres_Acc %>% 
+  filter(.metric != "distance") %>% 
+  mutate(group = case_when(
+    .metric == "sens" | .metric == "spec" ~ "1",
+    TRUE ~ "2"
+  )) 
+
+max_j_Acc <- rf_thres_Acc %>% 
+  filter(.metric == "j_index") %>% 
+  filter(.estimate == max(.estimate)) %>% 
+  pull(.threshold)
+
+rf_thres_Acc %>% 
+  ggplot(aes(.threshold, .estimate, color = .metric, alpha = group)) +
+  geom_line(linetype = 2, size = 1) +
+  geom_vline(xintercept = max_j_Acc, alpha = 0.6, size = 2, color = "palegreen4") +
+  geom_vline(xintercept = 0.5, alpha = 0.6, linetype = 1, size = 1, color = "grey20") +
+  labs(title = "Optimal Threshold",
+       color = "Metric",
+       x = "Threshold",
+       subtitle = "Accuracy") +
+  scale_alpha_manual(values = c(.08, 1), guide = "none") +
+  scale_color_manual(values = c("palegreen4","red","blue"),
+                     labels = c("J_Index", "Specificity", "Sensitivity")) +
+  theme_bw() +
+  theme(
+    plot.title = element_text(face = "bold", hjust = 0.1),
+    plot.subtitle = element_text(hjust = 0.1, color = "tomato"),
+    axis.title.y = element_blank()
+  )
+rf_thres_Acc %>% filter(.threshold == max_j)
+
+
+
+# F Score
+rf_thres_F <- rf_Results %>% 
+  mutate(drafted = relevel(drafted, ref = "No")) %>%
+  threshold_perf(drafted, RF_F_Prob, threshold = seq(0.2, 1, by = 0.05)) 
+
+rf_thres_F <- rf_thres_F %>% 
+  filter(.metric != "distance") %>% 
+  mutate(group = case_when(
+    .metric == "sens" | .metric == "spec" ~ "1",
+    TRUE ~ "2"
+  )) 
+
+max_j_F <- rf_thres_Acc %>% 
+  filter(.metric == "j_index") %>% 
+  filter(.estimate == max(.estimate)) %>% 
+  pull(.threshold)
+
+rf_thres_F %>% 
+  ggplot(aes(.threshold, .estimate, color = .metric, alpha = group)) +
+  geom_line(linetype = 2, size = 1) +
+  geom_vline(xintercept = max_j_F, alpha = 0.6, size = 2, color = "palegreen4") +
+  geom_vline(xintercept = 0.5, alpha = 0.6, linetype = 1, size = 1, color = "grey20") +
+  labs(title = "Optimal Threshold",
+       color = "Metric",
+       x = "Threshold",
+       subtitle = "F Score") +
+  scale_alpha_manual(values = c(.08, 1), guide = "none") +
+  scale_color_manual(values = c("palegreen4","red","blue"),
+                     labels = c("J_Index", "Specificity", "Sensitivity")) +
+  theme_bw() +
+  theme(
+    plot.title = element_text(face = "bold", hjust = 0.1),
+    plot.subtitle = element_text(hjust = 0.1, color = "tomato"),
+    axis.title.y = element_blank()
+  )
+rf_thres_F %>% filter(.threshold == max_j)
+
+# Modeling: Refit Diagnostics - Random Forrest ----
+
+# Predictions
+rf_Results_Thres <- 
+  tibble(drafted = nfl_test$drafted,
+         RF_Acc_Prob = predict(rf_FINAL_Acc, new_data = nfl_test, type = "prob") %>% pull(),
+         RF_F_Prob = predict(rf_FINAL_F, new_data = nfl_test, type = "prob") %>% pull()) %>% 
+  mutate(RF_Acc_Pred_4 = ifelse(RF_Acc_Prob > 0.4, "No","Yes") %>% factor(levels = c("Yes","No")),
+         RF_F_Pred_4 = ifelse(RF_F_Prob > 0.4, "No","Yes") %>% factor(levels = c("Yes","No")))
+
+# Confusion Matrix
+# - Accuracy
+rf_CM_Acc_40 <- rf_Results_Thres %>% 
+  conf_mat(truth = drafted, estimate = RF_Acc_Pred_4) %>% 
+  autoplot(type = "heatmap") +
+  labs(title = "Accuracy") +
+  theme_bw() +
+  theme(plot.title = element_text(hjust = 0.4, color = "darkolivegreen", face = "bold"),
+        axis.title.y = element_text(color = "tomato"),
+        axis.title.x = element_text(face = "bold", color = "cyan4"), 
+        legend.position = "none")
+# - F Score
+rf_CM_F_40 <- rf_Results_Thres %>% 
+  conf_mat(truth = drafted, estimate = RF_F_Pred_4) %>% 
+  autoplot(type = "heatmap") +
+  labs(title = "F Score") +
+  theme_bw() +
+  theme(plot.title = element_text(hjust = 0.4, color = "darkolivegreen", face = "bold"),
+        axis.title.y = element_blank(),
+        axis.title.x = element_text(face = "bold", color = "cyan4"), 
+        legend.position = "none")
+
+# - Visual
+ggarrange(rf_CM_Acc_40, rf_CM_F_40, nrow = 1)
+
+
+
+# Metrics
+rf_Thres_Metrics <-
+  # - Accuracy
+  tibble(Model = "Random_Forrest_Acc",
+         Accuracy = accuracy(rf_Results_Thres, truth = drafted, estimate = RF_Acc_Pred_4) %>% pull(.estimate) %>% round(3),
+         Sensitivity = sens(rf_Results_Thres, truth = drafted, estimate = RF_Acc_Pred_4) %>% pull(.estimate) %>% round(3),
+         Specificity = spec(rf_Results_Thres, truth = drafted, estimate = RF_Acc_Pred_4) %>% pull(.estimate) %>% round(3),
+         Precision = precision(rf_Results_Thres, truth = drafted, estimate = RF_Acc_Pred_4) %>% pull(.estimate) %>% round(3),
+         Recall = recall(rf_Results_Thres, truth = drafted, estimate = RF_Acc_Pred_4) %>% pull(.estimate) %>% round(3),
+         F1 = f_meas(rf_Results_Thres, truth = drafted, estimate = RF_Acc_Pred_4) %>% pull(.estimate) %>% round(3),
+         PPV = ppv(rf_Results_Thres, truth = drafted, estimate = RF_Acc_Pred_4) %>% pull(.estimate) %>% round(3),
+         NPV = npv(rf_Results_Thres, truth = drafted, estimate = RF_Acc_Pred_4) %>% pull(.estimate) %>% round(3),
+         AUC = roc_auc(rf_Results_Thres, drafted, RF_Acc_Prob, event_level = "second") %>% pull(.estimate) %>% round(3)) 
+
+rf_Thres_Metrics <- rf_Thres_Metrics %>%  
+  bind_rows(
+    tibble(Model = "Random_Forrest_F",
+           Accuracy = accuracy(rf_Results_Thres, truth = drafted, estimate = RF_F_Pred_4) %>% pull(.estimate) %>% round(3),
+           Sensitivity = sens(rf_Results_Thres, truth = drafted, estimate = RF_F_Pred_4) %>% pull(.estimate) %>% round(3),
+           Specificity = spec(rf_Results_Thres, truth = drafted, estimate = RF_F_Pred_4) %>% pull(.estimate) %>% round(3),
+           Precision = precision(rf_Results_Thres, truth = drafted, estimate = RF_F_Pred_4) %>% pull(.estimate) %>% round(3),
+           Recall = recall(rf_Results_Thres, truth = drafted, estimate = RF_F_Pred_4) %>% pull(.estimate) %>% round(3),
+           F1 = f_meas(rf_Results_Thres, truth = drafted, estimate = RF_F_Pred_4) %>% pull(.estimate) %>% round(3),
+           PPV = ppv(rf_Results_Thres, truth = drafted, estimate = RF_F_Pred_4) %>% pull(.estimate) %>% round(3),
+           NPV = npv(rf_Results_Thres, truth = drafted, estimate = RF_F_Pred_4) %>% pull(.estimate) %>% round(3),
+           AUC = roc_auc(rf_Results_Thres, drafted, RF_F_Prob, event_level = "second") %>% pull(.estimate) %>% round(3))
+  )
+

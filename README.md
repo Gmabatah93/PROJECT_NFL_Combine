@@ -321,7 +321,17 @@ F Score | 0.698 | 0.696 | 0.912 | 0.288 | 0.708 | 0.797 | 0.708 | 0.633
 ### Metrics
 Optimization | AUC | Accuracy | Sensitivity | Specificity | Precision | F1 | PPV | NPV
 --- | --- | --- | --- | --- | --- | --- | --- | ---
-Accuracy | 0.673 | 0.681 | 0.836 | 0.387 | 0.721 | 0.774 | 0.721 | 0.554
-Sensitivity | 0.674 | 0.684 | 0.857 | 0.357 | 0.716 | 0.78 | 0.716 | 0.568
-Precision | 0.675 | 0.672 | 0.814 | 0.402 | 0.721 | 0.765 | 0.721 | 0.533
-F Score | 0.672 | 0.686 | 0.859 | 0.357 | 0.717 | 0.782 | 0.717 | 0.573
+Accuracy | 73.2% | 70.8% | 88.3% | 37.7% | 72.9% | 79.9% | 72.9% | 63%
+F Score | 72.6% | 69.1% | 94.4% | 21.1% | 69.4% | 80% | 69.4% | 72.6%
+
+---
+
+# Refit: Probability Threshold
+<img src="Images/Thres_RF.PNG" width="  700">
+<img src="Images/CM_RF_Thres.PNG" width="  700">
+
+## Metrics
+Optimization | AUC | Accuracy | Sensitivity | Specificity | Precision | F1 | PPV | NPV
+--- | --- | --- | --- | --- | --- | --- | --- | ---
+Accuracy | 73.2% | 70.3% | 75.6% | 60.3% | 78.3% | 76.9% | 78.3% | 56.6%
+F Score | 72.6% | 69.6% | 78.5% | 52.8% | 75.9% | 77.2% | 75.9% | 56.5%
