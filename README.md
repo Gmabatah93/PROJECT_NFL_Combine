@@ -17,6 +17,7 @@ ggmosaic | 0.3.4
 ggpubr | 0.4.0
 FactoMiner | 2.4
 factoextra | 1.0.7
+probably | 0.0.6
 workflowsets | 0.0.1
 doParallel | 1.0.16
 
@@ -181,26 +182,36 @@ drafted | chr | What NFL team drafted player / Round / Pick / Year
 ### Random Forrest
 _no preprocess_
 
-#### Model Data
+**Model Data**
 <img src="Images/Model_RF.PNG" width="  700">
 
+#### PCA
+**Eigen**
+<img src="Images/Model_RF_PCA_Eig.PNG" width="  700">
+
+**Components**
+<img src="Images/Model_RF_PCA_components.PNG" width="  700">
+
+**Model Data**
+<img src="Images/Model_RF_PCA_2.PNG" width="  700">
+<img src="Images/Model_RF_PCA_4.PNG" width="  700">
 ### Control
 - **Parallel Processing**
 
 ### Metrics
- - [ROC | Sensitivity | Specificity | Precision | F1]
+ - [AUC | Sensitivity | Specificity | Precision | F1]
 
 ## Fit
 
 ### Logistic Regression
 
-#### Tune
+#### Grid
 <img src="Images/tune_log_grid.PNG" width="  600">
 
-#### Accuracy
+**Accuracy**
+
 <img src="Images/tune_log_fit_Acc.PNG" width="  600">
 
-**Best**
 
 Grid | Metric | Penalty | Mixture | Stat
 --- | --- | --- | --- | ---
@@ -246,56 +257,26 @@ Custom | F Score | 0.016 | 1 | 0.8
 
 ### Random Forest
 
-#### Tune
+#### Grid
 <img src="Images/tune_rf_grid.PNG" width="  600">
 
-#### Accuracy
+#### Fit - Latin
 
-<img src="Images/tune_rf_Acc.PNG" width="  600">
-
-**Best**
-
-Grid | Metric | mtry | min_n | Stat
---- | --- | --- | --- | ---
-Random | Accuracy | 3 | 38 | 0.71
-Latin  | Accuracy | 2 | 21 | 0.71
-Custom | Accuracy | 2 | 3 | 0.71
-
-#### Sensitivity
-
-<img src="Images/tune_rf_Sens.PNG" width="  600">
+<img src="Images/tune_rf_latin_Acc.PNG" width="  600">
+<img src="Images/tune_rf_latin_F.PNG" width="  600">
 
 **Best**
 
-Grid | Metric | mtry | min_n | Stat
+Preprocess | Metric | mtry | min_n | Stat
 --- | --- | --- | --- | ---
-Random | Sensitivity | 1 | 26 | 0.90
-Latin  | Sensitivity | 1 | 32 | 0.90
-Custom | Sensitivity | 1 | 1 | 0.89
+None | Accuracy | 3 | 28 | 70.7%
+PC 2  | Accuracy | 2 | 35 | 69.0%
+PC 4 | Accuracy | 1 | 32 | 68.9%
+None | F Score | 1 | 33 | 80.4%
+PC 2  | F Score | 1 | 25 | 79.7%
+PC 4 | F Score | 1 | 32 | 79.9%
 
-#### Precision
-
-<img src="Images/tune_rf_Prec.PNG" width="  600">
-
-**Best**
-
-Grid | Metric | mtry | min_n | Stat
---- | --- | --- | --- | ---
-Random | Precision | 7 | 17 | 0.74
-Latin  | Precision | 3 | 12 | 0.739
-Custom | Precision | 4 | 5 | 0.741
-
-#### F Score
-
-<img src="Images/tune_rf_F.PNG" width="  600">
-
-**Best**
-
-Grid | Metric | mtry | min_n | Stat
---- | --- | --- | --- | ---
-Random | F Score | 1 | 19 | 0.80
-Latin  | F Score | 1 | 19 | 0.80
-Custom | F Score | 1 | 1 | 0.80
+#### Fit - Custom
 
 ---
 

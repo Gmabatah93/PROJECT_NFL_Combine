@@ -7,6 +7,7 @@ library(ggmosaic)
 library(ggpubr)
 library(FactoMineR)
 library(factoextra)
+library(probably)
 library(workflowsets)
 library(doParallel)
 
@@ -68,7 +69,7 @@ nfl <- nfl %>%
 
 # - Change the old drafted variable to a tag
 nfl <- nfl %>% 
-  mutate(drafted = ifelse(is.na(drafted), "No","Yes") %>% factor)
+  mutate(drafted = ifelse(is.na(drafted), "No","Yes") %>% factor(levels = c("Yes","No")))
 
 # - Offense-Defense
 nfl <- nfl %>% 
@@ -106,12 +107,13 @@ nfl <- nfl %>%
 # Target Drafted
 nfl_draft <- nfl %>% 
   select(player, side, position, school, conference, year, everything()) %>% 
-  select(-school, -pick, -round)
+  select(-pick,-round) %>% 
+  mutate(drafted = ifelse(drafted == "Yes", 1,0) %>% factor(levels = c(1,0), labels = c("Yes","No")))
 
 # Target Round
 nfl_round <- nfl %>% 
   select(player, side, position, school, conference, year, everything()) %>% 
-  select(-school, -pick, -drafted) %>% 
+  select(-pick, -drafted) %>% 
   mutate(round = case_when(
                   round == "1st" ~ "1st",
                   TRUE ~ "Not 1st"
@@ -405,10 +407,6 @@ nfl_draft_PCA %>%
         axis.text = element_blank(),
         legend.position = "top",
         legend.title = element_text(face = "bold", size = 15))
-
-# New Dataset
-nfl_draft_simple <- nfl_draft %>% 
-  select(side, position, conference, weight, forty, broad_jump, bench, drafted)
 
 #
 # "DRAFT": Exploratory Data Analysis - Combine ----
@@ -887,18 +885,38 @@ nfl_df %>%
 
 #
 
-# Modeling: Prepocess ----
+# Modeling: Split & Control ----
 # Split
-nfl_split <- initial_split(nfl_draft_simple, prop = 0.80, strata = drafted)
+nfl_split <- initial_split(nfl_draft, prop = 0.80, strata = drafted)
 nfl_train <- training(nfl_split)
 nfl_test <- testing(nfl_split)
 # - K-Folds
 nfl_10fold <- vfold_cv(nfl_train, v = 10)
+# - Validation Set
+nfl_val <- nfl_train %>% validation_split(prop = 0.75, strata = drafted)
+nfl_val$splits[1]
 
-# Preprocess
+# Control
+nfl_ctrl <- 
+  control_grid(allow_par = TRUE,
+               save_pred = TRUE,
+               verbose = TRUE)
+
+# Metrics
+nfl_metrics <- metric_set(roc_auc, accuracy, sens, spec, precision, f_meas)
+
+
+
+#
+# Modeling: Preprocess - Logistic Regression ----
+
+# Normal
 nfl_recipe <- 
-  recipe(drafted ~ position + conference + weight + forty + broad_jump + bench,
-       data = nfl_train) %>% 
+  recipe(drafted ~ player + school + team + position + conference + 
+           height + weight + forty + broad_jump + bench,
+         data = nfl_train) %>% 
+  update_role(player, school, new_role = "id") %>% 
+  update_role(team, new_role = "team") %>% 
   step_other(position, threshold = 0.01) %>% 
   step_normalize(all_numeric()) %>% 
   step_dummy(position, conference)
@@ -907,32 +925,132 @@ nfl_recipe %>%
   prep() %>% juice() %>% 
   glimpse()
 
-nfl_recipe_simple <- 
-  recipe(drafted ~ position + conference + weight + forty + broad_jump + bench,
-         data = nfl_train) 
+
+# PCA
+nfl_recipe_pca <- 
+  recipe(drafted ~ .,
+       data = nfl_train) %>% 
+  update_role(player, school, new_role = "id") %>% 
+  update_role(team, new_role = "team") %>% 
+  step_other(position, threshold = 0.01) %>% 
+  step_normalize(all_numeric()) %>% 
+  step_pca(all_numeric(), num_comp = 3, id = "pca") %>% 
+  step_dummy(position, conference)
 # - model data
-nfl_recipe_simple %>% 
+nfl_recipe_pca %>% 
+  prep() %>% tidy(id = "pca") %>% 
+  filter(component %in% c("PC1","PC2"))
+
+nfl_recipe_pca %>% 
   prep() %>% juice() %>% 
   glimpse()
 
-# Control
-nfl_ctrl <- 
-  control_grid(event_level = "second",
-               allow_par = TRUE,
-               save_pred = TRUE,
-               verbose = TRUE)
+# PLS
+nfl_recipe_pls <- 
+  recipe(drafted ~ .,
+         data = nfl_train) %>% 
+  update_role(player, school, new_role = "id") %>% 
+  update_role(team, new_role = "team") %>% 
+  step_other(position, threshold = 0.01) %>% 
+  step_normalize(all_numeric()) %>% 
+  step_pls(all_numeric(), num_comp = 3, outcome = "drafted", id = "pls") %>% 
+  step_dummy(position, conference)
+# - model data
+nfl_recipe_pca %>% 
+  prep() %>% tidy(id = "pca") %>% 
+  filter(component %in% c("PC1","PC2"))
 
-# Metrics
-nfl_metrics <- metric_set(roc_auc, accuracy, sens, spec, recall, precision, f_meas)
+nfl_recipe_pca %>% 
+  prep() %>% juice() %>% 
+  glimpse()
 
+# Modeling: Preprocess - Random Forrest ----
+
+# Normal
+nfl_rf_recipe <- 
+  recipe(drafted ~ .,
+         data = nfl_train) %>% 
+  update_role(player, school, new_role = "id") %>% 
+  update_role(team, new_role = "team")
+# - model data
+nfl_rf_recipe %>% 
+  prep() %>% juice() %>% 
+  glimpse()
+
+
+# PCA
+nfl_rf_recipe_pca_2 <- 
+  recipe(drafted ~ .,
+         data = nfl_train) %>% 
+  update_role(player, school, new_role = "id") %>% 
+  update_role(team, new_role = "team") %>% 
+  step_other(position, threshold = 0.01) %>% 
+  step_normalize(all_numeric()) %>% 
+  step_pca(all_numeric(), num_comp = 2, id = "pca")
+
+nfl_rf_recipe_pca_4 <- 
+  recipe(drafted ~ .,
+         data = nfl_train) %>% 
+  update_role(player, school, new_role = "id") %>% 
+  update_role(team, new_role = "team") %>% 
+  step_other(position, threshold = 0.01) %>% 
+  step_normalize(all_numeric()) %>% 
+  step_pca(all_numeric(), num_comp = 4, id = "pca")
+
+# Eigen
+nfl_rf_recipe_pca %>% 
+  prep() %>% 
+  tidy(id = "pca", type = "variance") %>%  
+  filter(terms == "percent variance") %>% 
+  ggplot(aes(component, value)) +
+  geom_col(fill = "azure4") +
+  geom_label(aes(label = round(value,1))) +
+  labs(
+    title = "Eigenvalues",
+    y = "% of Total Variance"
+    ) +
+  theme_bw() +
+  theme(
+    plot.title = element_text(face = "bold", hjust = 0.2, color = "grey30"),
+    axis.text.y = element_blank()
+  )
+
+# Prinipal Components
+nfl_rf_recipe_pca %>% 
+  prep() %>% 
+  tidy(id = "pca") %>%
+  filter(component %in% c("PC1", "PC2", "PC3", "PC4")) %>% 
+  mutate(terms = tidytext::reorder_within(terms, 
+                                          abs(value),
+                                          component)) %>% 
+  ggplot(aes(abs(value), terms, fill = value > 0)) +
+  geom_col() +
+  facet_wrap(~ component, scales = "free") +
+  tidytext::scale_y_reordered() +
+  scale_fill_manual(values = c("antiquewhite","antiquewhite4")) +
+  labs(
+    title = "Principal Components",
+    x = "Absolute value of contribution",
+    y = NULL,
+    fill = "Positive ?"
+  ) +
+  theme_bw() +
+  theme(plot.title = element_text(face = "bold", hjust = 0.5, color = "grey30"))
+
+# Data
+nfl_rf_recipe_pca_2 %>% 
+  prep() %>% juice()
+
+nfl_rf_recipe_pca_4 %>% 
+  prep() %>% juice()
+
+nfl_rf_recipe_pca_2 %>% 
+  prep() %>% 
+  tidy(id = "pca") %>% 
+  pivot_wider(names_from = component, id_cols = terms) %>% 
+  select(terms:PC4)
 #
-# Modeling: Fit - Logistic Regression ----
-
-# Start Parallel Processing
-cl_3 <- parallel::makeCluster(2)
-doParallel::registerDoParallel(cl_3)
-
-# LOGISTIC REGRESSION
+# Modeling: Spec - Logistic Regression ----
 
 # Spec
 log_spec <- 
@@ -951,6 +1069,7 @@ log_wflow <-
 # Hyperparameters
 log_spec %>%  parameters() %>% pull_dials_object("penalty")
 log_spec %>%  parameters() %>% pull_dials_object("mixture")
+
 # - Random Grid
 set.seed(101)
 log_grid_random <- 
@@ -1003,447 +1122,28 @@ gg_Log_Grid_custom <- log_grid_custom %>%
 # Visual
 ggarrange(gg_Log_Grid_random, gg_Log_Grid_latin, gg_Log_Grid_custom, nrow = 1)
 
+# Modeling: Spec - Random Forrest ----
 
-# TUNE
-
-# Random Grid
-log_tune_random <-
-  log_wflow %>% 
-  tune_grid(
-    resamples = nfl_10fold,
-    grid = log_grid_random,
-    metrics = nfl_metrics,
-    control = nfl_ctrl
-  )
-# - plot: Accuracy
-gg_Log_tune_random_Acc <- log_tune_random %>% 
-  collect_metrics() %>% 
-  filter(.metric == "accuracy") %>%
-  mutate(mixture = case_when(
-    mixture >= 0   & mixture < 0.2 ~ "[0 - 0.2)",
-    mixture >= 0.2 & mixture < 0.4 ~ "[0.2 - 0.4)",
-    mixture >= 0.4 & mixture < 0.6 ~ "[0.4 - 0.6)",
-    mixture >= 0.6 & mixture < 0.8 ~ "[0.6 - 0.8)",
-    mixture >= 0.8 & mixture <= 1  ~ "[0.8 - 1]",
-  ) %>% factor) %>% 
-  ggplot(aes(penalty, mean)) +
-  geom_line(aes(color = mixture)) + geom_point() +
-  labs(title = "Evaluation: Random Grid",
-       subtitle = "Logistic Regression",
-       y = "Accuracy") +
-  scale_y_continuous(labels = scales::percent_format(accuracy = 0.1)) +
-  theme_bw() +
-  theme(plot.title = element_text(hjust = 0.4, face = "bold", size = 15),
-        plot.subtitle = element_text(hjust = 0.4, color = "darkolivegreen"),
-        axis.title.y = element_text(color = "tomato"),
-        axis.title.x = element_text(face = "bold", color = "cyan4"), 
-        legend.title = element_text(face = "bold", color = "cyan4"),
-        legend.text = element_text(size = 7),
-        legend.position = "bottom")
-# - best: Accuracy
-log_tune_random %>% show_best(metric = "accuracy")
-log_best_Acc <- log_tune_random %>% select_best(metric = "accuracy")
-# - plot: Sensitivity
-gg_Log_tune_random_Sens <- log_tune_random %>% 
-  collect_metrics() %>% 
-  filter(.metric == "sens") %>%
-  mutate(mixture = case_when(
-    mixture >= 0   & mixture < 0.2 ~ "[0 - 0.2)",
-    mixture >= 0.2 & mixture < 0.4 ~ "[0.2 - 0.4)",
-    mixture >= 0.4 & mixture < 0.6 ~ "[0.4 - 0.6)",
-    mixture >= 0.6 & mixture < 0.8 ~ "[0.6 - 0.8)",
-    mixture >= 0.8 & mixture <= 1  ~ "[0.8 - 1]",
-  ) %>% factor) %>% 
-  ggplot(aes(penalty, mean)) +
-  geom_line(aes(color = mixture)) + geom_point() +
-  labs(title = "Evaluation: Random Grid",
-       subtitle = "Logistic Regression",
-       y = "Sensitivity") +
-  scale_y_continuous(labels = scales::percent_format(accuracy = 0.1)) +
-  theme_bw() +
-  theme(plot.title = element_text(hjust = 0.4, face = "bold", size = 15),
-        plot.subtitle = element_text(hjust = 0.4, color = "darkolivegreen"),
-        axis.title.y = element_text(color = "tomato"),
-        axis.title.x = element_text(face = "bold", color = "cyan4"), 
-        legend.title = element_text(face = "bold", color = "cyan4"),
-        legend.text = element_text(size = 7),
-        legend.position = "bottom")
-# - best: Sensitivity
-log_tune_random %>% show_best(metric = "sens") %>% top_n(1)
-# - plot: Precision
-gg_Log_tune_random_Prec <- log_tune_random %>% 
-  collect_metrics() %>% 
-  filter(.metric == "precision") %>%
-  mutate(mixture = case_when(
-    mixture >= 0   & mixture < 0.2 ~ "[0 - 0.2)",
-    mixture >= 0.2 & mixture < 0.4 ~ "[0.2 - 0.4)",
-    mixture >= 0.4 & mixture < 0.6 ~ "[0.4 - 0.6)",
-    mixture >= 0.6 & mixture < 0.8 ~ "[0.6 - 0.8)",
-    mixture >= 0.8 & mixture <= 1  ~ "[0.8 - 1]",
-  ) %>% factor) %>% 
-  ggplot(aes(penalty, mean)) +
-  geom_line(aes(color = mixture)) + geom_point() +
-  labs(title = "Evaluation: Random Grid",
-       subtitle = "Logistic Regression",
-       y = "Precision") +
-  scale_y_continuous(labels = scales::percent_format(accuracy = 0.1)) +
-  theme_bw() +
-  theme(plot.title = element_text(hjust = 0.4, face = "bold", size = 15),
-        plot.subtitle = element_text(hjust = 0.4, color = "darkolivegreen"),
-        axis.title.y = element_text(color = "tomato"),
-        axis.title.x = element_text(face = "bold", color = "cyan4"), 
-        legend.title = element_text(face = "bold", color = "cyan4"),
-        legend.text = element_text(size = 7),
-        legend.position = "bottom")
-# - best: Precision
-log_tune_random %>% show_best(metric = "precision") %>% top_n(1)
-# -- plot: F Score
-gg_Log_tune_random_F <- log_tune_random %>% 
-  collect_metrics() %>% 
-  filter(.metric == "f_meas") %>%
-  mutate(mixture = case_when(
-    mixture >= 0   & mixture < 0.2 ~ "[0 - 0.2)",
-    mixture >= 0.2 & mixture < 0.4 ~ "[0.2 - 0.4)",
-    mixture >= 0.4 & mixture < 0.6 ~ "[0.4 - 0.6)",
-    mixture >= 0.6 & mixture < 0.8 ~ "[0.6 - 0.8)",
-    mixture >= 0.8 & mixture <= 1  ~ "[0.8 - 1]",
-  ) %>% factor) %>% 
-  ggplot(aes(penalty, mean)) +
-  geom_line(aes(color = mixture)) + geom_point() +
-  labs(title = "Evaluation: Random Grid",
-       subtitle = "Logistic Regression",
-       y = "F Score") +
-  scale_y_continuous(labels = scales::percent_format(accuracy = 0.1)) +
-  theme_bw() +
-  theme(plot.title = element_text(hjust = 0.4, face = "bold", size = 15),
-        plot.subtitle = element_text(hjust = 0.4, color = "darkolivegreen"),
-        axis.title.y = element_text(color = "tomato"),
-        axis.title.x = element_text(face = "bold", color = "cyan4"), 
-        legend.title = element_text(face = "bold", color = "cyan4"),
-        legend.text = element_text(size = 7),
-        legend.position = "bottom")
-# - best: F Score
-log_tune_random %>% show_best(metric = "f_meas") %>% top_n(1)
-
-
-# Latin Grid
-log_tune_latin <-
-  log_wflow %>% 
-  tune_grid(
-    resamples = nfl_10fold,
-    grid = log_grid_latin,
-    metrics = nfl_metrics,
-    control = nfl_ctrl
-  )
-# -  plot: Accuracy
-gg_Log_tune_latin_Acc <- log_tune_latin %>% 
-  collect_metrics() %>% 
-  filter(.metric == "accuracy") %>%
-  mutate(mixture = case_when(
-    mixture >= 0   & mixture < 0.2 ~ "[0 - 0.2)",
-    mixture >= 0.2 & mixture < 0.4 ~ "[0.2 - 0.4)",
-    mixture >= 0.4 & mixture < 0.6 ~ "[0.4 - 0.6)",
-    mixture >= 0.6 & mixture < 0.8 ~ "[0.6 - 0.8)",
-    mixture >= 0.8 & mixture <= 1  ~ "[0.8 - 1]",
-  ) %>% factor) %>% 
-  ggplot(aes(penalty, mean)) +
-  geom_line(aes(color = mixture)) + geom_point() +
-  labs(title = "Evaluation: Latin Grid",
-       subtitle = "Logistic Regression",
-       y = "Accuracy") +
-  scale_y_continuous(labels = scales::percent_format(accuracy = 0.1)) +
-  theme_bw() +
-  theme(plot.title = element_text(hjust = 0.4, face = "bold", size = 15),
-        plot.subtitle = element_text(hjust = 0.4, color = "darkolivegreen"),
-        axis.title.y = element_text(color = "tomato"),
-        axis.title.x = element_text(face = "bold", color = "cyan4"), 
-        legend.title = element_text(face = "bold", color = "cyan4"),
-        legend.text = element_text(size = 7),
-        legend.position = "bottom")
-# - best: Accuracy
-log_tune_latin %>% show_best(metric = "accuracy") %>% top_n(1)
-# - plot: Sens
-gg_Log_tune_latin_Sens <- log_tune_latin %>% 
-  collect_metrics() %>% 
-  filter(.metric == "sens") %>%
-  mutate(mixture = case_when(
-    mixture >= 0   & mixture < 0.2 ~ "[0 - 0.2)",
-    mixture >= 0.2 & mixture < 0.4 ~ "[0.2 - 0.4)",
-    mixture >= 0.4 & mixture < 0.6 ~ "[0.4 - 0.6)",
-    mixture >= 0.6 & mixture < 0.8 ~ "[0.6 - 0.8)",
-    mixture >= 0.8 & mixture <= 1  ~ "[0.8 - 1]",
-  ) %>% factor) %>% 
-  ggplot(aes(penalty, mean)) +
-  geom_line(aes(color = mixture)) + geom_point() +
-  labs(title = "Evaluation: Latin Grid",
-       subtitle = "Logistic Regression",
-       y = "Sensitivity") +
-  scale_y_continuous(labels = scales::percent_format(accuracy = 0.1)) +
-  theme_bw() +
-  theme(plot.title = element_text(hjust = 0.4, face = "bold", size = 15),
-        plot.subtitle = element_text(hjust = 0.4, color = "darkolivegreen"),
-        axis.title.y = element_text(color = "tomato"),
-        axis.title.x = element_text(face = "bold", color = "cyan4"), 
-        legend.title = element_text(face = "bold", color = "cyan4"),
-        legend.text = element_text(size = 7),
-        legend.position = "bottom")
-# - best: Sensitivity
-log_tune_latin %>% show_best(metric = "sens") %>% top_n(1)
-# -- plot: Precision
-gg_Log_tune_latin_Prec <- log_tune_latin %>% 
-  collect_metrics() %>% 
-  filter(.metric == "precision") %>%
-  mutate(mixture = case_when(
-    mixture >= 0   & mixture < 0.2 ~ "[0 - 0.2)",
-    mixture >= 0.2 & mixture < 0.4 ~ "[0.2 - 0.4)",
-    mixture >= 0.4 & mixture < 0.6 ~ "[0.4 - 0.6)",
-    mixture >= 0.6 & mixture < 0.8 ~ "[0.6 - 0.8)",
-    mixture >= 0.8 & mixture <= 1  ~ "[0.8 - 1]",
-  ) %>% factor) %>% 
-  ggplot(aes(penalty, mean)) +
-  geom_line(aes(color = mixture)) + geom_point() +
-  labs(title = "Evaluation: Latin Grid",
-       subtitle = "Logistic Regression",
-       y = "Precision") +
-  scale_y_continuous(labels = scales::percent_format(accuracy = 0.1)) +
-  theme_bw() +
-  theme(plot.title = element_text(hjust = 0.4, face = "bold", size = 15),
-        plot.subtitle = element_text(hjust = 0.4, color = "darkolivegreen"),
-        axis.title.y = element_text(color = "tomato"),
-        axis.title.x = element_text(face = "bold", color = "cyan4"), 
-        legend.title = element_text(face = "bold", color = "cyan4"),
-        legend.text = element_text(size = 7),
-        legend.position = "bottom")
-# - best: Precision
-log_tune_latin %>% show_best(metric = "precision") %>% top_n(1)
-# -- plot: F Score
-gg_Log_tune_latin_F <- log_tune_latin %>% 
-  collect_metrics() %>% 
-  filter(.metric == "f_meas") %>%
-  mutate(mixture = case_when(
-    mixture >= 0   & mixture < 0.2 ~ "[0 - 0.2)",
-    mixture >= 0.2 & mixture < 0.4 ~ "[0.2 - 0.4)",
-    mixture >= 0.4 & mixture < 0.6 ~ "[0.4 - 0.6)",
-    mixture >= 0.6 & mixture < 0.8 ~ "[0.6 - 0.8)",
-    mixture >= 0.8 & mixture <= 1  ~ "[0.8 - 1]",
-  ) %>% factor) %>% 
-  ggplot(aes(penalty, mean)) +
-  geom_line(aes(color = mixture)) + geom_point() +
-  labs(title = "Evaluation: Latin Grid",
-       subtitle = "Logistic Regression",
-       y = "F Score") +
-  scale_y_continuous(labels = scales::percent_format(accuracy = 0.1)) +
-  theme_bw() +
-  theme(plot.title = element_text(hjust = 0.4, face = "bold", size = 15),
-        plot.subtitle = element_text(hjust = 0.4, color = "darkolivegreen"),
-        axis.title.y = element_text(color = "tomato"),
-        axis.title.x = element_text(face = "bold", color = "cyan4"), 
-        legend.title = element_text(face = "bold", color = "cyan4"),
-        legend.text = element_text(size = 7),
-        legend.position = "bottom")
-# - best: F Score
-log_tune_latin %>% show_best(metric = "f_meas") %>% top_n(1)
-
-# Custom Grid
-log_tune_custom <-
-  log_wflow %>% 
-  tune_grid(
-    resamples = nfl_10fold,
-    grid = log_grid_custom,
-    metrics = nfl_metrics,
-    control = nfl_ctrl
-  )
-# - plot: Accuracy
-gg_Log_tune_custom_Acc <- log_tune_custom %>% 
-  collect_metrics() %>% 
-  filter(.metric == "accuracy") %>%
-  mutate(mixture = factor(mixture)) %>% 
-  ggplot(aes(penalty, mean)) +
-  geom_line(aes(color = mixture)) + geom_point() +
-  labs(title = "Evaluation: Custom Grid",
-       subtitle = "Logistic Regression",
-       y = "Accuracy") +
-  scale_y_continuous(labels = scales::percent_format(accuracy = 0.1)) +
-  theme_bw() +
-  theme(plot.title = element_text(hjust = 0.4, face = "bold", size = 15),
-        plot.subtitle = element_text(hjust = 0.4, color = "darkolivegreen"),
-        axis.title.y = element_text(color = "tomato"),
-        axis.title.x = element_text(face = "bold", color = "cyan4"), 
-        legend.title = element_text(face = "bold", color = "cyan4"),
-        legend.position = "bottom")
-# - best: Accuracy
-log_tune_custom %>% show_best(metric = "accuracy") %>% top_n(1)
-# - plot: Sensitivity
-gg_Log_tune_custom_Sens <- log_tune_custom %>% 
-  collect_metrics() %>% 
-  filter(.metric == "sens") %>%
-  mutate(mixture = factor(mixture)) %>% 
-  ggplot(aes(penalty, mean)) +
-  geom_line(aes(color = mixture)) + geom_point() +
-  labs(title = "Evaluation: Custom Grid",
-       subtitle = "Logistic Regression",
-       y = "Sensitivity") +
-  scale_y_continuous(labels = scales::percent_format(accuracy = 0.1)) +
-  theme_bw() +
-  theme(plot.title = element_text(hjust = 0.4, face = "bold", size = 15),
-        plot.subtitle = element_text(hjust = 0.4, color = "darkolivegreen"),
-        axis.title.y = element_text(color = "tomato"),
-        axis.title.x = element_text(face = "bold", color = "cyan4"), 
-        legend.title = element_text(face = "bold", color = "cyan4"),
-        legend.position = "bottom")
-# - best: Sensitivity
-log_tune_custom %>% show_best(metric = "sens") %>% top_n(1)
-# - plot: Precision
-gg_Log_tune_custom_Prec <- log_tune_custom %>% 
-  collect_metrics() %>% 
-  filter(.metric == "precision") %>%
-  mutate(mixture = factor(mixture)) %>% 
-  ggplot(aes(penalty, mean)) +
-  geom_line(aes(color = mixture)) + geom_point() +
-  labs(title = "Evaluation: Custom Grid",
-       subtitle = "Logistic Regression",
-       y = "Precision") +
-  scale_y_continuous(labels = scales::percent_format(accuracy = 0.1)) +
-  theme_bw() +
-  theme(plot.title = element_text(hjust = 0.4, face = "bold", size = 15),
-        plot.subtitle = element_text(hjust = 0.4, color = "darkolivegreen"),
-        axis.title.y = element_text(color = "tomato"),
-        axis.title.x = element_text(face = "bold", color = "cyan4"), 
-        legend.title = element_text(face = "bold", color = "cyan4"),
-        legend.position = "bottom")
-# - best: Precision
-log_tune_custom %>% show_best(metric = "precision") %>% top_n(1)
-# - plot: F Score
-gg_Log_tune_custom_F <- log_tune_custom %>% 
-  collect_metrics() %>% 
-  filter(.metric == "f_meas") %>%
-  mutate(mixture = factor(mixture)) %>% 
-  ggplot(aes(penalty, mean)) +
-  geom_line(aes(color = mixture)) + geom_point() +
-  labs(title = "Evaluation: Custom Grid",
-       subtitle = "Logistic Regression",
-       y = "F Score") +
-  scale_y_continuous(labels = scales::percent_format(accuracy = 0.1)) +
-  theme_bw() +
-  theme(plot.title = element_text(hjust = 0.4, face = "bold", size = 15),
-        plot.subtitle = element_text(hjust = 0.4, color = "darkolivegreen"),
-        axis.title.y = element_text(color = "tomato"),
-        axis.title.x = element_text(face = "bold", color = "cyan4"), 
-        legend.title = element_text(face = "bold", color = "cyan4"),
-        legend.position = "bottom")
-# - best: F Score
-log_tune_custom %>% show_best(metric = "f_meas") %>% top_n(1)
-
-# Visual
-# - Accuracy
-ggarrange(gg_Log_tune_random_Acc, gg_Log_tune_latin_Acc, gg_Log_tune_custom_Acc, nrow = 1)
-# - Sensitiviy
-ggarrange(gg_Log_tune_random_Sens, gg_Log_tune_latin_Sens, gg_Log_tune_custom_Sens, nrow = 1)
-# - Precision
-ggarrange(gg_Log_tune_random_Prec, gg_Log_tune_latin_Prec, gg_Log_tune_custom_Prec, nrow = 1)
-# - F Score
-ggarrange(gg_Log_tune_random_F, gg_Log_tune_latin_F, gg_Log_tune_custom_F, nrow = 1)
-
-
-# SA
-# - control
-nfl_ctrl_SA <- finetune::control_sim_anneal(no_improve = 10,
-                                            event_level = "second",
-                                            parallel_over = "everything",
-                                            verbose = TRUE)
-nfl_metric_Acc <- metric_set(accuracy)
-nfl_metric_F <- metric_set(f_meas)
-
-# Start Grid
-# - Accuracy
-log_SA_params_Acc <- 
-  log_wflow %>% 
-  parameters() %>% 
-  update(
-    penalty = penalty(range = c(0,0.006), trans = NULL),
-    mixture = mixture(range = c(0.5,1), trans = NULL)
-  ) 
-
-log_SA_grid_Acc <- 
-  log_wflow %>% 
-  parameters() %>% 
-  update(
-    penalty = penalty(range = c(0,0.006), trans = NULL),
-    mixture = mixture(range = c(0.5,1), trans = NULL)
-  ) %>% 
-  grid_regular(levels = 2)
-  
-log_SA_initial_Acc <- 
-  log_wflow %>% 
-  tune_grid(
-    resamples = nfl_10fold,
-    grid = log_SA_grid,
-    metrics = nfl_metrics
-  )
-
-# Refit
-# - Accuracy
-set.seed(101)
-log_tune_SA_Acc <- 
-  log_wflow %>% 
-  finetune::tune_sim_anneal(
-    resamples = nfl_10fold,
-    metrics = nfl_metric_Acc,
-    initial = log_SA_initial,
-    param_info = log_SA_params,
-    iter = 50,
-    control = nfl_ctrl_SA
-  )
-
-# FINAL fit
-
-# - Accuracy
-log_wflow_Acc_FINAL <- 
-  log_wflow %>% 
-  finalize_workflow(log_best_Acc)
-
-log_FINAL <- 
-  log_wflow_Acc_FINAL %>% 
-  fit(nfl_train)
-
-# Modeling: Fit - Random Forest ----
-
-# RANDOM FORREST
 # Spec
 rf_spec <- 
   rand_forest(
     mtry = tune(),
     trees = 1000,
     min_n = tune()
-) %>% 
+  ) %>% 
   set_engine("ranger") %>% 
   set_mode("classification")
+
 # Workflow
 rf_wflow <- 
   workflow() %>% 
   add_model(rf_spec) %>% 
-  add_recipe(nfl_recipe_simple)
+  add_recipe(nfl_rf_recipe)
 
 # Hyperparameters
 rf_spec %>%  parameters() %>% pull_dials_object("min_n")
 rf_spec %>%  parameters() %>% update(mtry = mtry(c(1,8))) %>%  pull_dials_object("mtry")
-# - Random Grid
-set.seed(101)
-rf_grid_random <- 
-  rf_spec %>% 
-  parameters(penalty(trans = NULL)) %>% 
-  update(mtry = mtry(c(1,8))) %>% 
-  grid_random(size = 50)
-# -- plot
-gg_RF_Grid_random <- rf_grid_random %>% 
-  ggplot(aes(min_n, mtry)) +
-  geom_point(shape = 1, size = 4, color = "grey60") +
-  labs(title = "Random Grid",
-       subtitle = "Random Forrest") +
-  theme_bw() +
-  theme(plot.title = element_text(hjust = 0.4, face = "bold", size = 15),
-        plot.subtitle = element_text(hjust = 0.4, color = "darkolivegreen"),
-        axis.title = element_text(face = "bold", color = "cyan4"))
+
 # - Latin Hypercube
 set.seed(101)
 rf_grid_latin <- 
@@ -1479,96 +1179,252 @@ gg_RF_Grid_custom <- rf_grid_custom %>%
         axis.title = element_text(face = "bold", color = "cyan4"))
 
 # Visual
-ggarrange(gg_RF_Grid_random, gg_RF_Grid_latin, gg_RF_Grid_custom, nrow = 1)
+ggarrange(gg_RF_Grid_latin, gg_RF_Grid_custom, nrow = 1)
 
 
+#
+# Modeling: Fit - Logistic Regression ----
 
-# TUNE: 
+# Start Parallel Processing
+cl_3 <- parallel::makeCluster(2)
+doParallel::registerDoParallel(cl_3)
 
-# Random
-rf_tune_random <-
-  rf_wflow %>% 
+# Random Grid
+log_tune_random <-
+  log_wflow %>% 
   tune_grid(
     resamples = nfl_10fold,
-    grid = rf_grid_random,
+    grid = log_grid_random,
+    metrics = nfl_metrics,
+    control = nfl_ctrl
+  )
+
+# - plot: Accuracy
+gg_Log_tune_random_Acc <- log_tune_random %>% 
+  collect_metrics() %>% 
+  filter(.metric == "accuracy") %>%
+  mutate(mixture = case_when(
+    mixture >= 0   & mixture < 0.2 ~ "[0 - 0.2)",
+    mixture >= 0.2 & mixture < 0.4 ~ "[0.2 - 0.4)",
+    mixture >= 0.4 & mixture < 0.6 ~ "[0.4 - 0.6)",
+    mixture >= 0.6 & mixture < 0.8 ~ "[0.6 - 0.8)",
+    mixture >= 0.8 & mixture <= 1  ~ "[0.8 - 1]",
+  ) %>% factor) %>% 
+  ggplot(aes(penalty, mean)) +
+  geom_line(aes(color = mixture)) + geom_point() +
+  labs(title = "Evaluation: Random Grid",
+       subtitle = "Logistic Regression",
+       y = "Accuracy") +
+  ylim(c(0.65, 0.72)) +
+  scale_y_continuous(labels = scales::percent_format(accuracy = 0.1)) +
+  theme_bw() +
+  theme(plot.title = element_text(hjust = 0.4, face = "bold", size = 15),
+        plot.subtitle = element_text(hjust = 0.4, color = "darkolivegreen"),
+        axis.title.y = element_text(color = "tomato"),
+        axis.title.x = element_text(face = "bold", color = "cyan4"), 
+        legend.title = element_text(face = "bold", color = "cyan4"),
+        legend.text = element_text(size = 7),
+        legend.position = "bottom")
+# - best: Accuracy
+log_tune_random %>% show_best(metric = "accuracy")
+# -- plot: F Score
+gg_Log_tune_random_F <- log_tune_random %>% 
+  collect_metrics() %>% 
+  filter(.metric == "f_meas") %>%
+  mutate(mixture = case_when(
+    mixture >= 0   & mixture < 0.2 ~ "[0 - 0.2)",
+    mixture >= 0.2 & mixture < 0.4 ~ "[0.2 - 0.4)",
+    mixture >= 0.4 & mixture < 0.6 ~ "[0.4 - 0.6)",
+    mixture >= 0.6 & mixture < 0.8 ~ "[0.6 - 0.8)",
+    mixture >= 0.8 & mixture <= 1  ~ "[0.8 - 1]",
+  ) %>% factor) %>% 
+  ggplot(aes(penalty, mean)) +
+  geom_line(aes(color = mixture)) + geom_point() +
+  labs(title = "Evaluation: Random Grid",
+       subtitle = "Logistic Regression",
+       y = "F Score") +
+  ylim(c(0.79, 0.81)) +
+  theme_bw() +
+  theme(plot.title = element_text(hjust = 0.4, face = "bold", size = 15),
+        plot.subtitle = element_text(hjust = 0.4, color = "darkolivegreen"),
+        axis.title.y = element_text(color = "tomato"),
+        axis.title.x = element_text(face = "bold", color = "cyan4"), 
+        legend.title = element_text(face = "bold", color = "cyan4"),
+        legend.text = element_text(size = 7),
+        legend.position = "bottom")
+# - best: F Score
+log_tune_random %>% show_best(metric = "f_meas")
+
+
+# Latin Grid
+log_tune_latin <-
+  log_wflow %>% 
+  tune_grid(
+    resamples = nfl_10fold,
+    grid = log_grid_latin,
+    metrics = nfl_metrics,
+    control = nfl_ctrl
+  )
+# -  plot: Accuracy
+gg_Log_tune_latin_Acc <- log_tune_latin %>% 
+  collect_metrics() %>% 
+  filter(.metric == "accuracy") %>%
+  mutate(mixture = case_when(
+    mixture >= 0   & mixture < 0.2 ~ "[0 - 0.2)",
+    mixture >= 0.2 & mixture < 0.4 ~ "[0.2 - 0.4)",
+    mixture >= 0.4 & mixture < 0.6 ~ "[0.4 - 0.6)",
+    mixture >= 0.6 & mixture < 0.8 ~ "[0.6 - 0.8)",
+    mixture >= 0.8 & mixture <= 1  ~ "[0.8 - 1]",
+  ) %>% factor) %>% 
+  ggplot(aes(penalty, mean)) +
+  geom_line(aes(color = mixture)) + geom_point() +
+  labs(title = "Evaluation: Latin Grid",
+       subtitle = "Logistic Regression",
+       y = "Accuracy") +
+  ylim(c(0.65, 0.72)) +
+  scale_y_continuous(labels = scales::percent_format(accuracy = 0.1)) +
+  theme_bw() +
+  theme(plot.title = element_text(hjust = 0.4, face = "bold", size = 15),
+        plot.subtitle = element_text(hjust = 0.4, color = "darkolivegreen"),
+        axis.title.y = element_text(color = "tomato"),
+        axis.title.x = element_text(face = "bold", color = "cyan4"), 
+        legend.title = element_text(face = "bold", color = "cyan4"),
+        legend.text = element_text(size = 7),
+        legend.position = "bottom")
+# - best: Accuracy
+log_tune_latin %>% show_best(metric = "accuracy")
+# -- plot: F Score
+gg_Log_tune_latin_F <- log_tune_latin %>% 
+  collect_metrics() %>% 
+  filter(.metric == "f_meas") %>%
+  mutate(mixture = case_when(
+    mixture >= 0   & mixture < 0.2 ~ "[0 - 0.2)",
+    mixture >= 0.2 & mixture < 0.4 ~ "[0.2 - 0.4)",
+    mixture >= 0.4 & mixture < 0.6 ~ "[0.4 - 0.6)",
+    mixture >= 0.6 & mixture < 0.8 ~ "[0.6 - 0.8)",
+    mixture >= 0.8 & mixture <= 1  ~ "[0.8 - 1]",
+  ) %>% factor) %>% 
+  ggplot(aes(penalty, mean)) +
+  geom_line(aes(color = mixture)) + geom_point() +
+  labs(title = "Evaluation: Latin Grid",
+       subtitle = "Logistic Regression",
+       y = "F Score") +
+  ylim(c(0.79, 0.81)) +
+  theme_bw() +
+  theme(plot.title = element_text(hjust = 0.4, face = "bold", size = 15),
+        plot.subtitle = element_text(hjust = 0.4, color = "darkolivegreen"),
+        axis.title.y = element_text(color = "tomato"),
+        axis.title.x = element_text(face = "bold", color = "cyan4"), 
+        legend.title = element_text(face = "bold", color = "cyan4"),
+        legend.text = element_text(size = 7),
+        legend.position = "bottom")
+# - best: F Score
+log_tune_latin %>% show_best(metric = "f_meas")
+
+# Custom Grid
+log_tune_custom <-
+  log_wflow %>% 
+  tune_grid(
+    resamples = nfl_10fold,
+    grid = log_grid_custom,
     metrics = nfl_metrics,
     control = nfl_ctrl
   )
 # - plot: Accuracy
-gg_RF_tune_random_Acc <- rf_tune_random %>% 
+gg_Log_tune_custom_Acc <- log_tune_custom %>% 
   collect_metrics() %>% 
   filter(.metric == "accuracy") %>%
-  mutate(mtry = factor(mtry)) %>% 
-  ggplot(aes(min_n, mean)) +
-  geom_line(aes(color = mtry)) + geom_point() +
-  labs(title = "Evaluation: Random Grid",
-       subtitle = "Random Forrest",
+  mutate(mixture = factor(mixture)) %>% 
+  ggplot(aes(penalty, mean)) +
+  geom_line(aes(color = mixture)) + geom_point() +
+  labs(title = "Evaluation: Custom Grid",
+       subtitle = "Logistic Regression",
        y = "Accuracy") +
+  ylim(c(0.65, 0.72)) +
   scale_y_continuous(labels = scales::percent_format(accuracy = 0.1)) +
   theme_bw() +
-  theme(plot.title = element_text(face = "bold"),
+  theme(plot.title = element_text(hjust = 0.4, face = "bold", size = 15),
+        plot.subtitle = element_text(hjust = 0.4, color = "darkolivegreen"),
         axis.title.y = element_text(color = "tomato"),
         axis.title.x = element_text(face = "bold", color = "cyan4"), 
         legend.title = element_text(face = "bold", color = "cyan4"),
-        legend.text = element_text(size = 7),
         legend.position = "bottom")
-# - plot: Sensitivity
-gg_RF_tune_random_Sens <- rf_tune_random %>% 
-  collect_metrics() %>% 
-  filter(.metric == "sens") %>%
-  mutate(mtry = factor(mtry)) %>% 
-  ggplot(aes(min_n, mean)) +
-  geom_line(aes(color = mtry)) + geom_point() +
-  labs(title = "Evaluation: Random Grid",
-       subtitle = "Random Forrest",
-       y = "Sensitivity") +
-  scale_y_continuous(labels = scales::percent_format(accuracy = 0.1)) +
-  theme_bw() +
-  theme(plot.title = element_text(face = "bold"),
-        axis.title.y = element_text(color = "tomato"),
-        axis.title.x = element_text(face = "bold", color = "cyan4"), 
-        legend.title = element_text(face = "bold", color = "cyan4"),
-        legend.text = element_text(size = 7),
-        legend.position = "bottom")
-# - plot: Precision
-gg_RF_tune_random_Prec <- rf_tune_random %>% 
-  collect_metrics() %>% 
-  filter(.metric == "precision") %>%
-  mutate(mtry = factor(mtry)) %>% 
-  ggplot(aes(min_n, mean)) +
-  geom_line(aes(color = mtry)) + geom_point() +
-  labs(title = "Evaluation: Random Grid",
-       subtitle = "Random Forrest",
-       y = "Precision") +
-  scale_y_continuous(labels = scales::percent_format(accuracy = 0.1)) +
-  theme_bw() +
-  theme(plot.title = element_text(face = "bold"),
-        axis.title.y = element_text(color = "tomato"),
-        axis.title.x = element_text(face = "bold", color = "cyan4"), 
-        legend.title = element_text(face = "bold", color = "cyan4"),
-        legend.text = element_text(size = 7),
-        legend.position = "bottom")
+# - best: Accuracy
+log_tune_custom %>% show_best(metric = "accuracy")
 # - plot: F Score
-gg_RF_tune_random_F <- rf_tune_random %>% 
+gg_Log_tune_custom_F <- log_tune_custom %>% 
   collect_metrics() %>% 
   filter(.metric == "f_meas") %>%
-  mutate(mtry = factor(mtry)) %>% 
-  ggplot(aes(min_n, mean)) +
-  geom_line(aes(color = mtry)) + geom_point() +
-  labs(title = "Evaluation: Random Grid",
-       subtitle = "Random Forrest",
+  mutate(mixture = factor(mixture)) %>% 
+  ggplot(aes(penalty, mean)) +
+  geom_line(aes(color = mixture)) + geom_point() +
+  labs(title = "Evaluation: Custom Grid",
+       subtitle = "Logistic Regression",
        y = "F Score") +
-  scale_y_continuous(labels = scales::percent_format(accuracy = 0.1)) +
+  ylim(c(0.79, 0.81)) +
   theme_bw() +
-  theme(plot.title = element_text(face = "bold"),
+  theme(plot.title = element_text(hjust = 0.4, face = "bold", size = 15),
+        plot.subtitle = element_text(hjust = 0.4, color = "darkolivegreen"),
         axis.title.y = element_text(color = "tomato"),
         axis.title.x = element_text(face = "bold", color = "cyan4"), 
         legend.title = element_text(face = "bold", color = "cyan4"),
-        legend.text = element_text(size = 7),
         legend.position = "bottom")
+# - best: F Score
+log_tune_custom %>% show_best(metric = "f_meas")
+
+# Visual
+# - Accuracy
+ggarrange(gg_Log_tune_random_Acc, gg_Log_tune_latin_Acc, gg_Log_tune_custom_Acc, nrow = 1)
+# - F Score
+ggarrange(gg_Log_tune_random_F, gg_Log_tune_latin_F, gg_Log_tune_custom_F, nrow = 1)
 
 
-# Latin
+# SA
+# - control
+nfl_ctrl_SA <- finetune::control_sim_anneal(no_improve = 10,
+                                            event_level = "second",
+                                            parallel_over = "everything",
+                                            verbose = TRUE)
+nfl_metric_Acc <- metric_set(accuracy)
+nfl_metric_F <- metric_set(f_meas)
+
+
+# Final Fit
+# - best parameters
+log_best_Acc <- log_tune_random %>% select_best(metric = "accuracy")
+log_best_F <- log_tune_custom %>% select_best(metric = "f_meas")
+
+
+# Start Parallel Processing
+cl_3 <- parallel::makeCluster(2)
+doParallel::registerDoParallel(cl_3)
+
+# - Accuracy
+log_wflow_FINAL_Acc <- 
+  log_wflow %>% 
+  finalize_workflow(log_best_Acc)
+
+log_FINAL_Acc <- 
+  log_wflow_FINAL_Acc %>% 
+  fit(nfl_train)
+
+# - F Score
+log_wflow_FINAL_F <- 
+  log_wflow %>% 
+  finalize_workflow(log_best_F)
+
+log_FINAL_F <- 
+  log_wflow_FINAL_F %>% 
+  fit(nfl_train)
+
+# Modeling: Fit - Random Forest ----
+
+# Start Parallel Processing
+cl_3 <- parallel::makeCluster(2)
+doParallel::registerDoParallel(cl_3)
+
+# LATIN Fit
+# - normal
 rf_tune_latin <-
   rf_wflow %>% 
   tune_grid(
@@ -1577,80 +1433,161 @@ rf_tune_latin <-
     metrics = nfl_metrics,
     control = nfl_ctrl
   )
-# - plot: Accuracy
+# - pca 2
+rf_tune_latin_pca_2 <-
+  rf_wflow %>% 
+  update_recipe(nfl_rf_recipe_pca_2) %>% 
+  tune_grid(
+    resamples = nfl_10fold,
+    grid = rf_grid_latin,
+    metrics = nfl_metrics,
+    control = nfl_ctrl
+  )
+# - pca 4
+rf_tune_latin_pca_4 <-
+  rf_wflow %>% 
+  update_recipe(nfl_rf_recipe_pca_4) %>% 
+  tune_grid(
+    resamples = nfl_10fold,
+    grid = rf_grid_latin,
+    metrics = nfl_metrics,
+    control = nfl_ctrl
+  )
+
+# PLOT: Accuracy
+# - normal
 gg_RF_tune_latin_Acc <- rf_tune_latin %>% 
   collect_metrics() %>% 
   filter(.metric == "accuracy") %>%
   mutate(mtry = factor(mtry)) %>% 
   ggplot(aes(min_n, mean)) +
   geom_line(aes(color = mtry)) + geom_point() +
-  labs(title = "Evaluation: Latin Grid",
-       subtitle = "Random Forrest",
+  labs(title = "Latin Grid",
+       subtitle = "No Preprocess",
        y = "Accuracy") +
-  scale_y_continuous(labels = scales::percent_format(accuracy = 0.1)) +
+  ylim(c(0.665, 0.71)) +
   theme_bw() +
-  theme(plot.title = element_text(face = "bold"),
+  theme(plot.title = element_text(hjust = 0.4, face = "bold", size = 15),
+        plot.subtitle = element_text(hjust = 0.4, color = "darkolivegreen"),
         axis.title.y = element_text(color = "tomato"),
         axis.title.x = element_text(face = "bold", color = "cyan4"), 
         legend.title = element_text(face = "bold", color = "cyan4"),
         legend.text = element_text(size = 7),
         legend.position = "bottom")
-# - plot: Sensitivity
-gg_RF_tune_latin_Sens <- rf_tune_latin %>% 
+# - PC 2
+gg_RF_tune_latin_pca_2_Acc <- rf_tune_latin_pca_2 %>% 
   collect_metrics() %>% 
-  filter(.metric == "sens") %>%
+  filter(.metric == "accuracy") %>%
   mutate(mtry = factor(mtry)) %>% 
   ggplot(aes(min_n, mean)) +
   geom_line(aes(color = mtry)) + geom_point() +
-  labs(title = "Evaluation: Latin Grid",
-       subtitle = "Random Forrest",
-       y = "Sensitivity") +
-  scale_y_continuous(labels = scales::percent_format(accuracy = 0.1)) +
+  labs(title = "Latin Grid",
+       subtitle = "Principal Components 2",
+       y = "Accuracy") +
+  ylim(c(0.665, 0.71)) +
   theme_bw() +
-  theme(plot.title = element_text(face = "bold"),
+  theme(plot.title = element_text(hjust = 0.4, face = "bold", size = 15),
+        plot.subtitle = element_text(hjust = 0.4, color = "darkolivegreen"),
         axis.title.y = element_text(color = "tomato"),
         axis.title.x = element_text(face = "bold", color = "cyan4"), 
         legend.title = element_text(face = "bold", color = "cyan4"),
         legend.text = element_text(size = 7),
         legend.position = "bottom")
-# - plot: Precision
-gg_RF_tune_latin_Prec <- rf_tune_latin %>% 
+# - PC 4
+gg_RF_tune_latin_pca_4_Acc <- rf_tune_latin_pca_4 %>% 
   collect_metrics() %>% 
-  filter(.metric == "precision") %>%
+  filter(.metric == "accuracy") %>%
   mutate(mtry = factor(mtry)) %>% 
   ggplot(aes(min_n, mean)) +
   geom_line(aes(color = mtry)) + geom_point() +
-  labs(title = "Evaluation: Latin Grid",
-       subtitle = "Random Forrest",
-       y = "Precision") +
-  scale_y_continuous(labels = scales::percent_format(accuracy = 0.1)) +
+  labs(title = "Latin Grid",
+       subtitle = "Principal Components 4",
+       y = "Accuracy") +
+  ylim(c(0.665, 0.71)) +
   theme_bw() +
-  theme(plot.title = element_text(face = "bold"),
+  theme(plot.title = element_text(hjust = 0.4, face = "bold", size = 15),
+        plot.subtitle = element_text(hjust = 0.4, color = "darkolivegreen"),
         axis.title.y = element_text(color = "tomato"),
         axis.title.x = element_text(face = "bold", color = "cyan4"), 
         legend.title = element_text(face = "bold", color = "cyan4"),
         legend.text = element_text(size = 7),
         legend.position = "bottom")
-# - plot: F Score
+# - Visual
+ggarrange(gg_RF_tune_latin_Acc, gg_RF_tune_latin_pca_2_Acc, gg_RF_tune_latin_pca_4_Acc, nrow = 1)
+# - best: Accuracy
+rf_tune_latin %>% show_best("accuracy")
+rf_tune_latin_pca_2 %>% show_best("accuracy")
+rf_tune_latin_pca_4 %>% show_best("accuracy")
+
+# PLOT: F Score
+# - normal
 gg_RF_tune_latin_F <- rf_tune_latin %>% 
   collect_metrics() %>% 
   filter(.metric == "f_meas") %>%
   mutate(mtry = factor(mtry)) %>% 
   ggplot(aes(min_n, mean)) +
   geom_line(aes(color = mtry)) + geom_point() +
-  labs(title = "Evaluation: Latin Grid",
-       subtitle = "Random Forrest",
+  labs(title = "Latin Grid",
+       subtitle = "No Preprocess",
        y = "F Score") +
-  scale_y_continuous(labels = scales::percent_format(accuracy = 0.1)) +
+  ylim(c(0.76, 0.805)) +
   theme_bw() +
-  theme(plot.title = element_text(face = "bold"),
+  theme(plot.title = element_text(hjust = 0.4, face = "bold", size = 15),
+        plot.subtitle = element_text(hjust = 0.4, color = "darkolivegreen"),
+        axis.title.y = element_text(color = "tomato"),
+        axis.title.x = element_text(face = "bold", color = "cyan4"), 
+        legend.title = element_text(face = "bold", color = "cyan4"),
+        legend.text = element_text(size = 7),
+        legend.position = "bottom")
+# - PC 2
+gg_RF_tune_latin_pca_2_F <- rf_tune_latin_pca_2 %>% 
+  collect_metrics() %>% 
+  filter(.metric == "f_meas") %>%
+  mutate(mtry = factor(mtry)) %>% 
+  ggplot(aes(min_n, mean)) +
+  geom_line(aes(color = mtry)) + geom_point() +
+  labs(title = "Latin Grid",
+       subtitle = "Principal Components 2",
+       y = "F Score") +
+  ylim(c(0.76, 0.805)) +
+  theme_bw() +
+  theme(plot.title = element_text(hjust = 0.4, face = "bold", size = 15),
+        plot.subtitle = element_text(hjust = 0.4, color = "darkolivegreen"),
+        axis.title.y = element_text(color = "tomato"),
+        axis.title.x = element_text(face = "bold", color = "cyan4"), 
+        legend.title = element_text(face = "bold", color = "cyan4"),
+        legend.text = element_text(size = 7),
+        legend.position = "bottom")
+# - PC 4
+gg_RF_tune_latin_pca_4_F <- rf_tune_latin_pca_4 %>% 
+  collect_metrics() %>% 
+  filter(.metric == "f_meas") %>%
+  mutate(mtry = factor(mtry)) %>% 
+  ggplot(aes(min_n, mean)) +
+  geom_line(aes(color = mtry)) + geom_point() +
+  labs(title = "Latin Grid",
+       subtitle = "Principal Components 4",
+       y = "F Score") +
+  ylim(c(0.76, 0.805)) +
+  theme_bw() +
+  theme(plot.title = element_text(hjust = 0.4, face = "bold", size = 15),
+        plot.subtitle = element_text(hjust = 0.4, color = "darkolivegreen"),
         axis.title.y = element_text(color = "tomato"),
         axis.title.x = element_text(face = "bold", color = "cyan4"), 
         legend.title = element_text(face = "bold", color = "cyan4"),
         legend.text = element_text(size = 7),
         legend.position = "bottom")
 
-# Custom
+# - Visual
+ggarrange(gg_RF_tune_latin_F, gg_RF_tune_latin_pca_2_F, gg_RF_tune_latin_pca_4_F, nrow = 1)
+# - best: F Score
+rf_tune_latin %>% show_best("f_meas")
+rf_tune_latin_pca_2 %>% show_best("f_meas")
+rf_tune_latin_pca_4 %>% show_best("f_meas")
+
+
+
+# CUSTOM
 rf_tune_custom <-
   rf_wflow %>% 
   tune_grid(
@@ -1671,48 +1608,16 @@ gg_RF_tune_custom_Acc <- rf_tune_custom %>%
        y = "Accuracy") +
   scale_y_continuous(labels = scales::percent_format(accuracy = 0.1)) +
   theme_bw() +
-  theme(plot.title = element_text(face = "bold"),
+  theme(plot.title = element_text(hjust = 0.4, face = "bold", size = 15),
+        plot.subtitle = element_text(hjust = 0.4, color = "darkolivegreen"),
         axis.title.y = element_text(color = "tomato"),
         axis.title.x = element_text(face = "bold", color = "cyan4"), 
         legend.title = element_text(face = "bold", color = "cyan4"),
         legend.text = element_text(size = 7),
         legend.position = "bottom")
-# - plot: Sensitivity
-gg_RF_tune_custom_Sens <- rf_tune_custom %>% 
-  collect_metrics() %>% 
-  filter(.metric == "sens") %>%
-  mutate(mtry = factor(mtry)) %>% 
-  ggplot(aes(min_n, mean)) +
-  geom_line(aes(color = mtry)) + geom_point() +
-  labs(title = "Evaluation: Custom Grid",
-       subtitle = "Random Forrest",
-       y = "Sensitivity") +
-  scale_y_continuous(labels = scales::percent_format(accuracy = 0.1)) +
-  theme_bw() +
-  theme(plot.title = element_text(face = "bold"),
-        axis.title.y = element_text(color = "tomato"),
-        axis.title.x = element_text(face = "bold", color = "cyan4"), 
-        legend.title = element_text(face = "bold", color = "cyan4"),
-        legend.text = element_text(size = 7),
-        legend.position = "bottom")
-# - plot: Precision
-gg_RF_tune_custom_Prec <- rf_tune_custom %>% 
-  collect_metrics() %>% 
-  filter(.metric == "precision") %>%
-  mutate(mtry = factor(mtry)) %>% 
-  ggplot(aes(min_n, mean)) +
-  geom_line(aes(color = mtry)) + geom_point() +
-  labs(title = "Evaluation: Custom Grid",
-       subtitle = "Random Forrest",
-       y = "Precision") +
-  scale_y_continuous(labels = scales::percent_format(accuracy = 0.1)) +
-  theme_bw() +
-  theme(plot.title = element_text(face = "bold"),
-        axis.title.y = element_text(color = "tomato"),
-        axis.title.x = element_text(face = "bold", color = "cyan4"), 
-        legend.title = element_text(face = "bold", color = "cyan4"),
-        legend.text = element_text(size = 7),
-        legend.position = "bottom")
+# - best: Accuracy
+rf_tune_custom %>% show_best("accuracy")
+rf_best_Acc_custom <- rf_tune_custom %>% select_best(metric = "accuracy")
 # - plot: F Score
 gg_RF_tune_custom_F <- rf_tune_custom %>% 
   collect_metrics() %>% 
@@ -1725,107 +1630,466 @@ gg_RF_tune_custom_F <- rf_tune_custom %>%
        y = "F Score") +
   scale_y_continuous(labels = scales::percent_format(accuracy = 0.1)) +
   theme_bw() +
-  theme(plot.title = element_text(face = "bold"),
+  theme(plot.title = element_text(hjust = 0.4, face = "bold", size = 15),
+        plot.subtitle = element_text(hjust = 0.4, color = "darkolivegreen"),
         axis.title.y = element_text(color = "tomato"),
         axis.title.x = element_text(face = "bold", color = "cyan4"), 
         legend.title = element_text(face = "bold", color = "cyan4"),
         legend.text = element_text(size = 7),
         legend.position = "bottom")
+# - best: F Score
+rf_tune_custom %>% show_best("f_meas")
+rf_best_F_custom <- rf_tune_custom %>% select_best(metric = "f_meas")
 
 
 # Visuals
 # - Accuracy
 ggarrange(gg_RF_tune_random_Acc, gg_RF_tune_latin_Acc, gg_RF_tune_custom_Acc, nrow = 1)
-# - Sensitivity
-ggarrange(gg_RF_tune_random_Sens, gg_RF_tune_latin_Sens, gg_RF_tune_custom_Sens, nrow = 1)
-# - Precision
-ggarrange(gg_RF_tune_random_Prec, gg_RF_tune_latin_Prec, gg_RF_tune_custom_Prec, nrow = 1)
 # - F Score
 ggarrange(gg_RF_tune_random_F, gg_RF_tune_latin_F, gg_RF_tune_custom_F, nrow = 1)
+
+
+# FINAL Fit
+
+# - Accuracy
+rf_wflow_FINAL_Acc <- 
+  rf_wflow %>% 
+  finalize_workflow(rf_best_Acc_custom)
+
+rf_FINAL_Acc <- 
+  rf_wflow_FINAL_Acc %>% 
+  fit(nfl_train)
+
+# - F Score
+rf_wflow_FINAL_F <- 
+  rf_wflow %>% 
+  finalize_workflow(rf_best_F_custom)
+
+rf_FINAL_F <- 
+  rf_wflow_FINAL_F %>% 
+  fit(nfl_train)
 
 # Stop Parallell Processing
 parallel::stopCluster(cl_3)
 
-# Modeling: Diagnostics ----
+# Modeling: Baseline Diagnostics - Logistic Regression ----
 
-# Logistic Regression
-# - Predictions
+# Predictions
 log_Results <- 
-  tibble(LOG_Pred = predict(log_FINAL, new_data = nfl_test) %>% pull(),
-         LOG_Prob = predict(log_FINAL, new_data = nfl_test, type = "prob") %>% pull())
-# - Conf Matrix
-log_Results %>% 
-  mutate(Actual = factor(nfl_test$drafted)) %>% 
-  conf_mat(truth = Actual, estimate = LOG_Pred) %>% 
+  tibble(Drafted = nfl_test$drafted,
+         LOG_Acc_Pred = predict(log_FINAL_Acc, new_data = nfl_test) %>% pull(),
+         LOG_Acc_Prob = predict(log_FINAL_Acc, new_data = nfl_test, type = "prob") %>% pull(.pred_Yes),
+         LOG_F_Pred = predict(log_FINAL_F, new_data = nfl_test) %>% pull(),
+         LOG_F_Prob = predict(log_FINAL_F, new_data = nfl_test, type = "prob") %>% pull(.pred_Yes))
+
+# Conf Matrix
+# - Accuracy
+log_CM_Acc <- log_Results %>% 
+  mutate(Actual = nfl_test$drafted) %>% 
+  conf_mat(truth = Actual, estimate = LOG_Acc_Pred) %>% 
   autoplot(type = "heatmap") +
-  labs(title = " Logistic Regression")
-# - Metrics
-log_FINAL_Metrics <- 
-  tibble(Model = "Logistic_Regression",
-         Accuracy = accuracy(log_Results, truth = factor(nfl_test$drafted), estimate = LOG_Pred) %>% pull(.estimate) %>% round(3),
-         Detection_Rate = detection_prevalence(log_Results, truth = factor(nfl_test$drafted), estimate = LOG_Pred, event_level = "second") %>% pull(.estimate) %>% round(3),
-         Sensitivity = sens(log_Results, truth = factor(nfl_test$drafted), estimate = LOG_Pred, event_level = "second") %>% pull(.estimate) %>% round(3),
-         Specificity = spec(log_Results, truth = factor(nfl_test$drafted), estimate = LOG_Pred, event_level = "second") %>% pull(.estimate) %>% round(3),
-         Precision = precision(log_Results, truth = factor(nfl_test$drafted), estimate = LOG_Pred, event_level = "second") %>% pull(.estimate) %>% round(3),
-         Recall = recall(log_Results, truth = factor(nfl_test$drafted), estimate = LOG_Pred, event_level = "second") %>% pull(.estimate) %>% round(3),
-         F1 = f_meas(log_Results, truth = factor(nfl_test$drafted), estimate = LOG_Pred, event_level = "second") %>% pull(.estimate) %>% round(3),
-         PPV = ppv(log_Results, truth = factor(nfl_test$drafted), estimate = LOG_Pred, event_level = "second") %>% pull(.estimate) %>% round(3),
-         NPV = npv(log_Results, truth = factor(nfl_test$drafted), estimate = LOG_Pred, event_level = "second") %>% pull(.estimate) %>% round(3),
-         AUC = roc_auc(log_Results, factor(nfl_test$drafted), LOG_Prob, event_level = "second") %>% pull(.estimate) %>% round(3))
-
-
-# Random Forrest
-
-# - Predictions
-rf_Results <- 
-  data_frame(RF_Pred = predict(rf_FINAL, new_data = nfl_test) %>% pull(),
-             RF_Prob = predict(rf_FINAL, new_data = nfl_test, type = "prob") %>% pull())
-# - Conf Matrix
-rf_Results %>% 
-  mutate(Actual = factor(nfl_test$drafted)) %>% 
-  conf_mat(truth = Actual, estimate = RF_Pred) %>% 
+  labs(title = "Accuracy") +
+  theme_bw() +
+  theme(plot.title = element_text(hjust = 0.4, color = "darkolivegreen", face = "bold"),
+        axis.title.y = element_text(color = "tomato"),
+        axis.title.x = element_text(face = "bold", color = "cyan4"), 
+        legend.position = "none")
+# - F Score
+log_CM_F <- log_Results %>% 
+  mutate(Actual = nfl_test$drafted) %>% 
+  conf_mat(truth = Actual, estimate = LOG_F_Pred) %>% 
   autoplot(type = "heatmap") +
-  labs(title = "Random Forrest")
-# - Metrics
-rf_FINAL_Metrics <- 
-  tibble(Model = "Random_Forest",
-         Accuracy = accuracy(rf_Results, truth = factor(nfl_test$drafted), estimate = RF_Pred) %>% pull(.estimate) %>% round(3),
-         Detection_Rate = detection_prevalence(rf_Results, truth = factor(nfl_test$drafted), estimate = RF_Pred, event_level = "second") %>% pull(.estimate) %>% round(3),
-         Sensitivity = sens(rf_Results, truth = factor(nfl_test$drafted), estimate = RF_Pred, event_level = "second") %>% pull(.estimate) %>% round(3),
-         Specificity = spec(rf_Results, truth = factor(nfl_test$drafted), estimate = RF_Pred, event_level = "second") %>% pull(.estimate) %>% round(3),
-         Precision = precision(rf_Results, truth = factor(nfl_test$drafted), estimate = RF_Pred, event_level = "second") %>% pull(.estimate) %>% round(3),
-         Recall = recall(rf_Results, truth = factor(nfl_test$drafted), estimate = RF_Pred, event_level = "second") %>% pull(.estimate) %>% round(3),
-         F1 = f_meas(rf_Results, truth = factor(nfl_test$drafted), estimate = RF_Pred, event_level = "second") %>% pull(.estimate) %>% round(3),
-         PPV = ppv(rf_Results, truth = factor(nfl_test$drafted), estimate = RF_Pred, event_level = "second") %>% pull(.estimate) %>% round(3),
-         NPV = npv(rf_Results, truth = factor(nfl_test$drafted), estimate = RF_Pred, event_level = "second") %>% pull(.estimate) %>% round(3),
-         AUC = roc_auc(rf_Results, factor(nfl_test$drafted), RF_Prob, event_level = "second") %>% pull(.estimate) %>% round(3))
+  labs(title = "F Score") +
+  theme_bw() +
+  theme(plot.title = element_text(hjust = 0.4, color = "darkolivegreen", face = "bold"),
+        axis.title.y = element_blank(),
+        axis.title.x = element_text(face = "bold", color = "cyan4"), 
+        legend.position = "none")
 
-
-# Summary
-log_FINAL_Metrics %>% 
-  bind_rows(rf_FINAL_Metrics)
+# - Visual
+ggarrange(log_CM_Acc, log_CM_F, nrow = 1)
 
 # ROC Curve
-# - Logistic Regression
-log_ROC <- log_Results %>%
+# - Accuracy
+log_ROC_Acc <- log_Results %>%
+  mutate(Actual = nfl_test$drafted) %>% 
+  roc_curve(Actual, LOG_Acc_Prob) %>% 
+  mutate(Model = "Accuracy")
+# - F Score
+log_ROC_F <- log_Results %>%
+  mutate(Actual = nfl_test$drafted) %>% 
+  roc_curve(Actual, LOG_F_Prob) %>% 
+  mutate(Model = "F Score")
+
+# - Visual
+log_ROC_Acc %>% 
+  bind_rows(log_ROC_F) %>% 
+  mutate(specificity = 1 - specificity) %>% 
+  ggplot(aes(specificity,sensitivity, color = Model)) +
+  geom_line() + geom_abline(slope = 1, linetype = 2, alpha = 0.2) +
+  labs(
+    title = "Logistic Regression",
+    x = "1 - specificity"
+  ) + 
+  theme_bw() + 
+  theme(plot.title = element_text(hjust = 0.4, face = "bold", size = 15),
+        axis.title.y = element_text(face = "bold", color = "tomato"),
+        axis.title.x = element_text(face = "bold", color = "tomato"), 
+        legend.position = "bottom")
+
+
+# Metrics
+log_FINAL_Metrics <-
+# - Accuracy
+  tibble(Model = "Logistic_Regression_Acc",
+         Accuracy = accuracy(log_Results, truth = nfl_test$drafted, estimate = LOG_Acc_Pred) %>% pull(.estimate) %>% round(3),
+         Detection_Rate = detection_prevalence(log_Results, truth = nfl_test$drafted, estimate = LOG_Acc_Pred) %>% pull(.estimate) %>% round(3),
+         Sensitivity = sens(log_Results, truth = nfl_test$drafted, estimate = LOG_Acc_Pred) %>% pull(.estimate) %>% round(3),
+         Specificity = spec(log_Results, truth = nfl_test$drafted, estimate = LOG_Acc_Pred) %>% pull(.estimate) %>% round(3),
+         Precision = precision(log_Results, truth = nfl_test$drafted, estimate = LOG_Acc_Pred) %>% pull(.estimate) %>% round(3),
+         Recall = recall(log_Results, truth = nfl_test$drafted, estimate = LOG_Acc_Pred) %>% pull(.estimate) %>% round(3),
+         F1 = f_meas(log_Results, truth = nfl_test$drafted, estimate = LOG_Acc_Pred) %>% pull(.estimate) %>% round(3),
+         PPV = ppv(log_Results, truth = nfl_test$drafted, estimate = LOG_Acc_Pred) %>% pull(.estimate) %>% round(3),
+         NPV = npv(log_Results, truth = nfl_test$drafted, estimate = LOG_Acc_Pred) %>% pull(.estimate) %>% round(3),
+         AUC = roc_auc(log_Results, nfl_test$drafted, LOG_Acc_Prob) %>% pull(.estimate) %>% round(3))
+
+# - F Score
+log_FINAL_Metrics <- log_FINAL_Metrics %>% 
+  bind_rows(
+    tibble(
+      Model = "Logistic_Regression_F",
+      Accuracy = accuracy(log_Results, truth = nfl_test$drafted, estimate = LOG_F_Pred) %>% pull(.estimate) %>% round(3),
+      Detection_Rate = detection_prevalence(log_Results, truth = nfl_test$drafted, estimate = LOG_F_Pred) %>% pull(.estimate) %>% round(3),
+      Sensitivity = sens(log_Results, truth = nfl_test$drafted, estimate = LOG_F_Pred) %>% pull(.estimate) %>% round(3),
+      Specificity = spec(log_Results, truth = nfl_test$drafted, estimate = LOG_F_Pred) %>% pull(.estimate) %>% round(3),
+      Precision = precision(log_Results, truth = nfl_test$drafted, estimate = LOG_F_Pred) %>% pull(.estimate) %>% round(3),
+      Recall = recall(log_Results, truth = nfl_test$drafted, estimate = LOG_F_Pred) %>% pull(.estimate) %>% round(3),
+      F1 = f_meas(log_Results, truth = nfl_test$drafted, estimate = LOG_F_Pred) %>% pull(.estimate) %>% round(3),
+      PPV = ppv(log_Results, truth = nfl_test$drafted, estimate = LOG_F_Pred) %>% pull(.estimate) %>% round(3),
+      NPV = npv(log_Results, truth = nfl_test$drafted, estimate = LOG_F_Pred) %>% pull(.estimate) %>% round(3),
+      AUC = roc_auc(log_Results, nfl_test$drafted, LOG_F_Prob) %>% pull(.estimate) %>% round(3))
+  )
+
+
+# Modeling: Baseline Diagnostics - Random Forrest ----
+
+# Predictions
+rf_Results <- 
+  tibble(RF_Acc_Pred = predict(rf_FINAL_Acc, new_data = nfl_test) %>% pull(),
+         RF_Acc_Prob = predict(rf_FINAL_Acc, new_data = nfl_test, type = "prob") %>% pull(),
+         RF_Sens_Pred = predict(rf_FINAL_Sens, new_data = nfl_test) %>% pull(),
+         RF_Sens_Prob = predict(rf_FINAL_Sens, new_data = nfl_test, type = "prob") %>% pull(),
+         RF_Prec_Pred = predict(rf_FINAL_Prec, new_data = nfl_test) %>% pull(),
+         RF_Prec_Prob = predict(rf_FINAL_Prec, new_data = nfl_test, type = "prob") %>% pull(),
+         RF_F_Pred = predict(rf_FINAL_F, new_data = nfl_test) %>% pull(),
+         RF_F_Prob = predict(rf_FINAL_F, new_data = nfl_test, type = "prob") %>% pull())
+
+# Conf Matrix
+# - Accuracy
+rf_CM_Acc <- rf_Results %>% 
   mutate(Actual = factor(nfl_test$drafted)) %>% 
-  roc_curve(Actual, LOG_Prob, event_level = "second") %>% 
-  mutate(Model = "Logisitic Regression")
-# - Random Forest
-rf_ROC <- rf_Results %>%
+  conf_mat(truth = Actual, estimate = RF_Acc_Pred) %>% 
+  autoplot(type = "heatmap") +
+  labs(title = "Accuracy") +
+  theme_bw() +
+  theme(plot.title = element_text(hjust = 0.4, color = "darkolivegreen", face = "bold"),
+        axis.title.y = element_text(color = "tomato"),
+        axis.title.x = element_text(face = "bold", color = "cyan4"), 
+        legend.position = "none")
+# - Sensitivity
+rf_CM_Sens <- rf_Results %>% 
   mutate(Actual = factor(nfl_test$drafted)) %>% 
-  roc_curve(Actual, RF_Prob, event_level = "second") %>% 
-  mutate(Model = "Random Forrest")
-# - Plot
-log_ROC %>% 
-  bind_rows(rf_ROC) %>% 
+  conf_mat(truth = Actual, estimate = RF_Sens_Pred) %>% 
+  autoplot(type = "heatmap") +
+  labs(title = "Sensitivity") +
+  theme_bw() +
+  theme(plot.title = element_text(hjust = 0.4, color = "darkolivegreen", face = "bold"),
+        axis.title.y = element_blank(),
+        axis.title.x = element_text(face = "bold", color = "cyan4"), 
+        legend.position = "none")
+# - Precision
+rf_CM_Prec <- rf_Results %>% 
+  mutate(Actual = factor(nfl_test$drafted)) %>% 
+  conf_mat(truth = Actual, estimate = RF_Prec_Pred) %>% 
+  autoplot(type = "heatmap") +
+  labs(title = "Precision") +
+  theme_bw() +
+  theme(plot.title = element_text(hjust = 0.4, color = "darkolivegreen", face = "bold"),
+        axis.title.y = element_blank(),
+        axis.title.x = element_text(face = "bold", color = "cyan4"), 
+        legend.position = "none")
+# - F Score
+rf_CM_F <- rf_Results %>% 
+  mutate(Actual = factor(nfl_test$drafted)) %>% 
+  conf_mat(truth = Actual, estimate = RF_F_Pred) %>% 
+  autoplot(type = "heatmap") +
+  labs(title = "F Score") +
+  theme_bw() +
+  theme(plot.title = element_text(hjust = 0.4, color = "darkolivegreen", face = "bold"),
+        axis.title.y = element_blank(),
+        axis.title.x = element_text(face = "bold", color = "cyan4"), 
+        legend.position = "none")
+
+# - Visual
+ggarrange(rf_CM_Acc, rf_CM_Sens, rf_CM_Prec, rf_CM_F, nrow = 1)
+
+# ROC Curve
+# - Accuracy
+rf_ROC_Acc <- rf_Results %>%
+  mutate(Actual = factor(nfl_test$drafted)) %>% 
+  roc_curve(Actual, RF_Acc_Prob, event_level = "second") %>% 
+  mutate(Model = "Accuracy")
+# - Sensitivity
+rf_ROC_Sens <- rf_Results %>%
+  mutate(Actual = factor(nfl_test$drafted)) %>% 
+  roc_curve(Actual, RF_Sens_Prob, event_level = "second") %>% 
+  mutate(Model = "Sensitivity")
+# - Precision
+rf_ROC_Prec <- rf_Results %>%
+  mutate(Actual = factor(nfl_test$drafted)) %>% 
+  roc_curve(Actual, RF_Prec_Prob, event_level = "second") %>% 
+  mutate(Model = "Precision")
+# - Sensitivity
+rf_ROC_F <- rf_Results %>%
+  mutate(Actual = factor(nfl_test$drafted)) %>% 
+  roc_curve(Actual, RF_F_Prob, event_level = "second") %>% 
+  mutate(Model = "F Score")
+
+# - Visual
+rf_ROC_Acc %>% 
+  bind_rows(rf_ROC_Sens, rf_ROC_Prec, rf_ROC_F) %>% 
   mutate(specificity = 1 - specificity) %>% 
   ggplot(aes(specificity, sensitivity, color = Model)) +
   geom_line() + geom_abline(slope = 1, linetype = 2, alpha = 0.2) +
   labs(
+    title = "Random Forrest",
     x = "1 - specificity"
   ) + 
   theme_bw() + 
-  theme(legend.position = "bottom")
+  theme(plot.title = element_text(hjust = 0.4, face = "bold", size = 15),
+        axis.title.y = element_text(face = "bold", color = "tomato"),
+        axis.title.x = element_text(face = "bold", color = "tomato"), 
+        legend.position = "bottom")
 
 
+# Metrics
+rf_FINAL_Metrics <-
+  # - Accuracy
+  tibble(Model = "Random_Forrest_Acc",
+         Accuracy = accuracy(rf_Results, truth = factor(nfl_test$drafted), estimate = RF_Acc_Pred) %>% pull(.estimate) %>% round(3),
+         Detection_Rate = detection_prevalence(rf_Results, truth = factor(nfl_test$drafted), estimate = RF_Acc_Pred, event_level = "second") %>% pull(.estimate) %>% round(3),
+         Sensitivity = sens(rf_Results, truth = factor(nfl_test$drafted), estimate = RF_Acc_Pred, event_level = "second") %>% pull(.estimate) %>% round(3),
+         Specificity = spec(rf_Results, truth = factor(nfl_test$drafted), estimate = RF_Acc_Pred, event_level = "second") %>% pull(.estimate) %>% round(3),
+         Precision = precision(rf_Results, truth = factor(nfl_test$drafted), estimate = RF_Acc_Pred, event_level = "second") %>% pull(.estimate) %>% round(3),
+         Recall = recall(rf_Results, truth = factor(nfl_test$drafted), estimate = RF_Acc_Pred, event_level = "second") %>% pull(.estimate) %>% round(3),
+         F1 = f_meas(rf_Results, truth = factor(nfl_test$drafted), estimate = RF_Acc_Pred, event_level = "second") %>% pull(.estimate) %>% round(3),
+         PPV = ppv(rf_Results, truth = factor(nfl_test$drafted), estimate = RF_Acc_Pred, event_level = "second") %>% pull(.estimate) %>% round(3),
+         NPV = npv(rf_Results, truth = factor(nfl_test$drafted), estimate = RF_Acc_Pred, event_level = "second") %>% pull(.estimate) %>% round(3),
+         AUC = roc_auc(rf_Results, factor(nfl_test$drafted), RF_Acc_Prob, event_level = "second") %>% pull(.estimate) %>% round(3))
+# - Sensitvity
+rf_FINAL_Metrics <- rf_FINAL_Metrics %>% 
+  bind_rows(
+    tibble(
+      Model = "Random_Forrest_Sens",
+      Accuracy = accuracy(rf_Results, truth = factor(nfl_test$drafted), estimate = RF_Sens_Pred) %>% pull(.estimate) %>% round(3),
+      Detection_Rate = detection_prevalence(rf_Results, truth = factor(nfl_test$drafted), estimate = RF_Sens_Pred, event_level = "second") %>% pull(.estimate) %>% round(3),
+      Sensitivity = sens(rf_Results, truth = factor(nfl_test$drafted), estimate = RF_Sens_Pred, event_level = "second") %>% pull(.estimate) %>% round(3),
+      Specificity = spec(rf_Results, truth = factor(nfl_test$drafted), estimate = RF_Sens_Pred, event_level = "second") %>% pull(.estimate) %>% round(3),
+      Precision = precision(rf_Results, truth = factor(nfl_test$drafted), estimate = RF_Sens_Pred, event_level = "second") %>% pull(.estimate) %>% round(3),
+      Recall = recall(rf_Results, truth = factor(nfl_test$drafted), estimate = RF_Sens_Pred, event_level = "second") %>% pull(.estimate) %>% round(3),
+      F1 = f_meas(rf_Results, truth = factor(nfl_test$drafted), estimate = RF_Sens_Pred, event_level = "second") %>% pull(.estimate) %>% round(3),
+      PPV = ppv(rf_Results, truth = factor(nfl_test$drafted), estimate = RF_Sens_Pred, event_level = "second") %>% pull(.estimate) %>% round(3),
+      NPV = npv(rf_Results, truth = factor(nfl_test$drafted), estimate = RF_Sens_Pred, event_level = "second") %>% pull(.estimate) %>% round(3),
+      AUC = roc_auc(rf_Results, factor(nfl_test$drafted), RF_Sens_Prob, event_level = "second") %>% pull(.estimate) %>% round(3))
+  )
+# - Precision
+rf_FINAL_Metrics <- rf_FINAL_Metrics %>% 
+  bind_rows(
+    tibble(
+      Model = "Random_Forrest_Prec",
+      Accuracy = accuracy(rf_Results, truth = factor(nfl_test$drafted), estimate = RF_Prec_Pred) %>% pull(.estimate) %>% round(3),
+      Detection_Rate = detection_prevalence(rf_Results, truth = factor(nfl_test$drafted), estimate = RF_Prec_Pred, event_level = "second") %>% pull(.estimate) %>% round(3),
+      Sensitivity = sens(rf_Results, truth = factor(nfl_test$drafted), estimate = RF_Prec_Pred, event_level = "second") %>% pull(.estimate) %>% round(3),
+      Specificity = spec(rf_Results, truth = factor(nfl_test$drafted), estimate = RF_Prec_Pred, event_level = "second") %>% pull(.estimate) %>% round(3),
+      Precision = precision(rf_Results, truth = factor(nfl_test$drafted), estimate = RF_Prec_Pred, event_level = "second") %>% pull(.estimate) %>% round(3),
+      Recall = recall(rf_Results, truth = factor(nfl_test$drafted), estimate = RF_Prec_Pred, event_level = "second") %>% pull(.estimate) %>% round(3),
+      F1 = f_meas(rf_Results, truth = factor(nfl_test$drafted), estimate = RF_Prec_Pred, event_level = "second") %>% pull(.estimate) %>% round(3),
+      PPV = ppv(rf_Results, truth = factor(nfl_test$drafted), estimate = RF_Prec_Pred, event_level = "second") %>% pull(.estimate) %>% round(3),
+      NPV = npv(rf_Results, truth = factor(nfl_test$drafted), estimate = RF_Prec_Pred, event_level = "second") %>% pull(.estimate) %>% round(3),
+      AUC = roc_auc(rf_Results, factor(nfl_test$drafted), RF_Prec_Prob, event_level = "second") %>% pull(.estimate) %>% round(3))
+  )
+# - F Score
+rf_FINAL_Metrics <- rf_FINAL_Metrics %>% 
+  bind_rows(
+    tibble(
+      Model = "Random_Forrest_F",
+      Accuracy = accuracy(rf_Results, truth = factor(nfl_test$drafted), estimate = RF_F_Pred) %>% pull(.estimate) %>% round(3),
+      Detection_Rate = detection_prevalence(rf_Results, truth = factor(nfl_test$drafted), estimate = RF_F_Pred, event_level = "second") %>% pull(.estimate) %>% round(3),
+      Sensitivity = sens(rf_Results, truth = factor(nfl_test$drafted), estimate = RF_F_Pred, event_level = "second") %>% pull(.estimate) %>% round(3),
+      Specificity = spec(rf_Results, truth = factor(nfl_test$drafted), estimate = RF_F_Pred, event_level = "second") %>% pull(.estimate) %>% round(3),
+      Precision = precision(rf_Results, truth = factor(nfl_test$drafted), estimate = RF_F_Pred, event_level = "second") %>% pull(.estimate) %>% round(3),
+      Recall = recall(rf_Results, truth = factor(nfl_test$drafted), estimate = RF_F_Pred, event_level = "second") %>% pull(.estimate) %>% round(3),
+      F1 = f_meas(rf_Results, truth = factor(nfl_test$drafted), estimate = RF_F_Pred, event_level = "second") %>% pull(.estimate) %>% round(3),
+      PPV = ppv(rf_Results, truth = factor(nfl_test$drafted), estimate = RF_F_Pred, event_level = "second") %>% pull(.estimate) %>% round(3),
+      NPV = npv(rf_Results, truth = factor(nfl_test$drafted), estimate = RF_F_Pred, event_level = "second") %>% pull(.estimate) %>% round(3),
+      AUC = roc_auc(rf_Results, factor(nfl_test$drafted), RF_F_Prob, event_level = "second") %>% pull(.estimate) %>% round(3))
+  )
+
+
+# Modeling: Refit: Probabiliy Threshold - Logistic Regression ----
+
+# Accuracy
+log_pred_Acc <- log_FINAL_Acc %>% 
+  predict(new_data = nfl_test, type = "prob") %>% pull()
+log_pred_F <- log_FINAL_F %>% 
+  predict(new_data = nfl_test, type = "prob")
+
+nfl_test_pred <- bind_cols(log_pred_Acc, nfl_test)
+
+log_pred_0.5 <- nfl_test_pred %>% 
+  mutate(.pred = make_two_class_pred(.pred_Yes, levels(drafted), threshold = 0.5)) %>% 
+  select(drafted, contains(".pred"))
+
+log_pred_0.5 <- mutate(log_pred_0.5, .pred = as.factor(.pred))
+
+log_pred_0.5 %>%  count(.truth = drafted, .pred)
+log_pred_0.5 %>% sens(drafted, .pred)
+log_pred_0.5 %>% spec(drafted, .pred)
+log_pred_0.5 %>% j_index(drafted, .pred)
+
+# - Accuracy
+log_thres_Acc <- log_Results %>% 
+  threshold_perf(Drafted, LOG_Acc_Prob, threshold = seq(0.2, 1, by = 0.05))
+
+log_thres_Acc <- log_thres_Acc %>% 
+  filter(.metric != "distance") %>% 
+  mutate(group = case_when(
+    .metric == "sens" | .metric == "spec" ~ "1",
+    TRUE ~ "2"
+  )) 
+
+max_sens <- log_thres_Acc %>% 
+  filter(.metric == "sens") %>% 
+  filter(.estimate == max(.estimate)) %>% 
+  pull(.threshold)
+max_spec <- log_thres_Acc %>% 
+  filter(.metric == "spec") %>% 
+  filter(.estimate == max(.estimate)) %>% 
+  pull(.threshold)
+max_j <- log_thres_Acc %>% 
+  filter(.metric == "j_index") %>% 
+  filter(.estimate == max(.estimate)) %>% 
+  pull(.threshold)
+
+log_thres_Acc %>% 
+  ggplot(aes(.threshold, .estimate, color = .metric, alpha = group)) +
+  geom_line() +
+  theme_bw() +
+  scale_alpha_manual(values = c(.2, 1), guide = "none") +
+  geom_vline(xintercept = max_j, alpha = 0.6, color = "green") +
+  labs(title = "Accuracy")
+  
+log_thres %>% filter(.threshold == max_j)
+
+# - F Score
+log_thres_F <- log_Results %>% 
+  threshold_perf(Drafted, LOG_F_Prob, threshold = seq(0.2, 1, by = 0.05))
+
+log_thres_F <- log_thres_F %>% 
+  filter(.metric != "distance") %>% 
+  mutate(group = case_when(
+    .metric == "sens" | .metric == "spec" ~ "1",
+    TRUE ~ "2"
+  )) 
+
+max_sens_F <- log_thres_F %>% 
+  filter(.metric == "sens") %>% 
+  filter(.estimate == max(.estimate)) %>% 
+  pull(.threshold)
+max_spec_F <- log_thres_F %>% 
+  filter(.metric == "spec") %>% 
+  filter(.estimate == max(.estimate)) %>% 
+  pull(.threshold)
+max_j_F <- log_thres_F %>% 
+  filter(.metric == "j_index") %>% 
+  filter(.estimate == max(.estimate)) %>% 
+  pull(.threshold)
+
+log_thres_F %>% 
+  ggplot(aes(.threshold, .estimate, color = .metric, alpha = group)) +
+  geom_line() +
+  theme_bw() +
+  scale_alpha_manual(values = c(.4, 1), guide = "none") +
+  geom_vline(xintercept = max_j, alpha = 0.6, color = "green") +
+  labs(title = "F Score")
+
+log_thres %>% filter(.threshold == max_j)
+
+# NEW
+nfl_test_pred %>% 
+  mutate(.pred = make_two_class_pred(.pred_Yes, levels(drafted), threshold = 0.5)) %>% 
+  select(drafted, contains(".pred"))
+
+log_Results_Thres <- log_Results %>% 
+  mutate(LOG_Acc_Pred_65 = make_two_class_pred(LOG_Acc_Prob, levels(Drafted), threshold = 0.65) %>% factor,
+         LOG_F_Pred_65 = make_two_class_pred(LOG_F_Prob, levels(Drafted), threshold = 0.65) %>% factor)
+
+# Confusion Matrix
+# - Accuracy
+log_CM_Acc_65 <- log_Results_Thres %>% 
+  conf_mat(truth = Drafted, estimate = LOG_Acc_Pred_65) %>% 
+  autoplot(type = "heatmap") +
+  labs(title = "Accuracy") +
+  theme_bw() +
+  theme(plot.title = element_text(hjust = 0.4, color = "darkolivegreen", face = "bold"),
+        axis.title.y = element_text(color = "tomato"),
+        axis.title.x = element_text(face = "bold", color = "cyan4"), 
+        legend.position = "none")
+# - F Score
+log_CM_F_65 <- log_Results_Thres %>% 
+  conf_mat(truth = Drafted, estimate = LOG_F_Pred_65) %>% 
+  autoplot(type = "heatmap") +
+  labs(title = "F Score") +
+  theme_bw() +
+  theme(plot.title = element_text(hjust = 0.4, color = "darkolivegreen", face = "bold"),
+        axis.title.y = element_blank(),
+        axis.title.x = element_text(face = "bold", color = "cyan4"), 
+        legend.position = "none")
+
+# - Visual
+ggarrange(log_CM_Acc_65, log_CM_F_65, nrow = 1)
+
+# Metrics
+log_Metrics_Thres <-
+  # - Accuracy
+  tibble(Model = "Logistic_Regression_Acc_65",
+         Accuracy = accuracy(log_Results_Thres, truth = Drafted, estimate = LOG_Acc_Pred_65) %>% pull(.estimate) %>% round(3),
+         Detection_Rate = detection_prevalence(log_Results_Thres, truth = Drafted, estimate = LOG_Acc_Pred_65) %>% pull(.estimate) %>% round(3),
+         Sensitivity = sens(log_Results_Thres, truth = Drafted, estimate = LOG_Acc_Pred_65) %>% pull(.estimate) %>% round(3),
+         Specificity = spec(log_Results_Thres, truth = Drafted, estimate = LOG_Acc_Pred_65) %>% pull(.estimate) %>% round(3),
+         Precision = precision(log_Results_Thres, truth = Drafted, estimate = LOG_Acc_Pred_65) %>% pull(.estimate) %>% round(3),
+         Recall = recall(log_Results_Thres, truth = Drafted, estimate = LOG_Acc_Pred_65) %>% pull(.estimate) %>% round(3),
+         F1 = f_meas(log_Results_Thres, truth = Drafted, estimate = LOG_Acc_Pred_65) %>% pull(.estimate) %>% round(3),
+         PPV = ppv(log_Results_Thres, truth = Drafted, estimate = LOG_Acc_Pred_65) %>% pull(.estimate) %>% round(3),
+         NPV = npv(log_Results_Thres, truth = Drafted, estimate = LOG_Acc_Pred_65) %>% pull(.estimate) %>% round(3),
+         AUC = roc_auc(log_Results_Thres, Drafted, LOG_Acc_Prob) %>% pull(.estimate) %>% round(3))
+
+# - F Score
+log_Metrics_Thres <- log_Metrics_Thres %>% 
+  bind_rows(
+    tibble(
+      Model = "Logistic_Regression_F_65",
+      Accuracy = accuracy(log_Results_Thres, truth = Drafted, estimate = LOG_F_Pred_65) %>% pull(.estimate) %>% round(3),
+      Detection_Rate = detection_prevalence(log_Results_Thres, truth = Drafted, estimate = LOG_F_Pred_65) %>% pull(.estimate) %>% round(3),
+      Sensitivity = sens(log_Results_Thres, truth = Drafted, estimate = LOG_F_Pred_65) %>% pull(.estimate) %>% round(3),
+      Specificity = spec(log_Results_Thres, truth = Drafted, estimate = LOG_F_Pred_65) %>% pull(.estimate) %>% round(3),
+      Precision = precision(log_Results_Thres, truth = Drafted, estimate = LOG_F_Pred_65) %>% pull(.estimate) %>% round(3),
+      Recall = recall(log_Results_Thres, truth = Drafted, estimate = LOG_F_Pred_65) %>% pull(.estimate) %>% round(3),
+      F1 = f_meas(log_Results_Thres, truth = Drafted, estimate = LOG_F_Pred_65) %>% pull(.estimate) %>% round(3),
+      PPV = ppv(log_Results_Thres, truth = Drafted, estimate = LOG_F_Pred_65) %>% pull(.estimate) %>% round(3),
+      NPV = npv(log_Results_Thres, truth = Drafted, estimate = LOG_F_Pred_65) %>% pull(.estimate) %>% round(3),
+      AUC = roc_auc(log_Results_Thres, Drafted, LOG_F_Prob) %>% pull(.estimate) %>% round(3))
+  )
+
+log_FINAL_Metrics %>% 
+  bind_rows(log_Metrics_Thres)
