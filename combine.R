@@ -1425,6 +1425,7 @@ doParallel::registerDoParallel(cl_3)
 
 # LATIN Fit
 # - normal
+set.seed(101)
 rf_tune_latin <-
   rf_wflow %>% 
   tune_grid(
@@ -1434,6 +1435,7 @@ rf_tune_latin <-
     control = nfl_ctrl
   )
 # - pca 2
+set.seed(101)
 rf_tune_latin_pca_2 <-
   rf_wflow %>% 
   update_recipe(nfl_rf_recipe_pca_2) %>% 
@@ -1444,6 +1446,7 @@ rf_tune_latin_pca_2 <-
     control = nfl_ctrl
   )
 # - pca 4
+set.seed(101)
 rf_tune_latin_pca_4 <-
   rf_wflow %>% 
   update_recipe(nfl_rf_recipe_pca_4) %>% 
@@ -1588,6 +1591,8 @@ rf_tune_latin_pca_4 %>% show_best("f_meas")
 
 
 # CUSTOM
+# - normal
+set.seed(101)
 rf_tune_custom <-
   rf_wflow %>% 
   tune_grid(
@@ -1596,17 +1601,41 @@ rf_tune_custom <-
     metrics = nfl_metrics,
     control = nfl_ctrl
   )
+# - PC 2
+set.seed(101)
+rf_tune_custom_pca_2 <- 
+  rf_wflow %>% 
+  update_recipe(nfl_rf_recipe_pca_2) %>%
+  tune_grid(
+    resamples = nfl_10fold,
+    grid = rf_grid_custom,
+    metrics = nfl_metrics,
+    control = nfl_ctrl
+  )
+# - PC 4
+set.seed(101)
+rf_tune_custom_pca_4 <- 
+  rf_wflow %>% 
+  update_recipe(nfl_rf_recipe_pca_4) %>%
+  tune_grid(
+    resamples = nfl_10fold,
+    grid = rf_grid_custom,
+    metrics = nfl_metrics,
+    control = nfl_ctrl
+  )
+
 # - plot: Accuracy
+# - normal
 gg_RF_tune_custom_Acc <- rf_tune_custom %>% 
   collect_metrics() %>% 
   filter(.metric == "accuracy") %>%
   mutate(mtry = factor(mtry)) %>% 
   ggplot(aes(min_n, mean)) +
   geom_line(aes(color = mtry)) + geom_point() +
-  labs(title = "Evaluation: Custom Grid",
-       subtitle = "Random Forrest",
+  labs(title = "Custom Grid",
+       subtitle = "No Preporcess",
        y = "Accuracy") +
-  scale_y_continuous(labels = scales::percent_format(accuracy = 0.1)) +
+  ylim(c(0.665, 0.71)) +
   theme_bw() +
   theme(plot.title = element_text(hjust = 0.4, face = "bold", size = 15),
         plot.subtitle = element_text(hjust = 0.4, color = "darkolivegreen"),
@@ -1615,20 +1644,64 @@ gg_RF_tune_custom_Acc <- rf_tune_custom %>%
         legend.title = element_text(face = "bold", color = "cyan4"),
         legend.text = element_text(size = 7),
         legend.position = "bottom")
+# - PC 2
+gg_RF_tune_custom_PC_2_Acc <- rf_tune_custom_pca_2 %>% 
+  collect_metrics() %>% 
+  filter(.metric == "accuracy") %>%
+  mutate(mtry = factor(mtry)) %>% 
+  ggplot(aes(min_n, mean)) +
+  geom_line(aes(color = mtry)) + geom_point() +
+  labs(title = "Custom Grid",
+       subtitle = "Principal Components 2",
+       y = "Accuracy") +
+  ylim(c(0.665, 0.71)) +
+  theme_bw() +
+  theme(plot.title = element_text(hjust = 0.4, face = "bold", size = 15),
+        plot.subtitle = element_text(hjust = 0.4, color = "darkolivegreen"),
+        axis.title.y = element_text(color = "tomato"),
+        axis.title.x = element_text(face = "bold", color = "cyan4"), 
+        legend.title = element_text(face = "bold", color = "cyan4"),
+        legend.text = element_text(size = 7),
+        legend.position = "bottom")
+# - PC 4
+gg_RF_tune_custom_PC_4_Acc <- rf_tune_custom_pca_4 %>% 
+  collect_metrics() %>% 
+  filter(.metric == "accuracy") %>%
+  mutate(mtry = factor(mtry)) %>% 
+  ggplot(aes(min_n, mean)) +
+  geom_line(aes(color = mtry)) + geom_point() +
+  labs(title = "Custom Grid",
+       subtitle = "Principal Components 4",
+       y = "Accuracy") +
+  ylim(c(0.665, 0.71)) +
+  theme_bw() +
+  theme(plot.title = element_text(hjust = 0.4, face = "bold", size = 15),
+        plot.subtitle = element_text(hjust = 0.4, color = "darkolivegreen"),
+        axis.title.y = element_text(color = "tomato"),
+        axis.title.x = element_text(face = "bold", color = "cyan4"), 
+        legend.title = element_text(face = "bold", color = "cyan4"),
+        legend.text = element_text(size = 7),
+        legend.position = "bottom")
+# - Visuals
+ggarrange(gg_RF_tune_custom_Acc, gg_RF_tune_custom_PC_2_Acc, gg_RF_tune_custom_PC_4_Acc, nrow = 1)
+
 # - best: Accuracy
 rf_tune_custom %>% show_best("accuracy")
-rf_best_Acc_custom <- rf_tune_custom %>% select_best(metric = "accuracy")
+rf_tune_custom_pca_2 %>% show_best("accuracy")
+rf_tune_custom_pca_4 %>% show_best("accuracy")
+
 # - plot: F Score
+# - normal
 gg_RF_tune_custom_F <- rf_tune_custom %>% 
   collect_metrics() %>% 
   filter(.metric == "f_meas") %>%
   mutate(mtry = factor(mtry)) %>% 
   ggplot(aes(min_n, mean)) +
   geom_line(aes(color = mtry)) + geom_point() +
-  labs(title = "Evaluation: Custom Grid",
-       subtitle = "Random Forrest",
+  labs(title = "Custom Grid",
+       subtitle = "No Preprocess",
        y = "F Score") +
-  scale_y_continuous(labels = scales::percent_format(accuracy = 0.1)) +
+  ylim(c(0.76,0.805)) + 
   theme_bw() +
   theme(plot.title = element_text(hjust = 0.4, face = "bold", size = 15),
         plot.subtitle = element_text(hjust = 0.4, color = "darkolivegreen"),
@@ -1637,16 +1710,50 @@ gg_RF_tune_custom_F <- rf_tune_custom %>%
         legend.title = element_text(face = "bold", color = "cyan4"),
         legend.text = element_text(size = 7),
         legend.position = "bottom")
+# - PC 2
+gg_RF_tune_custom_pca_2_F <- rf_tune_custom_pca_2 %>% 
+  collect_metrics() %>% 
+  filter(.metric == "f_meas") %>%
+  mutate(mtry = factor(mtry)) %>% 
+  ggplot(aes(min_n, mean)) +
+  geom_line(aes(color = mtry)) + geom_point() +
+  labs(title = "Custom Grid",
+       subtitle = "Principal Components 2",
+       y = "F Score") +
+  ylim(c(0.76,0.805)) + 
+  theme_bw() +
+  theme(plot.title = element_text(hjust = 0.4, face = "bold", size = 15),
+        plot.subtitle = element_text(hjust = 0.4, color = "darkolivegreen"),
+        axis.title.y = element_text(color = "tomato"),
+        axis.title.x = element_text(face = "bold", color = "cyan4"), 
+        legend.title = element_text(face = "bold", color = "cyan4"),
+        legend.text = element_text(size = 7),
+        legend.position = "bottom")
+# - PC 4
+gg_RF_tune_custom_pca_4_F <- rf_tune_custom_pca_4 %>% 
+  collect_metrics() %>% 
+  filter(.metric == "f_meas") %>%
+  mutate(mtry = factor(mtry)) %>% 
+  ggplot(aes(min_n, mean)) +
+  geom_line(aes(color = mtry)) + geom_point() +
+  labs(title = "Custom Grid",
+       subtitle = "Principal Components 4",
+       y = "F Score") +
+  ylim(c(0.76,0.805)) + 
+  theme_bw() +
+  theme(plot.title = element_text(hjust = 0.4, face = "bold", size = 15),
+        plot.subtitle = element_text(hjust = 0.4, color = "darkolivegreen"),
+        axis.title.y = element_text(color = "tomato"),
+        axis.title.x = element_text(face = "bold", color = "cyan4"), 
+        legend.title = element_text(face = "bold", color = "cyan4"),
+        legend.text = element_text(size = 7),
+        legend.position = "bottom")
+# - Visual
+ggarrange(gg_RF_tune_custom_F, gg_RF_tune_custom_pca_2_F, gg_RF_tune_custom_pca_4_F, nrow = 1)
 # - best: F Score
 rf_tune_custom %>% show_best("f_meas")
-rf_best_F_custom <- rf_tune_custom %>% select_best(metric = "f_meas")
-
-
-# Visuals
-# - Accuracy
-ggarrange(gg_RF_tune_random_Acc, gg_RF_tune_latin_Acc, gg_RF_tune_custom_Acc, nrow = 1)
-# - F Score
-ggarrange(gg_RF_tune_random_F, gg_RF_tune_latin_F, gg_RF_tune_custom_F, nrow = 1)
+rf_tune_custom_pca_2 %>% show_best("f_meas")
+rf_tune_custom_pca_4 %>% show_best("f_meas")
 
 
 # FINAL Fit

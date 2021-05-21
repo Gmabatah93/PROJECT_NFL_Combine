@@ -278,6 +278,18 @@ PC 4 | F Score | 1 | 32 | 79.9%
 
 #### Fit - Custom
 
+<img src="Images/tune_rf_custom_Acc.PNG" width="  600">
+<img src="Images/tune_rf_custom_F.PNG" width="  600">
+
+Preprocess | Metric | mtry | min_n | Stat
+--- | --- | --- | --- | ---
+None | Accuracy | 5 | 9 | 70.6%
+PC 2  | Accuracy | 1 | 7 | 69.0%
+PC 4 | Accuracy | 2 | 9 | 69.0%
+None | F Score | 1 | 9 | 80.2%
+PC 2  | F Score | 1 | 7 | 79.8%
+PC 4 | F Score | 1 | 7 | 79.7%
+
 ---
 
 # Diagnostic
