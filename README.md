@@ -166,35 +166,36 @@ drafted | chr | What NFL team drafted player / Round / Pick / Year
 
 ## Preprocess
 
-### Split
+**Split**
 - **Train**: 80% stratified by drafted feature
 - **Test**: 20% stratified by drafted feature
 - **Validation**: 10 fold cross-validation using the training set
 
-### Logistic Regression
+## Logistic Regression
 - **Bin**: Infrequent position into "Other" category   
 - **Normalize**: All numeric variables
 - **Dummy**: All categorical variables
 
 #### Model Data
-<img src="Images/Model_Log.PNG" width="  700">
-
-### Random Forrest
-_no preprocess_
-
-**Model Data**
-<img src="Images/Model_RF.PNG" width="  700">
+<img src="Images/Model_Log.PNG" width=" 700">
 
 #### PCA
 **Eigen**
-<img src="Images/Model_RF_PCA_Eig.PNG" width="  700">
+<img src="Images/Model_PCA_Eig.PNG" width=" 700">
 
 **Components**
-<img src="Images/Model_RF_PCA_components.PNG" width="  700">
+<img src="Images/Model_PCA_components.PNG" width=" 700">
 
 **Model Data**
-<img src="Images/Model_RF_PCA_2.PNG" width="  700">
-<img src="Images/Model_RF_PCA_4.PNG" width="  700">
+<img src="Images/Model_PCA_2.PNG" width=" 700">
+<img src="Images/Model_PCA_4.PNG" width=" 700">
+
+## Random Forrest
+_no preprocess_
+
+**Model Data**
+<img src="Images/Model_RF.PNG" width=" 700">
+
 ### Control
 - **Parallel Processing**
 
