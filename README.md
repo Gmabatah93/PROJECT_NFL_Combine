@@ -165,36 +165,52 @@ drafted | chr | What NFL team drafted player / Round / Pick / Year
 # Modeling
 
 ## Preprocess
+<img src="Images/NFL_Split.PNG" width=" 500">
 
 **Split**
+
 - **Train**: 80% stratified by drafted feature
 - **Test**: 20% stratified by drafted feature
 - **Validation**: 10 fold cross-validation using the training set
 
-## Logistic Regression
+## Preprocess - Logistic Regression
+
+#### NORMAL
 - **Bin**: Infrequent position into "Other" category   
 - **Normalize**: All numeric variables
 - **Dummy**: All categorical variables
 
-#### Model Data
-<img src="Images/Model_Log.PNG" width=" 700">
+**Model Data**
+<img src="Images/Model_Log_Normal.PNG" width=" 700">
 
 #### PCA
 **Eigen**
-<img src="Images/Model_PCA_Eig.PNG" width=" 700">
+<img src="Images/Model_Log_PCA_Eig.PNG" width=" 700">
 
 **Components**
-<img src="Images/Model_PCA_components.PNG" width=" 700">
+<img src="Images/Model_Log_PCA_Components.PNG" width=" 700">
 
 **Model Data**
-<img src="Images/Model_PCA_2.PNG" width=" 700">
-<img src="Images/Model_PCA_4.PNG" width=" 700">
+<img src="Images/Model_Log_PCA.PNG" width=" 700">
 
-## Random Forrest
-_no preprocess_
+### Simple
+**Model Data**  
+<img src="Images/Model_Log_Simple.PNG" width=" 700">
+
+## Preprocess - Random Forrest
+
+#### NORMAL
 
 **Model Data**
-<img src="Images/Model_RF.PNG" width=" 700">
+<img src="Images/Model_RF_Normal.PNG" width=" 700">
+
+#### PCA
+**Model Data**
+<img src="Images/Model_RF_PCA.PNG" width=" 700">
+
+#### Simple
+**Model Data**
+<img src="Images/Model_RF_Simple.PNG" width=" 700">
 
 ### Control
 - **Parallel Processing**
@@ -206,94 +222,99 @@ _no preprocess_
 
 ### Logistic Regression
 
-#### Grid
+**Grid**
+
 <img src="Images/tune_log_grid.PNG" width="  600">
+
+#### Latin Grid
 
 **Accuracy**
 
-<img src="Images/tune_log_fit_Acc.PNG" width="  600">
+<img src="Images/fit_Log_Latin_Acc.PNG" width="  600">
+
+**F Score**
+
+<img src="Images/fit_Log_Latin_F.PNG" width="  600">
 
 
-Grid | Metric | Penalty | Mixture | Stat
+Preprocess | Metric | Penalty | Mixture | Stat
 --- | --- | --- | --- | ---
-Random | Accuracy | -4.1e4 | 0.851 | 0.71
-Latin  | Accuracy | -1.4e8 | 0.516 | 0.71
-Custom | Accuracy | 0.006 | 1 | 0.7
+Normal | Accuracy | 0.00957 | 0.984 | 68.6%
+PCA  | Accuracy | 2.39e-10 | 0.794 | 69.1%
+Simple | Accuracy | 2.24e-5 | 0.152 | 70.2%
+Normal | F Score | 0.116 | 0.0558 | 79.7%
+PCA  | F Score | 0.116 | 0.0558 | 79.9%
+Simple | F Score | 0.0216 | 0.916 | 80%
 
-#### Sensitivity
+#### Custom Grid
 
-<img src="Images/tune_log_fit_Sens.PNG" width="  600">
+**Accuracy**
 
-**Best**
+<img src="Images/fit_Log_Custom_Acc.PNG" width="  600">
 
-Grid | Metric | Penalty | Mixture | Stat
+**F Score**
+
+<img src="Images/fit_Log_Custom_F.PNG" width="  600">
+
+Preprocess | Metric | Penalty | Mixture | Stat
 --- | --- | --- | --- | ---
-Random | Sensitivity | 0.136 | 0.955 | 1
-Latin  | Sensitivity | 0.712 | 0.854 | 1
-Custom | Sensitivity | 0.096 | 0.5 | 1
+Normal | Accuracy | 0.056 | 0 | 68.8%
+PCA  | Accuracy | 0.081 | 0 | 69.2%
+Simple | Accuracy | 0.006 | 1 | 68.8%
+Normal | F Score | 0.026 | 0.5 | 79.7%
+PCA  | F Score | 0.036 | 0.5 | 80%
+Simple | F Score | 0.031 | 0.5 | 80.1%
 
-#### Precision
-
-<img src="Images/tune_log_fit_Prec.PNG" width="  600">
-
-**Best**
-
-Grid | Metric | Penalty | Mixture | Stat
---- | --- | --- | --- | ---
-Random | Precision | -4.28e9 | 0.98 | 0.73
-Latin  | Precision | -6.54e7 | 0.572 | 0.73
-Custom | Precision | 0.001 | 1 | 0.73
-
-#### F Score
-
-<img src="Images/tune_log_fit_F.PNG" width="  600">
-
-**Best**
-
-Grid | Metric | Penalty | Mixture | Stat
---- | --- | --- | --- | ---
-Random | F Score | -3.92e4 | 0.961 | 0.8
-Latin  | F Score | .00957 | 0.984 | 0.8
-Custom | F Score | 0.016 | 1 | 0.8
 
 ### Random Forest
 
-#### Grid
+**Grid**
+
 <img src="Images/tune_rf_grid.PNG" width="  600">
 
-#### Fit - Latin
+#### Latin Grid
 
-<img src="Images/tune_rf_latin_Acc.PNG" width="  600">
-<img src="Images/tune_rf_latin_F.PNG" width="  600">
+**Accuracy**
+
+<img src="Images/fit_RF_Latin_Acc.PNG" width="  600">
+
+**F Score**
+
+<img src="Images/fit_RF_Latin_F.PNG" width="  600">
 
 **Best**
 
 Preprocess | Metric | mtry | min_n | Stat
 --- | --- | --- | --- | ---
-None | Accuracy | 3 | 28 | 70.7%
-PC 2  | Accuracy | 2 | 35 | 69.0%
-PC 4 | Accuracy | 1 | 32 | 68.9%
-None | F Score | 1 | 33 | 80.4%
-PC 2  | F Score | 1 | 25 | 79.7%
-PC 4 | F Score | 1 | 32 | 79.9%
+None | Accuracy | 6 | 22 | 72.2%
+PCA  | Accuracy | 7 | 39 | 70%
+Simple | Accuracy | 4 | 39 | 72.2%
+None | F Score | 6 | 22 | 80.4%
+PCA  | F Score | 1 | 32 | 79.7%
+Simple | F Score | 1 | 33 | 80.8%
 
-#### Fit - Custom
+#### Custom Grid
 
-<img src="Images/tune_rf_custom_Acc.PNG" width="  600">
-<img src="Images/tune_rf_custom_F.PNG" width="  600">
+**Accuracy**
+
+<img src="Images/fit_RF_Custom_Acc.PNG" width="  600">
+
+**F Score**
+
+<img src="Images/fit_RF_Custom_F.PNG" width="  600">
 
 Preprocess | Metric | mtry | min_n | Stat
 --- | --- | --- | --- | ---
-None | Accuracy | 5 | 9 | 70.6%
-PC 2  | Accuracy | 1 | 7 | 69.0%
-PC 4 | Accuracy | 2 | 9 | 69.0%
-None | F Score | 1 | 9 | 80.2%
-PC 2  | F Score | 1 | 7 | 79.8%
-PC 4 | F Score | 1 | 7 | 79.7%
+None | Accuracy | 5 | 9 | 72%
+PCA  | Accuracy | 1 | 3 | 68.7%
+Simple | Accuracy | 2 | 5 | 71.9%
+None | F Score | 4 | 1 | 80.3%
+PCA  | F Score | 1 | 3 | 79.2%
+Simple | F Score | 1 | 7 | 80.6%
 
 ---
 
-# Diagnostic
+# Validation Diagnostic
 
 ## Logistic Regression
 
@@ -306,10 +327,8 @@ PC 4 | F Score | 1 | 7 | 79.7%
 ### Metrics
 Optimization | AUC | Accuracy | Sensitivity | Specificity | Precision | F1 | PPV | NPV
 --- | --- | --- | --- | --- | --- | --- | --- | ---
-Accuracy | 0.698 | 0.714 | 0.865 | 0.427 | 0.741 | 0.798 | 0.741 | 0.625
-Sensitivity | 0.639 | 0.655 | 1 | 0 | 0.655 | 0.791 | 0.655 | NaN
-Precision | 0.698 | 0.714 | 0.865 | 0.427 | 0.741 | 0.798 | 0.741 | 0.625
-F Score | 0.698 | 0.696 | 0.912 | 0.288 | 0.708 | 0.797 | 0.708 | 0.633
+Accuracy | 0.676 | 0.687 | 0.904 | 0.277 | 0.703 | 0.791 | 0.703 | 0.603
+F Score | 0.658 | 0.683 | 0.963 | 0.151 | 0.682 | 0.799 | 0.682 | 0.686
 
 ## Random Forrest
 
@@ -322,17 +341,27 @@ F Score | 0.698 | 0.696 | 0.912 | 0.288 | 0.708 | 0.797 | 0.708 | 0.633
 ### Metrics
 Optimization | AUC | Accuracy | Sensitivity | Specificity | Precision | F1 | PPV | NPV
 --- | --- | --- | --- | --- | --- | --- | --- | ---
-Accuracy | 73.2% | 70.8% | 88.3% | 37.7% | 72.9% | 79.9% | 72.9% | 63%
-F Score | 72.6% | 69.1% | 94.4% | 21.1% | 69.4% | 80% | 69.4% | 72.6%
+Accuracy | 0.695 | 0.687 | 0.86 | 0.358 | 0.717 | 0.782 | 0.717 | 0.576
+F Score | 0.693 | 0.698 | 0.937 | 0.245 | 0.701 | 0.802 | 0.701 | 0.672
 
 ---
-
 # Refit: Probability Threshold
+
+## Logistic Regression
+<img src="Images/Thres_Log.PNG" width="  700">
+<img src="Images/CM_Log_Thres.PNG" width="  700">
+
+### Metrics
+Optimization | AUC | Accuracy | Sensitivity | Specificity | Precision | F1 | PPV | NPV
+--- | --- | --- | --- | --- | --- | --- | --- | ---
+Accuracy (Thres 65%) |
+
+## Random Forrest
+
 <img src="Images/Thres_RF.PNG" width="  700">
 <img src="Images/CM_RF_Thres.PNG" width="  700">
 
-## Metrics
+### Metrics
 Optimization | AUC | Accuracy | Sensitivity | Specificity | Precision | F1 | PPV | NPV
 --- | --- | --- | --- | --- | --- | --- | --- | ---
-Accuracy | 73.2% | 70.3% | 75.6% | 60.3% | 78.3% | 76.9% | 78.3% | 56.6%
-F Score | 72.6% | 69.6% | 78.5% | 52.8% | 75.9% | 77.2% | 75.9% | 56.5%
+Accuracy (Thres 40%) | 0.695 | 0.685 | 0.748 | 0.566 | 0.765 | 0.756 | 0.765 | 0.542
