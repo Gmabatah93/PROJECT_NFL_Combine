@@ -377,3 +377,22 @@ Accuracy (Thres 60%) | 0.732 | 0.722 | 0.777 | 0.616 | 0.793 | 0.785 | 0.793 | 0
 Optimization | AUC | Accuracy | Sensitivity | Specificity | Precision | F1 | PPV | NPV
 --- | --- | --- | --- | --- | --- | --- | --- | ---
 Accuracy (Thres 60%) | 0.722 | 0.696 | 0.734 | 0.623 | 0.786 | 0.759 | 0.786 | 0.553
+
+---
+# Final Diagnostic
+
+## Logistic Regression
+
+**Confusion Matrix**
+
+<img src="Images/CM_Log_FINAL.PNG" width="  700">
+
+**Metrics**
+
+## Random Forrest
+
+**Confusion Matrix**
+
+<img src="Images/CM_RF_FINAL.PNG" width="  700">
+
+**Metrics**

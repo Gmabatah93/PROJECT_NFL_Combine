@@ -2254,3 +2254,92 @@ rf_Thres_Metrics <-
          AUC = roc_auc(rf_Results_Thres, Drafted, RF_Acc_Prob) %>% pull(.estimate) %>% round(3)) 
 
 
+
+# Modeling: FINAL Diagnostics ----
+
+# Predictions
+Log_FINAL_Results <- 
+  tibble(Drafted = nfl_test$drafted,
+         LOG_Acc_Prob = predict(log_fit_Acc, new_data = nfl_test, type = "prob") %>% pull(.pred_Yes),
+         LOG_Acc_Pred = predict(log_fit_Acc, new_data = nfl_test) %>% pull(),
+         LOG_Pred_6 = ifelse(LOG_Acc_Prob > 0.6, "Yes","No") %>% factor(levels = c("Yes","No")),
+         LOG_F_Prob = predict(log_fit_F, new_data = nfl_test, type = "prob") %>% pull(.pred_Yes),
+         LOG_F_Pred = predict(log_fit_F, new_data = nfl_test) %>% pull())
+
+rf_FINAL_Results <- 
+  tibble(Drafted = nfl_test$drafted,
+         RF_Acc_Prob = predict(rf_fit_Acc, new_data = nfl_test, type = "prob") %>% pull(.pred_Yes),
+         RF_Acc_Pred = predict(rf_fit_Acc, new_data = nfl_test) %>% pull(),
+         RF_Pred_6 = ifelse(RF_Acc_Prob > 0.6, "Yes","No") %>% factor(levels = c("Yes","No")),
+         RF_F_Prob = predict(rf_fit_F, new_data = nfl_test, type = "prob") %>% pull(.pred_Yes),
+         RF_F_Pred = predict(rf_fit_F, new_data = nfl_test) %>% pull())
+
+# Confusion Matrix
+# - Logistic Regression
+log_CM_FINAL_Acc <- Log_FINAL_Results %>% 
+  conf_mat(truth = Drafted, estimate = LOG_Acc_Pred) %>% 
+  autoplot(type = "heatmap") +
+  labs(title = "Accuracy 50%") +
+  theme_bw() +
+  theme(plot.title = element_text(hjust = 0.4, color = "darkolivegreen", face = "bold"),
+        axis.title.y = element_text(color = "tomato"),
+        axis.title.x = element_text(face = "bold", color = "cyan4"), 
+        legend.position = "none")
+
+log_CM_FINAL_Acc_60 <- Log_FINAL_Results %>% 
+  conf_mat(truth = Drafted, estimate = LOG_Pred_6) %>% 
+  autoplot(type = "heatmap") +
+  labs(title = "Accuracy 60%") +
+  theme_bw() +
+  theme(plot.title = element_text(hjust = 0.4, color = "darkolivegreen", face = "bold"),
+        axis.title.y = element_text(color = "tomato"),
+        axis.title.x = element_text(face = "bold", color = "cyan4"), 
+        legend.position = "none")
+
+log_CM_FINAL_F <- Log_FINAL_Results %>% 
+  conf_mat(truth = Drafted, estimate = LOG_F_Pred) %>% 
+  autoplot(type = "heatmap") +
+  labs(title = "F Score") +
+  theme_bw() +
+  theme(plot.title = element_text(hjust = 0.4, color = "darkolivegreen", face = "bold"),
+        axis.title.y = element_blank(),
+        axis.title.x = element_text(face = "bold", color = "cyan4"), 
+        legend.position = "none")
+
+ggarrange(log_CM_FINAL_Acc, log_CM_FINAL_Acc_60, log_CM_FINAL_F, nrow = 1)
+
+# - Random Forrest
+rf_CM_FINAL_Acc <- rf_FINAL_Results %>% 
+  conf_mat(truth = Drafted, estimate = RF_Acc_Pred) %>% 
+  autoplot(type = "heatmap") +
+  labs(title = "Accuracy 50%") +
+  theme_bw() +
+  theme(plot.title = element_text(hjust = 0.4, color = "darkolivegreen", face = "bold"),
+        axis.title.y = element_text(color = "tomato"),
+        axis.title.x = element_text(face = "bold", color = "cyan4"), 
+        legend.position = "none")
+
+rf_CM_FINAL_Acc_60 <- rf_FINAL_Results %>% 
+  conf_mat(truth = Drafted, estimate = RF_Pred_6) %>% 
+  autoplot(type = "heatmap") +
+  labs(title = "Accuracy 60%") +
+  theme_bw() +
+  theme(plot.title = element_text(hjust = 0.4, color = "darkolivegreen", face = "bold"),
+        axis.title.y = element_text(color = "tomato"),
+        axis.title.x = element_text(face = "bold", color = "cyan4"), 
+        legend.position = "none")
+
+rf_CM_FINAL_F <- rf_FINAL_Results %>% 
+  conf_mat(truth = Drafted, estimate = RF_F_Pred) %>% 
+  autoplot(type = "heatmap") +
+  labs(title = "F Score") +
+  theme_bw() +
+  theme(plot.title = element_text(hjust = 0.4, color = "darkolivegreen", face = "bold"),
+        axis.title.y = element_blank(),
+        axis.title.x = element_text(face = "bold", color = "cyan4"), 
+        legend.position = "none")
+
+ggarrange(rf_CM_FINAL_Acc, rf_CM_FINAL_Acc_60, rf_CM_FINAL_F, nrow = 1)
+
+
+# Metrics
