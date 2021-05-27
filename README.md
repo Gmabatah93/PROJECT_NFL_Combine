@@ -389,6 +389,12 @@ Accuracy (Thres 60%) | 0.722 | 0.696 | 0.734 | 0.623 | 0.786 | 0.759 | 0.786 | 0
 
 **Metrics**
 
+Optimization | AUC | Accuracy | Sensitivity | Specificity | Precision | F1
+--- | --- | --- | --- | --- | --- | ---
+Accuracy (Thres 50%) | 0.749 | 0.708 | 0.889 | 0.367 | 0.727 | 0.80
+Accuracy (Thres 60%) | 0.749 | 0.694 | 0.769 | 0.553 | 0.765 | 0.767  
+F Score | 0.732 | 0.689 | 0.958 | 0.181 | 0.689 | 0.801
+
 ## Random Forrest
 
 **Confusion Matrix**
@@ -396,3 +402,9 @@ Accuracy (Thres 60%) | 0.722 | 0.696 | 0.734 | 0.623 | 0.786 | 0.759 | 0.786 | 0
 <img src="Images/CM_RF_FINAL.PNG" width="  700">
 
 **Metrics**
+
+Optimization | AUC | Accuracy | Sensitivity | Specificity | Precision | F1
+--- | --- | --- | --- | --- | --- | ---
+Accuracy (Thres 50%) | 0.74 | 0.724 | 0.875 | 0.437 | 0.747 | 0.806  
+Accuracy (Thres 60%) | 0.74 | 0.693 | 0.721 | 0.638 | 0.791 | 0.755  
+F Score | 0.738 | 0.694 | 0.947 | 0.216 | 0.696 | 0.802

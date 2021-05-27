@@ -2257,7 +2257,7 @@ rf_Thres_Metrics <-
 
 # Modeling: FINAL Diagnostics ----
 
-# Predictions
+# PREDICTIONS
 Log_FINAL_Results <- 
   tibble(Drafted = nfl_test$drafted,
          LOG_Acc_Prob = predict(log_fit_Acc, new_data = nfl_test, type = "prob") %>% pull(.pred_Yes),
@@ -2274,7 +2274,7 @@ rf_FINAL_Results <-
          RF_F_Prob = predict(rf_fit_F, new_data = nfl_test, type = "prob") %>% pull(.pred_Yes),
          RF_F_Pred = predict(rf_fit_F, new_data = nfl_test) %>% pull())
 
-# Confusion Matrix
+# CM
 # - Logistic Regression
 log_CM_FINAL_Acc <- Log_FINAL_Results %>% 
   conf_mat(truth = Drafted, estimate = LOG_Acc_Pred) %>% 
@@ -2342,4 +2342,79 @@ rf_CM_FINAL_F <- rf_FINAL_Results %>%
 ggarrange(rf_CM_FINAL_Acc, rf_CM_FINAL_Acc_60, rf_CM_FINAL_F, nrow = 1)
 
 
-# Metrics
+# METRICS
+# - Logistic Regression 50
+log_50_FINAL_Metrics <- 
+  tibble(Model = "Logistic_Regression_50",
+         Accuracy = accuracy(Log_FINAL_Results, truth = Drafted, estimate = LOG_Acc_Pred) %>% pull(.estimate) %>% round(3),
+         Sensitivity = sens(Log_FINAL_Results, truth = Drafted, estimate = LOG_Acc_Pred) %>% pull(.estimate) %>% round(3),
+         Specificity = spec(Log_FINAL_Results, truth = Drafted, estimate = LOG_Acc_Pred) %>% pull(.estimate) %>% round(3),
+         Precision = precision(Log_FINAL_Results, truth = Drafted, estimate = LOG_Acc_Pred) %>% pull(.estimate) %>% round(3),
+         Recall = recall(Log_FINAL_Results, truth = Drafted, estimate = LOG_Acc_Pred) %>% pull(.estimate) %>% round(3),
+         F1 = f_meas(Log_FINAL_Results, truth = Drafted, estimate = LOG_Acc_Pred) %>% pull(.estimate) %>% round(3),
+         PPV = ppv(Log_FINAL_Results, truth = Drafted, estimate = LOG_Acc_Pred) %>% pull(.estimate) %>% round(3),
+         NPV = npv(Log_FINAL_Results, truth = Drafted, estimate = LOG_Acc_Pred) %>% pull(.estimate) %>% round(3),
+         AUC = roc_auc(Log_FINAL_Results, Drafted, LOG_Acc_Prob) %>% pull(.estimate) %>% round(3))
+# - Logistic Regression 60
+log_60_FINAL_Metrics <- 
+  tibble(Model = "Logistic_Regression_60",
+         Accuracy = accuracy(Log_FINAL_Results, truth = Drafted, estimate = LOG_Pred_6) %>% pull(.estimate) %>% round(3),
+         Sensitivity = sens(Log_FINAL_Results, truth = Drafted, estimate = LOG_Pred_6) %>% pull(.estimate) %>% round(3),
+         Specificity = spec(Log_FINAL_Results, truth = Drafted, estimate = LOG_Pred_6) %>% pull(.estimate) %>% round(3),
+         Precision = precision(Log_FINAL_Results, truth = Drafted, estimate = LOG_Pred_6) %>% pull(.estimate) %>% round(3),
+         Recall = recall(Log_FINAL_Results, truth = Drafted, estimate = LOG_Pred_6) %>% pull(.estimate) %>% round(3),
+         F1 = f_meas(Log_FINAL_Results, truth = Drafted, estimate = LOG_Pred_6) %>% pull(.estimate) %>% round(3),
+         PPV = ppv(Log_FINAL_Results, truth = Drafted, estimate = LOG_Pred_6) %>% pull(.estimate) %>% round(3),
+         NPV = npv(Log_FINAL_Results, truth = Drafted, estimate = LOG_Pred_6) %>% pull(.estimate) %>% round(3),
+         AUC = roc_auc(Log_FINAL_Results, Drafted, LOG_Acc_Prob) %>% pull(.estimate) %>% round(3))
+# - Logistic Regression F
+log_F_FINAL_Metrics <- 
+  tibble(Model = "Logistic_Regression_F",
+         Accuracy = accuracy(Log_FINAL_Results, truth = Drafted, estimate = LOG_F_Pred) %>% pull(.estimate) %>% round(3),
+         Sensitivity = sens(Log_FINAL_Results, truth = Drafted, estimate = LOG_F_Pred) %>% pull(.estimate) %>% round(3),
+         Specificity = spec(Log_FINAL_Results, truth = Drafted, estimate = LOG_F_Pred) %>% pull(.estimate) %>% round(3),
+         Precision = precision(Log_FINAL_Results, truth = Drafted, estimate = LOG_F_Pred) %>% pull(.estimate) %>% round(3),
+         Recall = recall(Log_FINAL_Results, truth = Drafted, estimate = LOG_F_Pred) %>% pull(.estimate) %>% round(3),
+         F1 = f_meas(Log_FINAL_Results, truth = Drafted, estimate = LOG_F_Pred) %>% pull(.estimate) %>% round(3),
+         PPV = ppv(Log_FINAL_Results, truth = Drafted, estimate = LOG_F_Pred) %>% pull(.estimate) %>% round(3),
+         NPV = npv(Log_FINAL_Results, truth = Drafted, estimate = LOG_F_Pred) %>% pull(.estimate) %>% round(3),
+         AUC = roc_auc(Log_FINAL_Results, Drafted, LOG_F_Prob) %>% pull(.estimate) %>% round(3))
+# - Random Forrest 50
+rf_50_FINAL_Metrics <- 
+  tibble(Model = "Random_Forrest_50",
+         Accuracy = accuracy(rf_FINAL_Results, truth = Drafted, estimate = RF_Acc_Pred) %>% pull(.estimate) %>% round(3),
+         Sensitivity = sens(rf_FINAL_Results, truth = Drafted, estimate = RF_Acc_Pred) %>% pull(.estimate) %>% round(3),
+         Specificity = spec(rf_FINAL_Results, truth = Drafted, estimate = RF_Acc_Pred) %>% pull(.estimate) %>% round(3),
+         Precision = precision(rf_FINAL_Results, truth = Drafted, estimate = RF_Acc_Pred) %>% pull(.estimate) %>% round(3),
+         Recall = recall(rf_FINAL_Results, truth = Drafted, estimate = RF_Acc_Pred) %>% pull(.estimate) %>% round(3),
+         F1 = f_meas(rf_FINAL_Results, truth = Drafted, estimate = RF_Acc_Pred) %>% pull(.estimate) %>% round(3),
+         PPV = ppv(rf_FINAL_Results, truth = Drafted, estimate = RF_Acc_Pred) %>% pull(.estimate) %>% round(3),
+         NPV = npv(rf_FINAL_Results, truth = Drafted, estimate = RF_Acc_Pred) %>% pull(.estimate) %>% round(3),
+         AUC = roc_auc(rf_FINAL_Results, Drafted, RF_Acc_Prob) %>% pull(.estimate) %>% round(3))
+# - Random Forrest 60
+rf_60_FINAL_Metrics <- 
+  tibble(Model = "Random_Forrest_60",
+         Accuracy = accuracy(rf_FINAL_Results, truth = Drafted, estimate = RF_Pred_6) %>% pull(.estimate) %>% round(3),
+         Sensitivity = sens(rf_FINAL_Results, truth = Drafted, estimate = RF_Pred_6) %>% pull(.estimate) %>% round(3),
+         Specificity = spec(rf_FINAL_Results, truth = Drafted, estimate = RF_Pred_6) %>% pull(.estimate) %>% round(3),
+         Precision = precision(rf_FINAL_Results, truth = Drafted, estimate = RF_Pred_6) %>% pull(.estimate) %>% round(3),
+         Recall = recall(rf_FINAL_Results, truth = Drafted, estimate = RF_Pred_6) %>% pull(.estimate) %>% round(3),
+         F1 = f_meas(rf_FINAL_Results, truth = Drafted, estimate = RF_Pred_6) %>% pull(.estimate) %>% round(3),
+         PPV = ppv(rf_FINAL_Results, truth = Drafted, estimate = RF_Pred_6) %>% pull(.estimate) %>% round(3),
+         NPV = npv(rf_FINAL_Results, truth = Drafted, estimate = RF_Pred_6) %>% pull(.estimate) %>% round(3),
+         AUC = roc_auc(rf_FINAL_Results, Drafted, RF_Acc_Prob) %>% pull(.estimate) %>% round(3))
+# - Random Forrest F
+rf_F_FINAL_Metrics <- 
+  tibble(Model = "Random_Forrest_F",
+         Accuracy = accuracy(rf_FINAL_Results, truth = Drafted, estimate = RF_F_Pred) %>% pull(.estimate) %>% round(3),
+         Sensitivity = sens(rf_FINAL_Results, truth = Drafted, estimate = RF_F_Pred) %>% pull(.estimate) %>% round(3),
+         Specificity = spec(rf_FINAL_Results, truth = Drafted, estimate = RF_F_Pred) %>% pull(.estimate) %>% round(3),
+         Precision = precision(rf_FINAL_Results, truth = Drafted, estimate = RF_F_Pred) %>% pull(.estimate) %>% round(3),
+         Recall = recall(rf_FINAL_Results, truth = Drafted, estimate = RF_F_Pred) %>% pull(.estimate) %>% round(3),
+         F1 = f_meas(rf_FINAL_Results, truth = Drafted, estimate = RF_F_Pred) %>% pull(.estimate) %>% round(3),
+         PPV = ppv(rf_FINAL_Results, truth = Drafted, estimate = RF_F_Pred) %>% pull(.estimate) %>% round(3),
+         NPV = npv(rf_FINAL_Results, truth = Drafted, estimate = RF_F_Pred) %>% pull(.estimate) %>% round(3),
+         AUC = roc_auc(rf_FINAL_Results, Drafted, RF_F_Prob) %>% pull(.estimate) %>% round(3))
+# DataFrame
+log_50_FINAL_Metrics %>% 
+  bind_rows(log_60_FINAL_Metrics, log_F_FINAL_Metrics, rf_50_FINAL_Metrics, rf_60_FINAL_Metrics, rf_F_FINAL_Metrics)
