@@ -181,16 +181,20 @@ drafted | chr | What NFL team drafted player / Round / Pick / Year
 - **Dummy**: All categorical variables
 
 **Model Data**
+
 <img src="Images/Model_Log_Normal.PNG" width=" 700">
 
 #### PCA
 **Eigen**
+
 <img src="Images/Model_Log_PCA_Eig.PNG" width=" 700">
 
 **Components**
+
 <img src="Images/Model_Log_PCA_Components.PNG" width=" 700">
 
 **Model Data**
+
 <img src="Images/Model_Log_PCA.PNG" width=" 700">
 
 ### Simple
@@ -202,21 +206,29 @@ drafted | chr | What NFL team drafted player / Round / Pick / Year
 #### NORMAL
 
 **Model Data**
+
 <img src="Images/Model_RF_Normal.PNG" width=" 700">
 
 #### PCA
 **Model Data**
+
 <img src="Images/Model_RF_PCA.PNG" width=" 700">
 
 #### Simple
 **Model Data**
+
 <img src="Images/Model_RF_Simple.PNG" width=" 700">
 
 ### Control
 - **Parallel Processing**
 
 ### Metrics
- - [AUC | Sensitivity | Specificity | Precision | F1]
+ - **AUC:** Measure of performance across all possible class
+ - **Accuracy:** What percentage did the model correctly predicted who got drafted and who didn't
+ - **Sensitivity:** Out of all the players that got actually got drafted what percentage did the model predict correctly
+ - **Specificity:** Out of all the players that got did not get drafted what percentage did the model predict correctly
+ - **Precision:** Out of all the players the Model predicted got Drafted what percentage actually got Drafted ?
+ - **F1:** Balance between Precision and Recall "Sensitivity"
 
 ## Fit
 
@@ -239,12 +251,12 @@ drafted | chr | What NFL team drafted player / Round / Pick / Year
 
 Preprocess | Metric | Penalty | Mixture | Stat
 --- | --- | --- | --- | ---
-Normal | Accuracy | 0.00957 | 0.984 | 68.6%
-PCA  | Accuracy | 2.39e-10 | 0.794 | 69.1%
-Simple | Accuracy | 2.24e-5 | 0.152 | 70.2%
-Normal | F Score | 0.116 | 0.0558 | 79.7%
-PCA  | F Score | 0.116 | 0.0558 | 79.9%
-Simple | F Score | 0.0216 | 0.916 | 80%
+Normal | Accuracy | 0.00148 | 0.539 | 71%
+PCA  | Accuracy | 7.22e-6 | 0.331 | 69.3%
+Simple | Accuracy | 3.73e-5 | 0.735 | 69.3%
+Normal | F Score | 0.00957 | 0.984 | 80.5%
+PCA  | F Score | 0.0216 | 0.916 | 80.1%
+Simple | F Score | 0.0216 | 0.916 | 79.8%
 
 #### Custom Grid
 
@@ -258,12 +270,12 @@ Simple | F Score | 0.0216 | 0.916 | 80%
 
 Preprocess | Metric | Penalty | Mixture | Stat
 --- | --- | --- | --- | ---
-Normal | Accuracy | 0.056 | 0 | 68.8%
-PCA  | Accuracy | 0.081 | 0 | 69.2%
-Simple | Accuracy | 0.006 | 1 | 68.8%
-Normal | F Score | 0.026 | 0.5 | 79.7%
-PCA  | F Score | 0.036 | 0.5 | 80%
-Simple | F Score | 0.031 | 0.5 | 80.1%
+Normal | Accuracy | 0.001 | 1 | 71%
+PCA  | Accuracy | 0.016 | 1 | 69%
+Simple | Accuracy | 0.001 | 0 | 69.3%
+Normal | F Score | 0.011 | 1 | 80.5%
+PCA  | F Score | 0.041 | 0.5 | 80.2%
+Simple | F Score | 0.016 | 1 | 80%
 
 
 ### Random Forest
@@ -286,12 +298,12 @@ Simple | F Score | 0.031 | 0.5 | 80.1%
 
 Preprocess | Metric | mtry | min_n | Stat
 --- | --- | --- | --- | ---
-None | Accuracy | 6 | 22 | 72.2%
-PCA  | Accuracy | 7 | 39 | 70%
-Simple | Accuracy | 4 | 39 | 72.2%
-None | F Score | 6 | 22 | 80.4%
-PCA  | F Score | 1 | 32 | 79.7%
-Simple | F Score | 1 | 33 | 80.8%
+None | Accuracy | 7 | 37 | 70.5%
+PCA  | Accuracy | 3 | 28 | 69.5%
+Simple | Accuracy | 7 | 39 | 70.5%
+None | F Score | 1 | 25 | 80.3%
+PCA  | F Score | 1 | 19 | 80.1%
+Simple | F Score | 1 | 32 | 80.3%
 
 #### Custom Grid
 
@@ -305,12 +317,12 @@ Simple | F Score | 1 | 33 | 80.8%
 
 Preprocess | Metric | mtry | min_n | Stat
 --- | --- | --- | --- | ---
-None | Accuracy | 5 | 9 | 72%
-PCA  | Accuracy | 1 | 3 | 68.7%
-Simple | Accuracy | 2 | 5 | 71.9%
-None | F Score | 4 | 1 | 80.3%
-PCA  | F Score | 1 | 3 | 79.2%
-Simple | F Score | 1 | 7 | 80.6%
+None | Accuracy | 8 | 7 | 70.3%
+PCA  | Accuracy | 1 | 1 | 69.3%
+Simple | Accuracy | 5 | 5 | 70.5%
+None | F Score | 1 | 7 | 80.1%
+PCA  | F Score | 1 | 1 | 80.1%
+Simple | F Score | 1 | 9 | 80.1%
 
 ---
 
@@ -327,8 +339,8 @@ Simple | F Score | 1 | 7 | 80.6%
 ### Metrics
 Optimization | AUC | Accuracy | Sensitivity | Specificity | Precision | F1 | PPV | NPV
 --- | --- | --- | --- | --- | --- | --- | --- | ---
-Accuracy | 0.676 | 0.687 | 0.904 | 0.277 | 0.703 | 0.791 | 0.703 | 0.603
-F Score | 0.658 | 0.683 | 0.963 | 0.151 | 0.682 | 0.799 | 0.682 | 0.686
+Accuracy | 0.732 | 0.735 | 0.917 | 0.39 | 0.74 | 0.819 | 0.74 | 0.713
+F Score | 0.724 | 0.68 | 0.953 | 0.164 | 0.683 | 0.796 | 0.65 | 0.65
 
 ## Random Forrest
 
@@ -341,8 +353,8 @@ F Score | 0.658 | 0.683 | 0.963 | 0.151 | 0.682 | 0.799 | 0.682 | 0.686
 ### Metrics
 Optimization | AUC | Accuracy | Sensitivity | Specificity | Precision | F1 | PPV | NPV
 --- | --- | --- | --- | --- | --- | --- | --- | ---
-Accuracy | 0.695 | 0.687 | 0.86 | 0.358 | 0.717 | 0.782 | 0.717 | 0.576
-F Score | 0.693 | 0.698 | 0.937 | 0.245 | 0.701 | 0.802 | 0.701 | 0.672
+Accuracy | 0.722 | 0.704 | 0.87 | 0.39 | 0.73 | 0.794 | 0.73 | 0.614
+F Score | 0.732 | 0.683 | 0.953 | 0.17 | 0.685 | 0.797 | 0.685 | 0.659
 
 ---
 # Refit: Probability Threshold
@@ -354,7 +366,7 @@ F Score | 0.693 | 0.698 | 0.937 | 0.245 | 0.701 | 0.802 | 0.701 | 0.672
 ### Metrics
 Optimization | AUC | Accuracy | Sensitivity | Specificity | Precision | F1 | PPV | NPV
 --- | --- | --- | --- | --- | --- | --- | --- | ---
-Accuracy (Thres 65%) |
+Accuracy (Thres 60%) | 0.732 | 0.722 | 0.777 | 0.616 | 0.793 | 0.785 | 0.793 | 0.594
 
 ## Random Forrest
 
@@ -364,4 +376,4 @@ Accuracy (Thres 65%) |
 ### Metrics
 Optimization | AUC | Accuracy | Sensitivity | Specificity | Precision | F1 | PPV | NPV
 --- | --- | --- | --- | --- | --- | --- | --- | ---
-Accuracy (Thres 40%) | 0.695 | 0.685 | 0.748 | 0.566 | 0.765 | 0.756 | 0.765 | 0.542
+Accuracy (Thres 60%) | 0.722 | 0.696 | 0.734 | 0.623 | 0.786 | 0.759 | 0.786 | 0.553
