@@ -236,46 +236,36 @@ drafted | chr | What NFL team drafted player / Round / Pick / Year
 
 **Grid**
 
-<img src="Images/tune_log_grid.PNG" width="  600">
+<img src="Images/tune_Log_grid.PNG" width="  600">
 
-#### Latin Grid
 
-**Accuracy**
+#### **Accuracy**
 
 <img src="Images/fit_Log_Latin_Acc.PNG" width="  600">
-
-**F Score**
-
-<img src="Images/fit_Log_Latin_F.PNG" width="  600">
-
-
-Preprocess | Metric | Penalty | Mixture | Stat
---- | --- | --- | --- | ---
-Normal | Accuracy | 0.00148 | 0.539 | 71%
-PCA  | Accuracy | 7.22e-6 | 0.331 | 69.3%
-Simple | Accuracy | 3.73e-5 | 0.735 | 69.3%
-Normal | F Score | 0.00957 | 0.984 | 80.5%
-PCA  | F Score | 0.0216 | 0.916 | 80.1%
-Simple | F Score | 0.0216 | 0.916 | 79.8%
-
-#### Custom Grid
-
-**Accuracy**
-
 <img src="Images/fit_Log_Custom_Acc.PNG" width="  600">
 
-**F Score**
+Preprocess | Grid | Penalty | Mixture | Stat
+--- | --- | --- | --- | ---
+Normal | Latin | 0.003 | 0.989 | 71.3%
+PCA  | Latin | 0.000 | 0.101 | 68.8%
+Simple | Latin | 0.000 | 0.925 | 70.3%
+Normal | Custom | 0.001 | 1 | 71.4%
+PCA  | Custom | 0.016 | 1 | 69.4%
+Simple | Custom | 0.016 | 0.5 | 69.8%
 
+#### **F Score**
+
+<img src="Images/fit_Log_Latin_F.PNG" width="  600">
 <img src="Images/fit_Log_Custom_F.PNG" width="  600">
 
-Preprocess | Metric | Penalty | Mixture | Stat
+Preprocess | Grid | Penalty | Mixture | Stat
 --- | --- | --- | --- | ---
-Normal | Accuracy | 0.001 | 1 | 71%
-PCA  | Accuracy | 0.016 | 1 | 69%
-Simple | Accuracy | 0.001 | 0 | 69.3%
-Normal | F Score | 0.011 | 1 | 80.5%
-PCA  | F Score | 0.041 | 0.5 | 80.2%
-Simple | F Score | 0.016 | 1 | 80%
+Normal | Latin | 0.011 | 0.559 | 80.4%
+PCA  | Latin | 0.086 | 0.204 | 79.6%
+Simple | Latin | 0.014 | 0.559 | 79.7%
+Normal | Custom | 0.011 | 1 | 80.6%
+PCA  | Custom | 0.026 | 0.5 | 79.9%
+Simple | Custom | 0.011 | 1 | 80%
 
 
 ### Random Forest
@@ -298,12 +288,12 @@ Simple | F Score | 0.016 | 1 | 80%
 
 Preprocess | Metric | mtry | min_n | Stat
 --- | --- | --- | --- | ---
-None | Accuracy | 7 | 37 | 70.5%
-PCA  | Accuracy | 3 | 28 | 69.5%
-Simple | Accuracy | 7 | 39 | 70.5%
-None | F Score | 1 | 25 | 80.3%
-PCA  | F Score | 1 | 19 | 80.1%
-Simple | F Score | 1 | 32 | 80.3%
+None | Accuracy | 7 | 37 | 71.3%
+PCA  | Accuracy | 2 | 35 | 69.7%
+Simple | Accuracy | 3 | 24 | 70.5%
+None | F Score | 1 | 19 | 80.3%
+PCA  | F Score | 1 | 25 | 80%
+Simple | F Score | 1 | 33 | 80.2%
 
 #### Custom Grid
 
@@ -317,12 +307,12 @@ Simple | F Score | 1 | 32 | 80.3%
 
 Preprocess | Metric | mtry | min_n | Stat
 --- | --- | --- | --- | ---
-None | Accuracy | 8 | 7 | 70.3%
-PCA  | Accuracy | 1 | 1 | 69.3%
-Simple | Accuracy | 5 | 5 | 70.5%
-None | F Score | 1 | 7 | 80.1%
-PCA  | F Score | 1 | 1 | 80.1%
-Simple | F Score | 1 | 9 | 80.1%
+None | Accuracy | 5 | 9 | 71.2%
+PCA  | Accuracy | 1 | 9 | 69.1%
+Simple | Accuracy | 1 | 5 | 70.2%
+None | F Score | 1 | 9 | 80.4%
+PCA  | F Score | 1 | 9 | 79.8%
+Simple | F Score | 1 | 5 | 79.9%
 
 ---
 
@@ -337,10 +327,12 @@ Simple | F Score | 1 | 9 | 80.1%
 <img src="Images/ROC_Log.PNG" width="  700">
 
 ### Metrics
-Optimization | AUC | Accuracy | Sensitivity | Specificity | Precision | F1 | PPV | NPV
---- | --- | --- | --- | --- | --- | --- | --- | ---
-Accuracy | 0.732 | 0.735 | 0.917 | 0.39 | 0.74 | 0.819 | 0.74 | 0.713
-F Score | 0.724 | 0.68 | 0.953 | 0.164 | 0.683 | 0.796 | 0.65 | 0.65
+Optimization | AUC | Accuracy | Sensitivity | Specificity | Precision | Recall | F1
+--- | --- | --- | --- | --- | --- | --- | ---
+Accuracy (P = 0.003, M = 0.989) | 0.711 | 0.707 | 0.86 | 0.415 | 0.736 | 0.86 | 0.793 
+Accuracy (P = 0.001, M = 1) | 0.713 | 0.704 | 0.85 | 0.428 | 0.738 | 0.85 | 0.79
+F Score (P = 0.014, M = 0.559) | 0.718 | 0.709 | 0.917 | 0.314 | 0.717 | 0.917 | 0.805
+F Score (P = 0.011, M = 1) | 0.712 | 0.704 | 0.92 | 0.296 | 0.712 | 0.92 | 0.803
 
 ## Random Forrest
 
@@ -381,30 +373,26 @@ Accuracy (Thres 60%) | 0.722 | 0.696 | 0.734 | 0.623 | 0.786 | 0.759 | 0.786 | 0
 ---
 # Final Diagnostic
 
-## Logistic Regression
-
-**Confusion Matrix**
+## Confusion Matrix
+**Logistic Regression**
 
 <img src="Images/CM_Log_FINAL.PNG" width="  700">
 
-**Metrics**
 
-Optimization | AUC | Accuracy | Sensitivity | Specificity | Precision | F1
---- | --- | --- | --- | --- | --- | ---
-Accuracy (Thres 50%) | 0.749 | 0.708 | 0.889 | 0.367 | 0.727 | 0.80
-Accuracy (Thres 60%) | 0.749 | 0.694 | 0.769 | 0.553 | 0.765 | 0.767  
-F Score | 0.732 | 0.689 | 0.958 | 0.181 | 0.689 | 0.801
-
-## Random Forrest
-
-**Confusion Matrix**
+**Random Forrest**
 
 <img src="Images/CM_RF_FINAL.PNG" width="  700">
 
-**Metrics**
+## ROC Curve
+<img src="Images/ROC_Final.PNG" width="  700">
+
+## Metrics  
 
 Optimization | AUC | Accuracy | Sensitivity | Specificity | Precision | F1
 --- | --- | --- | --- | --- | --- | ---
-Accuracy (Thres 50%) | 0.74 | 0.724 | 0.875 | 0.437 | 0.747 | 0.806  
-Accuracy (Thres 60%) | 0.74 | 0.693 | 0.721 | 0.638 | 0.791 | 0.755  
-F Score | 0.738 | 0.694 | 0.947 | 0.216 | 0.696 | 0.802
+Logistic Regression (Thres 50%) | 0.749 | 0.708 | 0.889 | 0.367 | 0.727 | 0.80
+Logistic Regression (Thres 60%) | 0.749 | 0.694 | 0.769 | 0.553 | 0.765 | 0.767  
+Logistic Regression F | 0.732 | 0.689 | 0.958 | 0.181 | 0.689 | 0.801
+Random Forrest (Thres 50%) | 0.74 | 0.724 | 0.875 | 0.437 | 0.747 | 0.806  
+Random Forrest (Thres 60%) | 0.74 | 0.693 | 0.721 | 0.638 | 0.791 | 0.755  
+Random Forrest F | 0.738 | 0.694 | 0.947 | 0.216 | 0.696 | 0.802
