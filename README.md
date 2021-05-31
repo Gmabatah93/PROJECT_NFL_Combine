@@ -274,45 +274,34 @@ Simple | Custom | 0.011 | 1 | 80%
 
 <img src="Images/tune_rf_grid.PNG" width="  600">
 
-#### Latin Grid
-
-**Accuracy**
+#### **Accuracy**
 
 <img src="Images/fit_RF_Latin_Acc.PNG" width="  600">
-
-**F Score**
-
-<img src="Images/fit_RF_Latin_F.PNG" width="  600">
-
-**Best**
-
-Preprocess | Metric | mtry | min_n | Stat
---- | --- | --- | --- | ---
-None | Accuracy | 7 | 37 | 71.3%
-PCA  | Accuracy | 2 | 35 | 69.7%
-Simple | Accuracy | 3 | 24 | 70.5%
-None | F Score | 1 | 19 | 80.3%
-PCA  | F Score | 1 | 25 | 80%
-Simple | F Score | 1 | 33 | 80.2%
-
-#### Custom Grid
-
-**Accuracy**
-
 <img src="Images/fit_RF_Custom_Acc.PNG" width="  600">
 
-**F Score**
+Preprocess | grid | mtry | min_n | Stat
+--- | --- | --- | --- | ---
+None | Latin | 4 | 6 | 70.3%
+PCA  | Latin | 1 | 11 | 68.5%
+Simple | Latin | 2 | 36 | 70.4%
+None | Custom | 3 | 9 | 69.8%
+PCA  | Custom | 1 | 7 | 68.4%
+Simple | Custom | 1 | 1 | 70.3%
 
+#### **F Score**
+
+<img src="Images/fit_RF_Latin_F.PNG" width="  600">
 <img src="Images/fit_RF_Custom_F.PNG" width="  600">
 
-Preprocess | Metric | mtry | min_n | Stat
+Preprocess | grid | mtry | min_n | Stat
 --- | --- | --- | --- | ---
-None | Accuracy | 5 | 9 | 71.2%
-PCA  | Accuracy | 1 | 9 | 69.1%
-Simple | Accuracy | 1 | 5 | 70.2%
-None | F Score | 1 | 9 | 80.4%
-PCA  | F Score | 1 | 9 | 79.8%
-Simple | F Score | 1 | 5 | 79.9%
+None | Latin | 1 | 40 | 79.8%
+PCA  | Latin | 1 | 34 | 79.4%
+Simple | Latin | 1 | 11 | 79.8%
+None | Custom | 1 | 3 | 79.5%
+PCA  | Custom | 1 | 7 | 79.3%
+Simple | Custom | 1 | 1 | 80%
+
 
 ---
 
@@ -329,7 +318,7 @@ Simple | F Score | 1 | 5 | 79.9%
 ### Metrics
 Optimization | AUC | Accuracy | Sensitivity | Specificity | Precision | Recall | F1
 --- | --- | --- | --- | --- | --- | --- | ---
-Accuracy (P = 0.003, M = 0.989) | 0.711 | 0.707 | 0.86 | 0.415 | 0.736 | 0.86 | 0.793 
+Accuracy (P = 0.003, M = 0.989) | 0.711 | 0.707 | 0.86 | 0.415 | 0.736 | 0.86 | 0.793
 Accuracy (P = 0.001, M = 1) | 0.713 | 0.704 | 0.85 | 0.428 | 0.738 | 0.85 | 0.79
 F Score (P = 0.014, M = 0.559) | 0.718 | 0.709 | 0.917 | 0.314 | 0.717 | 0.917 | 0.805
 F Score (P = 0.011, M = 1) | 0.712 | 0.704 | 0.92 | 0.296 | 0.712 | 0.92 | 0.803
@@ -343,10 +332,13 @@ F Score (P = 0.011, M = 1) | 0.712 | 0.704 | 0.92 | 0.296 | 0.712 | 0.92 | 0.803
 <img src="Images/ROC_RF.PNG" width="  700">
 
 ### Metrics
-Optimization | AUC | Accuracy | Sensitivity | Specificity | Precision | F1 | PPV | NPV
---- | --- | --- | --- | --- | --- | --- | --- | ---
-Accuracy | 0.722 | 0.704 | 0.87 | 0.39 | 0.73 | 0.794 | 0.73 | 0.614
-F Score | 0.732 | 0.683 | 0.953 | 0.17 | 0.685 | 0.797 | 0.685 | 0.659
+
+Optimization | AUC | Accuracy | Sensitivity | Specificity | Precision | Recall | F1
+--- | --- | --- | --- | --- | --- | --- | ---
+Accuracy (mtry = 2, min = 36) | 0.735 | 0.711 | 0.907 | 0.34 | 0.722 | 0.907 | 0.804
+Accuracy (mtry = 1, min = 1) | 0.726 | 0.693 | 0.917 | 0.27 | 0.704 | 0.917 | 0.797
+F Score (mtry = 1, min = 1) | 0.726 | 0.693 | 0.917 | 0.27 | 0.704 | 0.917 | 0.797
+F Score (mtry = 1, min = 11) | 0.731 | 0.696 | 0.917 | 0.277 | 0.706 | 0.917 | 0.798
 
 ---
 # Refit: Probability Threshold
@@ -356,9 +348,10 @@ F Score | 0.732 | 0.683 | 0.953 | 0.17 | 0.685 | 0.797 | 0.685 | 0.659
 <img src="Images/CM_Log_Thres.PNG" width="  700">
 
 ### Metrics
-Optimization | AUC | Accuracy | Sensitivity | Specificity | Precision | F1 | PPV | NPV
---- | --- | --- | --- | --- | --- | --- | --- | ---
-Accuracy (Thres 60%) | 0.732 | 0.722 | 0.777 | 0.616 | 0.793 | 0.785 | 0.793 | 0.594
+Optimization | AUC | Accuracy | Sensitivity | Specificity | Precision | Recall| F1
+--- | --- | --- | --- | --- | --- | --- | ---
+Acc-70%, (P = 0.003, M = 0.989) | 0.711 | 0.622 | 0.548 | 0.761 | 0.813 | 0.548 | 0.655
+Acc-60%, (P = 0.001, M = 1) | 0.713 | 0.678 | 0.741 | 0.56 | 0.761 | 0.741 | 0.751
 
 ## Random Forrest
 
@@ -366,9 +359,10 @@ Accuracy (Thres 60%) | 0.732 | 0.722 | 0.777 | 0.616 | 0.793 | 0.785 | 0.793 | 0
 <img src="Images/CM_RF_Thres.PNG" width="  700">
 
 ### Metrics
-Optimization | AUC | Accuracy | Sensitivity | Specificity | Precision | F1 | PPV | NPV
---- | --- | --- | --- | --- | --- | --- | --- | ---
-Accuracy (Thres 60%) | 0.722 | 0.696 | 0.734 | 0.623 | 0.786 | 0.759 | 0.786 | 0.553
+Optimization | AUC | Accuracy | Sensitivity | Specificity | Precision | Recall | F1
+--- | --- | --- | --- | --- | --- | --- | ---
+Acc-70%  (mtry = 2, min = 36)| 0.735 | 0.607 | 0.475 | 0.855 | 0.861 | 0.475 | 0.612
+Acc-65%  (mtry = 1, min = 1)| 0.726 | 0.687 | 0.767 | 0.535 | 0.757 | 0.767 | 0.762 
 
 ---
 # Final Diagnostic
