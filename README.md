@@ -235,7 +235,7 @@ drafted | chr | What NFL team drafted player / Round / Pick / Year
 
 **Grid**
 
-<img src="Images/tune_Log_Grid.PNG" width="  600">
+<img src="Images/tune_log_grid.PNG" width="  600">
 
 
 #### **Accuracy**
