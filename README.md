@@ -176,7 +176,6 @@ drafted | chr | What NFL team drafted player / Round / Pick / Year
 ## Preprocess - Logistic Regression
 
 #### NORMAL
-- **Bin**: Infrequent position into "Other" category   
 - **Normalize**: All numeric variables
 - **Dummy**: All categorical variables
 
@@ -236,7 +235,7 @@ drafted | chr | What NFL team drafted player / Round / Pick / Year
 
 **Grid**
 
-<img src="Images/tune_Log_grid.PNG" width="  600">
+<img src="Images/tune_Log_Grid.PNG" width="  600">
 
 
 #### **Accuracy**
@@ -362,7 +361,7 @@ Acc-60%, (P = 0.001, M = 1) | 0.713 | 0.678 | 0.741 | 0.56 | 0.761 | 0.741 | 0.7
 Optimization | AUC | Accuracy | Sensitivity | Specificity | Precision | Recall | F1
 --- | --- | --- | --- | --- | --- | --- | ---
 Acc-70%  (mtry = 2, min = 36)| 0.735 | 0.607 | 0.475 | 0.855 | 0.861 | 0.475 | 0.612
-Acc-65%  (mtry = 1, min = 1)| 0.726 | 0.687 | 0.767 | 0.535 | 0.757 | 0.767 | 0.762 
+Acc-65%  (mtry = 1, min = 1)| 0.726 | 0.687 | 0.767 | 0.535 | 0.757 | 0.767 | 0.762
 
 ---
 # Final Diagnostic
