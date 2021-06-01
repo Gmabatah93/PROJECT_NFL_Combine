@@ -308,11 +308,11 @@ Simple | Custom | 1 | 1 | 80%
 
 ## Logistic Regression
 
-### Confusion Matrix
-<img src="Images/CM_Log.PNG" width="  700">
-
 ### ROC Curve
 <img src="Images/ROC_Log.PNG" width="  700">
+
+### Confusion Matrix
+<img src="Images/CM_Log.PNG" width="  700">
 
 ### Metrics
 Optimization | AUC | Accuracy | Sensitivity | Specificity | Precision | Recall | F1
@@ -324,11 +324,11 @@ F Score (P = 0.011, M = 1) | 0.712 | 0.704 | 0.92 | 0.296 | 0.712 | 0.92 | 0.803
 
 ## Random Forrest
 
-### Confusion Matrix
-<img src="Images/CM_RF.PNG" width="  700">
-
 ### ROC Curve
 <img src="Images/ROC_RF.PNG" width="  700">
+
+### Confusion Matrix
+<img src="Images/CM_RF.PNG" width="  700">
 
 ### Metrics
 
@@ -366,6 +366,9 @@ Acc-65%  (mtry = 1, min = 1)| 0.726 | 0.687 | 0.767 | 0.535 | 0.757 | 0.767 | 0.
 ---
 # Final Diagnostic
 
+## ROC Curve
+<img src="Images/ROC_Final.PNG" width="  700">
+
 ## Confusion Matrix
 **Logistic Regression**
 
@@ -376,16 +379,20 @@ Acc-65%  (mtry = 1, min = 1)| 0.726 | 0.687 | 0.767 | 0.535 | 0.757 | 0.767 | 0.
 
 <img src="Images/CM_RF_FINAL.PNG" width="  700">
 
-## ROC Curve
-<img src="Images/ROC_Final.PNG" width="  700">
 
 ## Metrics  
 
-Optimization | AUC | Accuracy | Sensitivity | Specificity | Precision | F1
---- | --- | --- | --- | --- | --- | ---
-Logistic Regression (Thres 50%) | 0.749 | 0.708 | 0.889 | 0.367 | 0.727 | 0.80
-Logistic Regression (Thres 60%) | 0.749 | 0.694 | 0.769 | 0.553 | 0.765 | 0.767  
-Logistic Regression F | 0.732 | 0.689 | 0.958 | 0.181 | 0.689 | 0.801
-Random Forrest (Thres 50%) | 0.74 | 0.724 | 0.875 | 0.437 | 0.747 | 0.806  
-Random Forrest (Thres 60%) | 0.74 | 0.693 | 0.721 | 0.638 | 0.791 | 0.755  
-Random Forrest F | 0.738 | 0.694 | 0.947 | 0.216 | 0.696 | 0.802
+Optimization | AUC | Accuracy | Sensitivity | Specificity | Precision | Recall | F1
+--- | --- | --- | --- | --- | --- | --- | ---
+LOG Acc-50% (p=0.003, m=0.989) | 0.74 | 0.703 | 0.873 | 0.382 | 0.728 | 0.873 | 0.794
+LOG Acc-70% (p=0.003, m=0.989) | 0.74 | 0.644 | 0.589 | 0.749 | 0.816 | 0.589 | 0.684  
+LOG Acc-50% (p=0.001, m=1) | 0.738 | 0.712 | 0.867 | 0.417 | 0.738 | 0.867 | 0.798
+LOG Acc-60% (p=0.001, m=1) | 0.738 | 0.708 | 0.785 | 0.563 | 0.773 | 0.785 | 0.779  
+LOG F-50% (p=0.014, m=0.559) | 0.733 | 0.689 | 0.92 | 0.251 | 0.7 | 0.92 | 0.795
+LOG F-50% (p=0.011, m=1) | 0.738 | 0.696 | 0.931 | 0.251 | 0.702 | 0.931 | 0.8
+RF Acc-50% (mtry=2, min=36) | 0.745 | 0.717 | 0.92 | 0.332 | 0.723 | 0.92 | 0.81
+RF Acc-70% (mtry=2, min=36) | 0.745 | 0.625 | 0.538 | 0.789 | 0.829 | 0.538 | 0.653
+RF Acc-50% (mtry=1, min=1) | 0.739 | 0.696 | 0.939 | 0.236 | 0.7 | 0.939 | 0.802
+RF Acc-65% (mtry=1, min=1) | 0.739 | 0.667 | 0.668 | 0.663 | 0.79 | 0.668 | 0.724
+RF F-50% (mtry=1, min=1) | 0.739 | 0.696 | 0.939 | 0.236 | 0.7 | 0.939 | 0.802
+RF F-50% (mtry=1, min=11) | 0.74 | 0.705 | 0.944 | 0.251 | 0.705 | 0.904 | 0.807
