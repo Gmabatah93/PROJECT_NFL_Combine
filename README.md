@@ -396,3 +396,11 @@ RF Acc-50% (mtry=1, min=1) | 0.739 | 0.696 | 0.939 | 0.236 | 0.7 | 0.939 | 0.802
 RF Acc-65% (mtry=1, min=1) | 0.739 | 0.667 | 0.668 | 0.663 | 0.79 | 0.668 | 0.724
 RF F-50% (mtry=1, min=1) | 0.739 | 0.696 | 0.939 | 0.236 | 0.7 | 0.939 | 0.802
 RF F-50% (mtry=1, min=11) | 0.74 | 0.705 | **_0.944_** | 0.251 | 0.705 | 0.904 | 0.807
+
+**Top 2 (Accuracy)**
+- Random Forrest (mtry = 2, min = 36): **71.7%**
+- Logistic Regression (penalty = 0.001, mix = 1 "LASSO"): **71.2**
+
+**Top 2 (F Score)**
+- Random Forrest (mtry = 2, min = 36): **81%**
+- Random Forrest (mtry = 1, min = 11): **80.7%**
