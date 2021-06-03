@@ -2103,10 +2103,48 @@ nfl_test %>%
   select(-player) %>% 
   mutate(drafted = ifelse(drafted == "Yes", 1,0))
 
-nfl_rf_recipe_simple %>% 
-  prep() %>% juice() %>% 
-  select(-player, -school, -team)
+bake(prep(nfl_rf_recipe_simple), new_data = nfl_test) %>% 
+  select(-player, -school, -team) %>%
+  count(conference)
 
+nfl_test_num <- 
+  bake(prep(nfl_rf_recipe_simple), new_data = nfl_test) %>% 
+  select(-player, -school, -team) %>% 
+  mutate(position = case_when(
+              position == "C"    ~ 1,
+              position == "CB"   ~ 2,
+              position == "DE"   ~ 3,
+              position == "DT"   ~ 4 ,
+              position == "EDGE" ~ 5,
+              position == "FB"   ~ 6,
+              position == "FS"   ~ 7,
+              position == "ILB"  ~ 8,
+              position == "LS"   ~ 9,
+              position == "OG"   ~ 10,
+              position == "OLB"  ~ 11,
+              position == "OT"   ~ 12,
+              position == "QB"   ~ 13,
+              position == "RB"   ~ 14,
+              position == "SS"   ~ 15,
+              position == "TE"   ~ 16,
+              position == "WR"   ~ 17),
+         conference = case_when(
+             conference == "Division I-A (ACC)"             ~ 1,
+             conference == "Division I-A (American)"        ~ 2,
+             conference == "Division I-A (Big 10)"          ~ 3,
+             conference == "Division I-A (Big 12)"          ~ 4,
+             conference == "Division I-A (Conference USA)" ~ 5,
+             conference == "Division I-A (MAC)"             ~ 6,
+             conference == "Division I-A (Mountain West)"   ~ 7,
+             conference == "Division I-A (Pac-12)"          ~ 8,
+             conference == "Division I-A (SEC)"             ~ 9,
+             conference == "Division I-A (Sunbelt)"         ~ 10,
+             conference == "Division I-AA"                  ~ 11,
+             conference == "Division II & III"              ~ 12
+         ),
+         drafted = ifelse(drafted == "Yes",1,0))
+
+model_performance(exp_RF.F_test)
 # - Random Forrest (Mtry = 1 | Min_n = 1)
 exp_RF.F_test <- explain(model = rf_fit_F,
                          data = nfl_test_num, y = nfl_test_num$drafted,
