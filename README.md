@@ -49,38 +49,38 @@ drafted | chr | What NFL team drafted player / Round / Pick / Year
 # Exploratory Data Analysis
 
 ## Summary
-<img src="Images/draft.PNG" width="700">
+<img src="Images/EDA_drafted.PNG" width="700">
 
-**Note (Target)**: **_65%_** of players in this dataset was Drafted
+**Note (Target)**: Of all the players in this data **_65%_** of players in this dataset was Drafted
 
-<img src="Images/draft_Side.PNG" width="700">
+<img src="Images/EDA_draft_side.PNG" width="700">
 
-<img src="Images/draft_Position.PNG" width="700">
+<img src="Images/EDA_draft_position.PNG" width="700">
 
 **Note (Position)**: There are _1459_ Defensive and _1426_ Offensive players in this dataset
 - Of the _1459_ Defensive players **70%** was Drafted. Of the _1426_ Offensive players **61%** was Drafted.
 - Top 3 Offensive Positions Drafted: **_OT | WR | RB_**
 - Top 3 Defensive Positions Drafted: **_CB | DE | OLB_**
 
-<img src="Images/draft_Conference.PNG" width="700" />
+<img src="Images/EDA_draft_conference.PNG" width="700" />
 
 **Note (Conference)**: The majority of players Drafted came from the **_[ SEC | ACC | Big 10 ]_** Conferences
 
 ## Correlation
-<img src="Images/Combine_Corr.PNG" width="700">
+<img src="Images/EDA_corr.PNG" width="700">
 
-<img src="Images/Combine_sig.PNG" width="700">
+<img src="Images/EDA_corr_sig.PNG" width="700">
 
 **Note (Correlation)**: Alot of the Combine metrics are **_Highly_** Corelated
 
 ## Principal Component Analysis
 <p float="left">
-  <img src="Images/Combine_PCA.PNG" width="500">
-  <img src="Images/Combine_PCA_draft.PNG" width="500">
+  <img src="Images/PCA_biplot.PNG" width="500">
+  <img src="Images/PCA_biplot_drafted.PNG" width="500">
 </p>
 
-<img src="Images/Combine_PCA_Eig.PNG" width="600">
-
+<img src="Images/PCA_eig.PNG" width="700">
+<img src="Images/PCA_pc.PNG" width="700">
 **Note (PCA)**:
 - **PC1**: Represents Agility/Explosiveness
   + Agility: forty | three_cone | shuttle
@@ -93,9 +93,9 @@ drafted | chr | What NFL team drafted player / Round / Pick / Year
 ## Combine Summary
 
 ### Weight
-<img src="Images/Combine_Weight.PNG" width="700">
-<img src="Images/Combine_Weight_Position_draft.PNG" width="  700">
-<img src="Images/Combine_Weight_Conference_draft.PNG" width="  700">
+<img src="Images/COMBINE_weight.PNG" width="700">
+<img src="Images/COMBINE_weight_side.PNG" width="  700">
+<img src="Images/COMBINE_weight_conference.PNG" width="  700">
 
 **Note (Weight)**: Average weight for players in this dataset is **_252lbs_**
 - Offense: **_262lbs_**
@@ -110,9 +110,9 @@ drafted | chr | What NFL team drafted player / Round / Pick / Year
   + Elite = **_253lbs_** | Division I-A = **_246lbs_** | Division I-AA = **_252_** | Division II & II = **_266lbs_**
 
 ### Forty
-<img src="Images/Combine_40.PNG" width="  700">
-<img src="Images/Combine_40_Position.PNG" width="  700">
-<img src="Images/Combine_40_Conference.PNG" width="  700">
+<img src="Images/COMBINE_40.PNG" width="  700">
+<img src="Images/COMBINE_40_side.PNG" width="  700">
+<img src="Images/COMBINE_40_conference.PNG" width="  700">
 
 **Note (Forty):** Average forty for players in this dataset is **_4.81secs_**
 - Offense: **_4.72secs_**
@@ -127,9 +127,9 @@ drafted | chr | What NFL team drafted player / Round / Pick / Year
   + Elite = **_4.81secs_** | Division I-A = **_4.78secs_** | Division I-AA = **_4.82secs_** | Division II & II = **_4.89secs_**
 
 ### Bench
-<img src="Images/Combine_Bench.PNG" width="  700">
-<img src="Images/Combine_Bench_Position.PNG" width="  700">
-<img src="Images/Combine_Bench_Conference.PNG" width="  700">
+<img src="Images/COMBINE_bench.PNG" width="  700">
+<img src="Images/COMBINE_bench_side.PNG" width="  700">
+<img src="Images/COMBINE_Bench_conference.PNG" width="  700">
 
 **Note (Bench):** Average bench for players in this dataset is **_21reps_**
 - Offense: **_21reps_**
@@ -144,9 +144,9 @@ drafted | chr | What NFL team drafted player / Round / Pick / Year
   + Elite = **_21reps_** | Division I-A = **_21reps_** | Division I-AA = **_21reps_** | Division II & II = **_23reps_**
 
 ### Broad Jump
-<img src="Images/Combine_Jump.PNG" width="  700">
-<img src="Images/Combine_Jump_Position.PNG" width="  700">
-<img src="Images/Combine_Jump_Conference.PNG" width="  700">
+<img src="Images/COMBINE_jump.PNG" width="  700">
+<img src="Images/COMBINE_jump_side.PNG" width="  700">
+<img src="Images/COMBINE_jump_conference.PNG" width="  700">
 
 **Note (Jump):** Average broad jump for players in this dataset is **_113inches**
 - Offense: **_110inches_**
@@ -181,24 +181,24 @@ drafted | chr | What NFL team drafted player / Round / Pick / Year
 
 **Model Data**
 
-<img src="Images/Model_Log_Normal.PNG" width=" 700">
+<img src="Images/PREPROCESS_LOG_normal.PNG" width=" 700">
 
 #### PCA
-**Eigen**
-
-<img src="Images/Model_Log_PCA_Eig.PNG" width=" 700">
 
 **Components**
 
-<img src="Images/Model_Log_PCA_Components.PNG" width=" 700">
+<img src="Images/PREPROCESS_LOG_pca_pc.PNG" width=" 700">
 
 **Model Data**
 
-<img src="Images/Model_Log_PCA.PNG" width=" 700">
+<img src="Images/PREPROCESS_LOG_pca.PNG" width=" 700">
 
 ### Simple
+
 **Model Data**  
-<img src="Images/Model_Log_Simple.PNG" width=" 700">
+
+<img src="Images/PREPROCESS_LOG_simple.PNG" width=" 700">
+
 
 ## Preprocess - Random Forrest
 
@@ -206,17 +206,19 @@ drafted | chr | What NFL team drafted player / Round / Pick / Year
 
 **Model Data**
 
-<img src="Images/Model_RF_Normal.PNG" width=" 700">
+<img src="Images/PREPROCESS_RF_none.PNG" width=" 700">
 
 #### PCA
+
 **Model Data**
 
-<img src="Images/Model_RF_PCA.PNG" width=" 700">
+<img src="Images/PREPROCESS_RF_pca.PNG" width=" 700">
 
 #### Simple
+
 **Model Data**
 
-<img src="Images/Model_RF_Simple.PNG" width=" 700">
+<img src="Images/PREPROCESS_RF_simple.PNG" width=" 700">
 
 ### Control
 - **Parallel Processing**

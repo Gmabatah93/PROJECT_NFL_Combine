@@ -973,7 +973,7 @@ nfl_log_recipe_pca %>%
   geom_col() +
   facet_wrap(~ component, scales = "free") +
   tidytext::scale_y_reordered() +
-  scale_fill_manual(values = c("antiquewhite4","antiquewhite")) +
+  scale_fill_manual(values = c("antiquewhite","antiquewhite4")) +
   labs(
     title = "Principal Components",
     x = "Absolute value of contribution",
