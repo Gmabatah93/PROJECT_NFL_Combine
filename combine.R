@@ -1135,6 +1135,7 @@ rf_grid_custom %>%
 
 #
 # Modeling: Fit - Logistic Regression ----
+set.seed(101)
 options(tidymodels.dark = TRUE) 
 
 # Normal
@@ -1237,7 +1238,7 @@ gg_Log_tune_normal_F <- log_tune_normal %>%
   labs(title = "Logistic Regression",
        subtitle = "Normal",
        y = "F Score") +
-  ylim(c(0.78, 0.81)) +
+  ylim(c(0.785, 0.81)) +
   theme_bw() +
   theme(plot.title = element_text(hjust = 0.4, face = "bold", size = 15),
         plot.subtitle = element_text(hjust = 0.4, color = "darkolivegreen"),
@@ -1255,7 +1256,7 @@ gg_Log_tune_pca_F <- log_tune_pca %>%
   labs(title = "Logistic Regression",
        subtitle = "PCA",
        y = "F Score") +
-  ylim(c(0.78, 0.81)) +
+  ylim(c(0.785, 0.81)) +
   theme_bw() +
   theme(plot.title = element_text(hjust = 0.4, face = "bold", size = 15),
         plot.subtitle = element_text(hjust = 0.4, color = "darkolivegreen"),
@@ -1273,7 +1274,7 @@ gg_Log_tune_simple_F <- log_tune_simple %>%
   labs(title = "Logistic Regression",
        subtitle = "Simple",
        y = "F Score") +
-  ylim(c(0.78, 0.81)) +
+  ylim(c(0.785, 0.81)) +
   theme_bw() +
   theme(plot.title = element_text(hjust = 0.4, face = "bold", size = 15),
         plot.subtitle = element_text(hjust = 0.4, color = "darkolivegreen"),
@@ -1303,25 +1304,23 @@ log_tune_simple %>% show_best(metric = "f_meas", n = 1)   # 80.5 | 006 | 1
 #
 # Modeling: FINAL Fit - Logistic Regression ----
 
-# Accuracy 71.5%: penaly = 0.006, mix = 0.5
+# Accuracy (Simple) 71.5%: penaly = 0.001, mix = 0.5
 # - hyperparameter
-log_best_Acc <- log_tune_normal %>% select_best(metric = "accuracy")
+log_best_Acc <- log_tune_simple %>% select_best(metric = "accuracy")
 # - fit
 log_fit_Acc <- 
-  log_wflow %>% 
+  log_wflow %>%
+  update_recipe(nfl_log_recipe_simple) %>%
   finalize_workflow(log_best_Acc) %>% 
   fit(nfl_train)
-# - vip
-log_fit_Acc %>% 
-  pull_workflow_fit() %>% 
-  vip(num_features = 20)
 
-# F Score 80.8%: penaly = 0.006, mix = 1
+# F Score (Simple) 80.5%: penaly = 0.006, mix = 1
 # - hyperparameter
-log_best_F <- log_tune_normal %>% select_best(metric = "f_meas")
+log_best_F <- log_tune_simple %>% select_best(metric = "f_meas")
 # - fit
 log_fit_F <- 
   log_wflow %>% 
+  update_recipe(nfl_log_recipe_simple) %>%
   finalize_workflow(log_best_F) %>% 
   fit(nfl_train)
 
@@ -1329,9 +1328,9 @@ log_fit_F <-
 # Modeling: Fit - Random Forest ----
 
 # Start Parallel Processing
-cl <- detectCores()
-registerDoParallel(cl)
-
+cl_6 <- makeCluster(6)
+registerDoParallel(cl_6)
+set.seed(101)
 # Normal
 rf_tune_normal <-
   rf_wflow %>% 
@@ -1361,6 +1360,9 @@ rf_tune_simple <-
     metrics = nfl_metrics,
     control = nfl_ctrl
   )
+
+# Stop Parallell Processing
+stopCluster(cl_6)
 
 # - plot: Accuracy
 # - normal
@@ -1493,34 +1495,29 @@ rf_tune_simple %>% show_best("accuracy", n = 1) # 70.4 | 2 | 9
 # - best: F Score
 rf_tune_normal %>% show_best("f_meas", n = 1)   # 79.7 | 1 | 5
 rf_tune_pca %>% show_best("f_meas", n = 1)      # 78.5 | 1 | 5
-rf_tune_simple %>% show_best("f_meas", n = 1)   # 79.6 | 1 | 1
-
-# Stop Parallell Processing
-stopCluster(cl)
+rf_tune_simple %>% show_best("f_meas", n = 1)   # 79.6 | 1 | 9
 
 
 #
 # Modeling: FINAL Fit - Random Forrest ----
 
-# Accuracy 70.4%: Mtry = 2, Min_n = 9
+# Accuracy (Simple) 70.4%: Mtry = 2, Min_n = 9
 # - hyperparamter
 rf_best_Acc <- rf_tune_simple %>% select_best(metric = "accuracy")
 # - fit
 rf_fit_Acc <- 
   rf_wflow %>% 
+  update_recipe(nfl_rf_recipe_simple) %>% 
   finalize_workflow(rf_best_Acc) %>% 
   fit(nfl_train)
-# - vip
-rf_fit_Acc %>% 
-  pull_workflow_fit() %>% 
-  vip(num_features = 10)
 
-# F Score 79.6%: Mtry = 1, Min_N = 1
+# F Score (Simple) 79.6%: Mtry = 1, Min_N = 9
 # - hyperparameter
 rf_best_F <- rf_tune_simple %>% select_best(metric = "f_meas")
 # - fit
 rf_fit_F <- 
   rf_wflow %>% 
+  update_recipe(nfl_rf_recipe_simple) %>% 
   finalize_workflow(rf_best_F) %>% 
   fit(nfl_train)
 
@@ -1570,7 +1567,7 @@ log_ROC_Acc %>%
 log_CM_Acc <- log_Results %>% 
   conf_mat(truth = Drafted, estimate = LOG_Acc_Pred) %>% 
   autoplot(type = "heatmap") +
-  labs(title = "Accuracy", subtitle = "Penalty = 0.006 | Mix = 0.5") +
+  labs(title = "Accuracy", subtitle = "penalty = 0.001 | mix = 0.5") +
   theme_bw() +
   theme(plot.title = element_text(hjust = 0.5, color = "darkolivegreen", face = "bold"),
         plot.subtitle = element_text(hjust = 0.5, color = "skyblue"),
@@ -1582,7 +1579,7 @@ log_CM_Acc <- log_Results %>%
 log_CM_F <- log_Results %>% 
   conf_mat(truth = Drafted, estimate = LOG_F_Pred) %>% 
   autoplot(type = "heatmap") +
-  labs(title = "F Score", subtitle = "Penalty = 0.006 | Mix = 1") +
+  labs(title = "F Score", subtitle = "penalty = 0.006 | mix = 1") +
   theme_bw() +
   theme(plot.title = element_text(hjust = 0.5, color = "darkolivegreen", face = "bold"),
         plot.subtitle = element_text(hjust = 0.5, color = "skyblue"),
@@ -1640,7 +1637,7 @@ rf_ROC_Acc <- rf_Results %>%
 # - F Score
 rf_ROC_F <- rf_Results %>%
   roc_curve(Drafted, RF_F_Prob) %>% 
-  mutate(Model = "F_mtry1_min1")
+  mutate(Model = "F_mtry1_min9")
 # - Visual
 rf_ROC_Acc %>% 
   bind_rows(rf_ROC_Acc, rf_ROC_F) %>% 
@@ -1663,7 +1660,7 @@ rf_ROC_Acc %>%
 rf_CM_Acc <- rf_Results %>% 
   conf_mat(truth = Drafted, estimate = RF_Acc_Pred) %>% 
   autoplot(type = "heatmap") +
-  labs(title = "Accuracy", subtitle = "Mtry = 2 | Min_n = 9") +
+  labs(title = "Accuracy", subtitle = "mtry = 2 | min_n = 9") +
   theme_bw() +
   theme(plot.title = element_text(hjust = 0.5, color = "darkolivegreen", face = "bold"),
         plot.subtitle = element_text(hjust = 0.5, color = "skyblue"),
@@ -1674,7 +1671,7 @@ rf_CM_Acc <- rf_Results %>%
 rf_CM_F <- rf_Results %>% 
   conf_mat(truth = Drafted, estimate = RF_F_Pred) %>% 
   autoplot(type = "heatmap") +
-  labs(title = "F Score", subtitle = "Mtry = 1 | Min_n = 1") +
+  labs(title = "F Score", subtitle = "mtry = 1 | min_n = 9") +
   theme_bw() +
   theme(plot.title = element_text(hjust = 0.5, color = "darkolivegreen", face = "bold"),
         plot.subtitle = element_text(hjust = 0.5, color = "skyblue"),
@@ -1713,7 +1710,7 @@ rf_Metrics <- rf_Metrics %>%
 # Modeling: Refit: Probabiliy Threshold - Logistic Regression ----
 
 
-# Accuracy 71.5%: penaly = 0.006, mix = 0.5
+# Accuracy (Simple) 71.1%: penaly = 0.001, mix = 0.5
 
 # - thresholds
 log_Thres <- log_Results %>% 
@@ -1736,18 +1733,19 @@ log_Thres %>%
   geom_line(linetype = 2, size = 1) +
   geom_vline(xintercept = max_j_log, alpha = 0.6, size = 2, color = "palegreen4") +
   geom_vline(xintercept = 0.5, alpha = 0.6, linetype = 1, size = 1, color = "grey20") +
-  labs(title = "Logistic Regression - Optimal Threshold",
-       subtitle = "Penalty = 0.006 | Mix = 0.5",
+  labs(title = "Logistic Regression",
+       subtitle = "penalty = 0.001 | mix = 0.5",
        color = "Metric",
-       x = "Threshold") +
-  scale_alpha_manual(values = c(.08, 1), guide = "none") +
+       x = "Optimal Threshold") +
+  scale_alpha_manual(values = c(.2, 1), guide = "none") +
   scale_color_manual(values = c("palegreen4","red","blue"),
                      labels = c("J_Index", "Sensitivity", "Specificity")) +
   theme_bw() +
   theme(
     plot.title = element_text(face = "bold", hjust = 0.5),
     plot.subtitle = element_text(hjust = 0.5, color = "skyblue"),
-    legend.position = "none"
+    axis.title.y = element_text(color = "tomato"),
+    axis.title.x = element_text(hjust = 0.53, color = "palegreen4", face = "italic")
   )
 
 
@@ -1762,10 +1760,10 @@ log_Results_Thres %>%
   conf_mat(truth = Drafted, estimate = LOG_Acc_Pred6) %>% 
   autoplot(type = "heatmap") +
   labs(title = "Logistic Regression (Thres 60%)",
-       subtitle = "Penalty = 0.006 | Mix = 0.5") +
+       subtitle = "penalty = 0.001 | mix = 0.5") +
   theme_bw() +
-  theme(plot.title = element_text(hjust = 0.5, face = "bold"),
-        plot.subtitle = element_text(hjust = 0.5, color = "darkolivegreen"),
+  theme(plot.title = element_blank(),
+        plot.subtitle = element_blank(),
         axis.title.y = element_text(color = "tomato"),
         axis.title.x = element_text(face = "bold", color = "cyan4"), 
         legend.position = "none")
@@ -1782,11 +1780,12 @@ log_Thres_Metrics <-
          F1 = f_meas(log_Results_Thres, truth = Drafted, estimate = LOG_Acc_Pred6) %>% pull(.estimate) %>% round(3)) 
 
 log_Metrics %>% bind_rows(log_Thres_Metrics)  
+
 #
 # Modeling: Refit: Probabiliy Threshold - Random Forrest ----
 
 
-# Accuracy 70.4%: Mtry = 2, Min_n = 9
+# Accuracy (Simple) 70.4%: Mtry = 2, Min_n = 9
 # - thresholds
 rf_Thres <- rf_Results %>% 
   threshold_perf(Drafted, RF_Acc_Prob, threshold = seq(0.2, 1, by = 0.05))
@@ -1808,10 +1807,10 @@ rf_Thres %>%
   geom_line(linetype = 2, size = 1) +
   geom_vline(xintercept = max_j_rf, alpha = 0.6, size = 2, color = "palegreen4") +
   geom_vline(xintercept = 0.5, alpha = 0.6, linetype = 1, size = 1, color = "grey20") +
-  labs(title = "Random Forrest - Optimal Threshold",
-       subtitle = "Mtry = 2 | Min = 9",
+  labs(title = "Random Forrest",
+       subtitle = "mtry = 2 | min = 9",
        color = "Metric",
-       x = "Threshold") +
+       x = "Optimal Threshold") +
   scale_alpha_manual(values = c(.08, 1), guide = "none") +
   scale_color_manual(values = c("palegreen4","red","blue"),
                      labels = c("J_Index", "Sensitivity", "Specificity")) +
@@ -1819,7 +1818,8 @@ rf_Thres %>%
   theme(
     plot.title = element_text(face = "bold", hjust = 0.5),
     plot.subtitle = element_text(hjust = 0.5, color = "skyblue"),
-    legend.position = "none"
+    axis.title.y = element_text(color = "tomato"),
+    axis.title.x = element_text(hjust = 0.52, color = "palegreen4", face = "italic")
   )
 
 
@@ -1836,8 +1836,8 @@ rf_Results_Thres %>%
   labs(title = "Random Forrest (Thres 60%)",
        subtitle = "Mtry = 2 | Mix = 9") +
   theme_bw() +
-  theme(plot.title = element_text(hjust = 0.5, face = "bold"),
-        plot.subtitle = element_text(hjust = 0.5, color = "darkolivegreen"),
+  theme(plot.title = element_blank(),
+        plot.subtitle = element_blank(),
         axis.title.y = element_text(color = "tomato"),
         axis.title.x = element_text(face = "bold", color = "cyan4"), 
         legend.position = "none")
@@ -1881,17 +1881,17 @@ rf_FINAL_Results <-
 # - Logistic Regression
 Log_ROC_Acc_FINAL <- Log_FINAL_Results %>%
   roc_curve(Drafted, LOG_Acc_Prob) %>% 
-  mutate(Model = "LOG_Acc_p0.006_m0.5")
+  mutate(Model = "LOG_p0.001_m0.5")
 Log_ROC_F_FINAL <- Log_FINAL_Results %>%
   roc_curve(Drafted, LOG_F_Prob) %>% 
-  mutate(Model = "LOG_F_p006_m1")
+  mutate(Model = "LOG_p006_m1")
 # - Random Forrest
 rf_ROC_Acc_FINAL <- rf_FINAL_Results %>%
   roc_curve(Drafted, RF_Acc_Prob) %>% 
-  mutate(Model = "RF_Acc_mtry2_min9")
+  mutate(Model = "RF_mtry2_min9")
 rf_ROC_F_FINAL <- rf_FINAL_Results %>%
   roc_curve(Drafted, RF_F_Prob) %>% 
-  mutate(Model = "RF_F_mtry1_min1")
+  mutate(Model = "RF_mtry1_min9")
 # - Visual
 Log_ROC_Acc_FINAL %>% 
   bind_rows(Log_ROC_F_FINAL, rf_ROC_Acc_FINAL, rf_ROC_F_FINAL) %>% 
@@ -1904,7 +1904,7 @@ Log_ROC_Acc_FINAL %>%
   ) + 
   theme_bw() + 
   theme(plot.title = element_text(hjust = 0.5, face = "bold", size = 15),
-        plot.subtitle = element_text(hjust = 0.5, color = "darkgreen"),
+        plot.subtitle = element_text(hjust = 0.5, color = "darkgreen", face = "bold"),
         axis.title.y = element_text(face = "bold", color = "tomato"),
         axis.title.x = element_text(face = "bold", color = "tomato"), 
         legend.position = "bottom")
@@ -1916,7 +1916,7 @@ log_CM_FINAL_Acc <- Log_FINAL_Results %>%
   conf_mat(truth = Drafted, estimate = LOG_Acc_Pred) %>% 
   autoplot(type = "heatmap") +
   labs(title = "Accuracy 50%",
-       subtitle = "Penalty = 0.006 | Mix = 0.5") +
+       subtitle = "penalty = 0.001 | mix = 0.5") +
   theme_bw() +
   theme(plot.title = element_text(hjust = 0.5, color = "darkolivegreen", face = "bold"),
         plot.subtitle = element_text(hjust = 0.5, color = "skyblue"),
@@ -1928,7 +1928,7 @@ log_CM_FINAL_Acc60 <- Log_FINAL_Results %>%
   conf_mat(truth = Drafted, estimate = LOG_Acc60_Pred) %>% 
   autoplot(type = "heatmap") +
   labs(title = "Accuracy 60%",
-       subtitle = "Penalty = 0.006 | Mix = 0.5") +
+       subtitle = "penalty = 0.001 | mix = 0.5") +
   theme_bw() +
   theme(plot.title = element_text(hjust = 0.5, color = "darkolivegreen", face = "bold"),
         plot.subtitle = element_text(hjust = 0.5, color = "skyblue"),
@@ -1941,7 +1941,7 @@ log_CM_FINAL_F <- Log_FINAL_Results %>%
   conf_mat(truth = Drafted, estimate = LOG_F_Pred) %>% 
   autoplot(type = "heatmap") +
   labs(title = "F Score",
-       subtitle = "Penalty = 0.006 | Mix = 1") +
+       subtitle = "penalty = 0.006 | mix = 1") +
   theme_bw() +
   theme(plot.title = element_text(hjust = 0.5, color = "darkolivegreen", face = "bold"),
         plot.subtitle = element_text(hjust = 0.5, color = "skyblue"),
@@ -1958,7 +1958,7 @@ rf_CM_FINAL_Acc <- rf_FINAL_Results %>%
   conf_mat(truth = Drafted, estimate = RF_Acc_Pred) %>% 
   autoplot(type = "heatmap") +
   labs(title = "Accuracy 50%",
-       subtitle = "Mtry = 2 | Min = 9") +
+       subtitle = "mtry = 2 | min = 9") +
   theme_bw() +
   theme(plot.title = element_text(hjust = 0.5, color = "darkolivegreen", face = "bold"),
         plot.subtitle = element_text(hjust = 0.5, color = "skyblue"),
@@ -1970,7 +1970,7 @@ rf_CM_FINAL_Acc60 <- rf_FINAL_Results %>%
   conf_mat(truth = Drafted, estimate = RF_Acc60_Pred) %>% 
   autoplot(type = "heatmap") +
   labs(title = "Accuracy 60%",
-       subtitle = "Mtry = 2 | Min = 9") +
+       subtitle = "mtry = 2 | min = 9") +
   theme_bw() +
   theme(plot.title = element_text(hjust = 0.5, color = "darkolivegreen", face = "bold"),
         plot.subtitle = element_text(hjust = 0.5, color = "skyblue"),
@@ -1983,7 +1983,7 @@ rf_CM_FINAL_F <- rf_FINAL_Results %>%
   conf_mat(truth = Drafted, estimate = RF_F_Pred) %>% 
   autoplot(type = "heatmap") +
   labs(title = "F Score",
-       subtitle = "Mtry = 1 | Min = 1") +
+       subtitle = "mtry = 1 | min = 9") +
   theme_bw() +
   theme(plot.title = element_text(hjust = 0.5, color = "darkolivegreen", face = "bold"),
         plot.subtitle = element_text(hjust = 0.5, color = "skyblue"),
@@ -1998,7 +1998,7 @@ ggarrange(rf_CM_FINAL_Acc, rf_CM_FINAL_Acc60, rf_CM_FINAL_F, nrow = 1)
 
 
 # METRICS
-# - Logistic Regression Acc 1
+# - Logistic Regression 50% (penalty = 0.001, mix = 0.5)
 log_Acc_FINAL_Metrics <- 
   tibble(Model = "Logistic_Regression_Acc",
          AUC = roc_auc(Log_FINAL_Results, Drafted, LOG_Acc_Prob) %>% pull(.estimate) %>% round(3),
@@ -2008,7 +2008,7 @@ log_Acc_FINAL_Metrics <-
          Precision = precision(Log_FINAL_Results, truth = Drafted, estimate = LOG_Acc_Pred) %>% pull(.estimate) %>% round(3),
          Recall = recall(Log_FINAL_Results, truth = Drafted, estimate = LOG_Acc_Pred) %>% pull(.estimate) %>% round(3),
          F1 = f_meas(Log_FINAL_Results, truth = Drafted, estimate = LOG_Acc_Pred) %>% pull(.estimate) %>% round(3))
-# - Logistic Regression Acc (60%)
+# - Logistic Regression 60% (penalty = 0.001, mix = 0.5)
 log_Acc60_FINAL_Metrics <- 
   tibble(Model = "Logistic_Regression_Acc60",
          AUC = roc_auc(Log_FINAL_Results, Drafted, LOG_Acc_Prob) %>% pull(.estimate) %>% round(3),
@@ -2018,7 +2018,7 @@ log_Acc60_FINAL_Metrics <-
          Precision = precision(Log_FINAL_Results, truth = Drafted, estimate = LOG_Acc60_Pred) %>% pull(.estimate) %>% round(3),
          Recall = recall(Log_FINAL_Results, truth = Drafted, estimate = LOG_Acc60_Pred) %>% pull(.estimate) %>% round(3),
          F1 = f_meas(Log_FINAL_Results, truth = Drafted, estimate = LOG_Acc60_Pred) %>% pull(.estimate) %>% round(3))
-# - Logistic Regression F
+# - Logistic Regression F (penalty = 0.006, mix = 1)
 log_F_FINAL_Metrics <- 
   tibble(Model = "Logistic_Regression_F",
          AUC = roc_auc(Log_FINAL_Results, Drafted, LOG_F_Prob) %>% pull(.estimate) %>% round(3),
@@ -2033,7 +2033,7 @@ log_Metrics_FINAL <- log_Acc_FINAL_Metrics %>%
   bind_rows(log_Acc60_FINAL_Metrics, log_F_FINAL_Metrics)
 
 
-# - Random Forrest Acc 
+# - Random Forrest Acc 50% (mtry = 2, min = 9)
 rf_Acc_FINAL_Metrics <- 
   tibble(Model = "Random_Forrest_Acc",
          AUC = roc_auc(rf_FINAL_Results, Drafted, RF_Acc_Prob) %>% pull(.estimate) %>% round(3),
@@ -2043,7 +2043,7 @@ rf_Acc_FINAL_Metrics <-
          Precision = precision(rf_FINAL_Results, truth = Drafted, estimate = RF_Acc_Pred) %>% pull(.estimate) %>% round(3),
          Recall = recall(rf_FINAL_Results, truth = Drafted, estimate = RF_Acc_Pred) %>% pull(.estimate) %>% round(3),
          F1 = f_meas(rf_FINAL_Results, truth = Drafted, estimate = RF_Acc_Pred) %>% pull(.estimate) %>% round(3))
-# - Random Forrest Acc (60%)
+# - Random Forrest Acc 60% (mtry = 2, min = 9)
 rf_Acc60_FINAL_Metrics <- 
   tibble(Model = "Random_Forrest_Acc60",
          AUC = roc_auc(rf_FINAL_Results, Drafted, RF_Acc_Prob) %>% pull(.estimate) %>% round(3),
@@ -2053,7 +2053,7 @@ rf_Acc60_FINAL_Metrics <-
          Precision = precision(rf_FINAL_Results, truth = Drafted, estimate = RF_Acc60_Pred) %>% pull(.estimate) %>% round(3),
          Recall = recall(rf_FINAL_Results, truth = Drafted, estimate = RF_Acc60_Pred) %>% pull(.estimate) %>% round(3),
          F1 = f_meas(rf_FINAL_Results, truth = Drafted, estimate = RF_Acc60_Pred) %>% pull(.estimate) %>% round(3))
-# - Random Forrest F
+# - Random Forrest F (mtry = 1, min = 9)
 rf_F_FINAL_Metrics <- 
   tibble(Model = "Random_Forrest_F",
          AUC = roc_auc(rf_FINAL_Results, Drafted, RF_F_Prob) %>% pull(.estimate) %>% round(3),
@@ -2076,8 +2076,8 @@ metrics_FINAL <- log_Metrics_FINAL %>%
 
 # Top Models: 
 # - F Score
-#       1) 81.2%: Random Forrest.F
-#       2) 80.6%: Random Forrest.Acc
+#       1) 80.2%: Random Forrest.Acc
+#       2) 79.8%: Random Forrest.F
 # - Accuracy
 #       1) 71.7%: Random Forrest.Acc
 #       2) 71.4%: Random Forrest.F
