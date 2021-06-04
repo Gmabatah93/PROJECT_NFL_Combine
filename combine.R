@@ -130,13 +130,16 @@ nfl_draft %>%
   ggplot(aes(drafted, n)) +
   geom_col(aes(fill = drafted)) +
   geom_label(aes(label = n)) +
+  labs(fill = "Drafted ?",
+       caption = "Year: 2000 - 2018") +
   theme(
     axis.text.y = element_blank(),
     axis.title.y = element_blank(),
     axis.title.x = element_blank(),
     axis.text.x = element_blank(),
     legend.position = "top",
-    legend.title = element_text(face = "bold", size = 15)
+    legend.title = element_text(face = "bold", size = 15),
+    plot.caption = element_text(color = "gray70", face = "italic")
   ) + 
   scale_fill_manual(values = c("grey80", "forestgreen"))
 
@@ -165,12 +168,14 @@ gg_draft_Side_prop <- nfl_draft %>%
   mutate(side = fct_reorder(side, n)) %>% 
   ggplot(aes(side, n, fill = drafted)) +
   geom_col(position = "fill") + geom_hline(yintercept = 0.66, color = "red") +
+  labs(caption = "Year: 2000 - 2018") +
   theme(
     axis.title.y = element_blank(),
     axis.text.y = element_text(size = 12),
     axis.title.x = element_blank(),
     axis.text.x = element_text(face = "italic", size = 15, hjust = 1, angle = 45),
-    legend.position = "none"
+    legend.position = "none",
+    plot.caption = element_text(color = "gray70", face = "italic")
   ) +
   scale_y_continuous(labels = scales::percent_format()) +
   scale_fill_manual(values = c("grey80","forestgreen"))
@@ -186,12 +191,14 @@ gg_draft_Position <- nfl_draft %>%
   mutate(position = fct_reorder(position, n)) %>% 
   ggplot(aes(position, n, fill = drafted)) +
   geom_col(position = "dodge") +
-  labs(title = "Position") +
+  labs(title = "Position",
+       caption = "Year: 2000 - 2018") +
   theme(
     plot.title = element_text(hjust = 0.5, face = "bold", size = 20),
     axis.title.y = element_blank(),
     axis.title.x = element_blank(),
-    legend.position = "none"
+    legend.position = "none",
+    plot.caption = element_text(color = "gray70", face = "italic")
   ) +
   scale_fill_manual(values = c("grey80","forestgreen"))
 gg_draft_position_Offense_prop <- nfl_draft %>%
@@ -258,11 +265,13 @@ gg_draft_conference_prop <- nfl_draft %>%
   ggplot(aes(conference, n, fill = drafted)) +
   geom_col(position = "fill") +
   geom_hline(yintercept = 0.66, color = "red") +
+  labs(caption = "Year: 2000 - 2018") +
   theme(
     axis.title = element_blank(),
     axis.text.y = element_text(size = 12),
     axis.text.x = element_text(angle = 45, hjust = 1, face = "bold"),
-    legend.position = "none"
+    legend.position = "none",
+    plot.caption = element_text(color = "gray70", face = "italic")
   ) +
   scale_y_continuous(labels = scales::percent_format()) +
   scale_fill_manual(values = c("grey80","forestgreen"))
@@ -278,7 +287,9 @@ nfl_draft %>%
                          colors = c("darksalmon","white","royalblue4"),
                          tl.cex = 10,
                          title = "Combine Stats: Correlation") +
-  theme(plot.title = element_text(hjust = 0.5, face = "bold", size = 20))
+  labs(caption = "Year: 2000 - 2018") +
+  theme(plot.title = element_text(hjust = 0.5, face = "bold", size = 20),
+        plot.caption = element_text(color = "gray70", face = "italic"))
 
 # Drafted
 # - Weight ~ Forty: 89
@@ -361,9 +372,9 @@ nfl_draft_PCA %>%
                   col.var = "grey25", alpha.var = "cos2",
                   geom.ind = "point", pointsize = 0.5,
                   col.ind = "grey85", 
-                  title = "Combine PCA Biplot",
+                  title = "PCA Biplot: Combine Stats",
                   legend.title = list(alpha = "Quality of Representation")) +
-  theme(plot.title = element_text(hjust = 0.5, face = "bold", size = 18),
+  theme(plot.title = element_text(hjust = 0.4, face = "bold", size = 18),
         legend.position = "bottom")
 
 # Eigen: 70.1% Explained by PC1
@@ -400,30 +411,30 @@ nfl_draft_PCA %>%
                   geom.ind = "point", pointsize = 0.5,
                   col.ind = nfl_draft$drafted, 
                   addEllipses = TRUE, ellispe.type = "norm",
-                  palette = c("gray80", "forestgreen"),
-                  legend.title = "Drafted") +
+                  palette = c("forestgreen","gray80"),
+                  legend.title = "Drafted ?") +
   guides(alpha = FALSE) +
   theme(plot.title = element_blank(),
         axis.title = element_blank(),
         axis.text = element_blank(),
         legend.position = "top",
-        legend.title = element_text(face = "bold", size = 15))
+        legend.title = element_text(hjust = 0.2,face = "bold", size = 15))
 
 #
 # "DRAFT": Exploratory Data Analysis - Combine ----
 
 # Combine Data: Weight
 # - mean
-nfl_mean_weight <- nfl_draft_simple$weight %>% mean
+nfl_mean_weight <- nfl_draft$weight %>% mean
 # - plot
-gg_Combine_Weight_draft <- nfl_draft_simple %>% 
+gg_Combine_Weight_draft <- nfl_draft %>% 
   ggplot(aes(weight)) +
   geom_histogram(bins = 50, alpha = 0.3) + 
   geom_vline(xintercept = nfl_mean_weight, color = "red") +
   labs(title = "Combine: Weight") +
-  theme(plot.title = element_text(hjust = 0.3, face = "bold", size = 20),
+  theme(plot.title = element_text(hjust = 0.4, face = "bold", size = 20),
         axis.title = element_blank())
-gg_Combine_Weight_Position_draft <- nfl_draft_simple %>% 
+gg_Combine_Weight_Position_draft <- nfl_draft %>% 
   ggplot(aes(weight, fill = side)) +
   geom_density(alpha = 0.1) +
   scale_fill_manual(values = c("blue","red")) +
@@ -434,7 +445,7 @@ gg_Combine_Weight_Position_draft <- nfl_draft_simple %>%
 ggarrange(gg_Combine_Weight_draft, gg_Combine_Weight_Position_draft, ncol = 1)
 
 # - By Side
-gg_Combine_Weight_Offense_draft <- nfl_draft_simple %>% 
+gg_Combine_Weight_Offense_draft <- nfl_draft %>% 
   filter(side == "Offense") %>% 
   ggplot(aes(position, weight, fill = drafted)) +
   geom_boxplot() + geom_hline(yintercept = nfl_mean_weight, color = "red") +
@@ -445,7 +456,7 @@ gg_Combine_Weight_Offense_draft <- nfl_draft_simple %>%
         axis.title.x = element_blank(),
         legend.position = "none") +
   scale_fill_manual(values = c("gray80", "forestgreen"))
-gg_Combine_Weight_Defense_draft <- nfl_draft_simple %>% 
+gg_Combine_Weight_Defense_draft <- nfl_draft %>% 
   filter(side == "Defense") %>% 
   ggplot(aes(position, weight, fill = drafted)) +
   geom_boxplot() + geom_hline(yintercept = nfl_mean_weight, color = "darkred") +
@@ -459,7 +470,7 @@ gg_Combine_Weight_Defense_draft <- nfl_draft_simple %>%
 ggarrange(gg_Combine_Weight_Offense_draft, gg_Combine_Weight_Defense_draft, nrow = 1)  
 
 # - By Conference
-gg_Combine_Weight_Conference_draft <- nfl_draft_simple %>%
+nfl_draft %>%
   mutate(cond = case_when(
     conference %in% c("Division I-A (SEC)", "Division I-A (ACC)", "Division I-A (Big 10)", "Division I-A (Big 12)", "Division I-A (Pac-12)") ~ "Elite",
     conference %in% c("Division I-A (American)", "Division I-A (Sunbelt)", "Division I-A (Mountain West)", "Division I-A (MAC)","Division I-A (Conference USA)") ~ "Division I-A",
@@ -468,28 +479,28 @@ gg_Combine_Weight_Conference_draft <- nfl_draft_simple %>%
   )) %>% 
   ggplot(aes(conference, weight, fill = cond)) +
   geom_boxplot() + geom_hline(yintercept = nfl_mean_weight, color = "red") +
-  labs(title = "Conference") +
+  labs(title = "Conference",
+       caption = "Year: 2000 - 2018") +
   theme(plot.title = element_text(face = "bold", hjust = 0.5, size = 15),
         axis.text.x = element_text(angle = 45, hjust = 1),
         axis.title.y = element_text(colour = "red"),
-        axis.title.x = element_blank()) +
+        axis.title.x = element_blank(),
+        plot.caption = element_text(color = "gray70", face = "italic")) +
   scale_fill_brewer(palette = "YlGnBu")
-# -- visual
-gg_Combine_Weight_Conference_draft
 
 
 # Combine Data: Forty
 # - mean
-nfl_mean_forty <- nfl_draft_simple$forty %>% mean
+nfl_mean_forty <- nfl_draft$forty %>% mean
 # - plot
-gg_Combine_40_draft <- nfl_draft_simple %>% 
+gg_Combine_40_draft <- nfl_draft %>% 
   ggplot(aes(forty)) +
   geom_histogram(bins = 50, alpha = 0.3) + 
   geom_vline(xintercept = nfl_mean_forty, color = "red") +
   labs(title = "Combine: 40") +
-  theme(plot.title = element_text(hjust = 0.3, face = "bold", size = 20),
+  theme(plot.title = element_text(hjust = 0.4, face = "bold", size = 20),
         axis.title = element_blank())
-gg_Combine_40_Position_draft <- nfl_draft_simple %>% 
+gg_Combine_40_Position_draft <- nfl_draft %>% 
   ggplot(aes(forty, fill = side)) +
   geom_density(alpha = 0.1) +
   scale_fill_manual(values = c("blue","red")) +
@@ -500,7 +511,7 @@ gg_Combine_40_Position_draft <- nfl_draft_simple %>%
 ggarrange(gg_Combine_40_draft, gg_Combine_40_Position_draft, ncol = 1)
 
 # - By Side
-gg_Combine_40_Offense_draft <- nfl_draft_simple %>% 
+gg_Combine_40_Offense_draft <- nfl_draft %>% 
   filter(side == "Offense") %>% 
   ggplot(aes(position, forty, fill = drafted)) +
   geom_boxplot() + geom_hline(yintercept = nfl_mean_forty, color = "red") +
@@ -512,7 +523,7 @@ gg_Combine_40_Offense_draft <- nfl_draft_simple %>%
         legend.position = "none") +
   ylim(c(4,6)) +
   scale_fill_manual(values = c("gray80", "forestgreen")) 
-gg_Combine_40_Defense_draft <- nfl_draft_simple %>% 
+gg_Combine_40_Defense_draft <- nfl_draft %>% 
   filter(side == "Defense") %>% 
   ggplot(aes(position, forty, fill = drafted)) +
   geom_boxplot() + geom_hline(yintercept = nfl_mean_forty, color = "darkred") +
@@ -528,7 +539,7 @@ ggarrange(gg_Combine_40_Offense_draft, gg_Combine_40_Defense_draft, nrow = 1)
 
 
 # - By Conference
-gg_Combine_40_Conference_draft <- nfl_draft_simple %>%
+nfl_draft %>%
   mutate(cond = case_when(
     conference %in% c("Division I-A (SEC)", "Division I-A (ACC)", "Division I-A (Big 10)", "Division I-A (Big 12)", "Division I-A (Pac-12)") ~ "Elite",
     conference %in% c("Division I-A (American)", "Division I-A (Sunbelt)", "Division I-A (Mountain West)", "Division I-A (MAC)","Division I-A (Conference USA)") ~ "Division I-A",
@@ -537,28 +548,27 @@ gg_Combine_40_Conference_draft <- nfl_draft_simple %>%
   )) %>% 
   ggplot(aes(conference, forty, fill = cond)) +
   geom_boxplot() + geom_hline(yintercept = nfl_mean_forty, color = "red") +
-  labs(title = "Conference") +
+  labs(title = "Conference",
+       caption = "Year: 2000 - 2018") +
   theme(plot.title = element_text(face = "bold", hjust = 0.5, size = 15),
         axis.text.x = element_text(angle = 45, hjust = 1),
         axis.title.y = element_text(colour = "red"),
-        axis.title.x = element_blank()) +
+        axis.title.x = element_blank(),
+        plot.caption = element_text(color = "gray70", face = "italic")) +
   scale_fill_brewer(palette = "YlGnBu")
-# -- visual
-gg_Combine_40_Conference_draft
-
 
 # Combine Data: Bench
 # - mean
-nfl_mean_bench <- nfl_draft_simple$bench %>% mean
+nfl_mean_bench <- nfl_draft$bench %>% mean
 # - plot
-gg_Combine_Bench_draft <- nfl_draft_simple %>% 
+gg_Combine_Bench_draft <- nfl_draft %>% 
   ggplot(aes(bench)) +
   geom_histogram(bins = 50, alpha = 0.3) + 
   geom_vline(xintercept = nfl_mean_bench, color = "red") +
   labs(title = "Combine: Bench") +
-  theme(plot.title = element_text(hjust = 0.3, face = "bold", size = 20),
+  theme(plot.title = element_text(hjust = 0.4, face = "bold", size = 20),
         axis.title = element_blank())
-gg_Combine_Bench_Position_draft <- nfl_draft_simple %>% 
+gg_Combine_Bench_Position_draft <- nfl_draft %>% 
   ggplot(aes(bench, fill = side)) +
   geom_density(alpha = 0.1) +
   scale_fill_manual(values = c("blue","red")) +
@@ -569,7 +579,7 @@ gg_Combine_Bench_Position_draft <- nfl_draft_simple %>%
 ggarrange(gg_Combine_Bench_draft, gg_Combine_Bench_Position_draft, ncol = 1)
 
 # - By Side
-gg_Combine_Bench_Offense_draft <- nfl_draft_simple %>% 
+gg_Combine_Bench_Offense_draft <- nfl_draft %>% 
   filter(side == "Offense") %>% 
   ggplot(aes(position, bench, fill = drafted)) +
   geom_boxplot() + geom_hline(yintercept = nfl_mean_bench, color = "red") +
@@ -580,7 +590,7 @@ gg_Combine_Bench_Offense_draft <- nfl_draft_simple %>%
         axis.title.x = element_blank(),
         legend.position = "none") +
   scale_fill_manual(values = c("gray80", "forestgreen"))
-gg_Combine_Bench_Defense_draft <- nfl_draft_simple %>% 
+gg_Combine_Bench_Defense_draft <- nfl_draft %>% 
   filter(side == "Defense") %>% 
   ggplot(aes(position, bench, fill = drafted)) +
   geom_boxplot() + geom_hline(yintercept = nfl_mean_bench, color = "darkred") +
@@ -594,7 +604,7 @@ gg_Combine_Bench_Defense_draft <- nfl_draft_simple %>%
 ggarrange(gg_Combine_Bench_Offense_draft, gg_Combine_Bench_Defense_draft, nrow = 1)  
 
 # - By Conference
-gg_Combine_Bench_Conference_draft <- nfl_draft_simple %>%
+nfl_draft %>%
   mutate(cond = case_when(
     conference %in% c("Division I-A (SEC)", "Division I-A (ACC)", "Division I-A (Big 10)", "Division I-A (Big 12)", "Division I-A (Pac-12)") ~ "Elite",
     conference %in% c("Division I-A (American)", "Division I-A (Sunbelt)", "Division I-A (Mountain West)", "Division I-A (MAC)","Division I-A (Conference USA)") ~ "Division I-A",
@@ -603,27 +613,27 @@ gg_Combine_Bench_Conference_draft <- nfl_draft_simple %>%
   )) %>% 
   ggplot(aes(conference, bench, fill = cond)) +
   geom_boxplot() + geom_hline(yintercept = nfl_mean_bench, color = "red") +
-  labs(title = "Conference") +
+  labs(title = "Conference",
+       caption = "Year: 2000 - 2018") +
   theme(plot.title = element_text(face = "bold", hjust = 0.5, size = 15),
         axis.text.x = element_text(angle = 45, hjust = 1),
         axis.title.y = element_text(colour = "red"),
-        axis.title.x = element_blank()) +
+        axis.title.x = element_blank(),
+        plot.caption = element_text(color = "gray70", face = "italic")) +
   scale_fill_brewer(palette = "YlGnBu")
-# -- visual
-gg_Combine_Bench_Conference_draft
 
 # Combine Data: Broad Jump
 # - mean
-nfl_mean_jump <- nfl_draft_simple$broad_jump %>% mean
+nfl_mean_jump <- nfl_draft$broad_jump %>% mean
 # - plot
-gg_Combine_Jump_draft <- nfl_draft_simple %>% 
+gg_Combine_Jump_draft <- nfl_draft %>% 
   ggplot(aes(broad_jump)) +
   geom_histogram(bins = 50, alpha = 0.3) + 
   geom_vline(xintercept = nfl_mean_jump, color = "red") +
   labs(title = "Combine: Broad Jump") +
-  theme(plot.title = element_text(hjust = 0.3, face = "bold", size = 20),
+  theme(plot.title = element_text(hjust = 0.5, face = "bold", size = 20),
         axis.title = element_blank())
-gg_Combine_Jump_Position_draft <- nfl_draft_simple %>% 
+gg_Combine_Jump_Position_draft <- nfl_draft %>% 
   ggplot(aes(broad_jump, fill = side)) +
   geom_density(alpha = 0.1) +
   scale_fill_manual(values = c("blue","red")) +
@@ -634,7 +644,7 @@ gg_Combine_Jump_Position_draft <- nfl_draft_simple %>%
 ggarrange(gg_Combine_Jump_draft, gg_Combine_Jump_Position_draft, ncol = 1)
 
 # - By Side
-gg_Combine_Jump_Offense_draft <- nfl_draft_simple %>% 
+gg_Combine_Jump_Offense_draft <- nfl_draft %>% 
   filter(side == "Offense") %>% 
   ggplot(aes(position, broad_jump, fill = drafted)) +
   geom_boxplot() + geom_hline(yintercept = nfl_mean_jump, color = "red") +
@@ -646,7 +656,7 @@ gg_Combine_Jump_Offense_draft <- nfl_draft_simple %>%
         legend.position = "none") +
   ylim(c(80,140)) +
   scale_fill_manual(values = c("gray80", "forestgreen"))
-gg_Combine_Jump_Defense_draft <- nfl_draft_simple %>% 
+gg_Combine_Jump_Defense_draft <- nfl_draft %>% 
   filter(side == "Defense") %>% 
   ggplot(aes(position, broad_jump, fill = drafted)) +
   geom_boxplot() + geom_hline(yintercept = nfl_mean_jump, color = "darkred") +
@@ -661,7 +671,7 @@ gg_Combine_Jump_Defense_draft <- nfl_draft_simple %>%
 ggarrange(gg_Combine_Jump_Offense_draft, gg_Combine_Jump_Defense_draft, nrow = 1)  
 
 # - By Conference
-gg_Combine_Jump_Conference_draft <- nfl_draft_simple %>%
+nfl_draft %>%
   mutate(cond = case_when(
     conference %in% c("Division I-A (SEC)", "Division I-A (ACC)", "Division I-A (Big 10)", "Division I-A (Big 12)", "Division I-A (Pac-12)") ~ "Elite",
     conference %in% c("Division I-A (American)", "Division I-A (Sunbelt)", "Division I-A (Mountain West)", "Division I-A (MAC)","Division I-A (Conference USA)") ~ "Division I-A",
@@ -670,19 +680,18 @@ gg_Combine_Jump_Conference_draft <- nfl_draft_simple %>%
   )) %>% 
   ggplot(aes(conference, broad_jump, fill = cond)) +
   geom_boxplot() + geom_hline(yintercept = nfl_mean_jump, color = "red") +
-  labs(title = "Conference") +
+  labs(title = "Conference",
+       caption = "Year: 2000 - 2018") +
   theme(plot.title = element_text(face = "bold", hjust = 0.5, size = 15),
         axis.text.x = element_text(angle = 45, hjust = 1),
         axis.title.y = element_text(colour = "red"),
-        axis.title.x = element_blank()) +
+        axis.title.x = element_blank(),
+        plot.caption = element_text(color = "gray70", face = "italic")) +
   scale_fill_brewer(palette = "YlGnBu")
-# -- visual
-gg_Combine_Jump_Conference_draft
-
 
 
 # "DRAFT": Exploratory Data Analysis - Offense ----
-nfl_draft_simple %>% 
+nfl_draft %>% 
   filter(side =="Offense") %>% 
   count(drafted)
 # - note: 874 drafted
@@ -690,7 +699,7 @@ nfl_draft_simple %>%
 # STATS: 
 
 # Summary
-nfl_draft_simple %>% 
+nfl_draft %>% 
   filter(side == "Offense") %>% 
   summarise(Avg_Weight = mean(weight),
             Avg_Forty = mean(forty),
@@ -698,7 +707,7 @@ nfl_draft_simple %>%
             Avg_Bench = mean(bench))
 
 # By Conference
-nfl_offense_stat_Conference <- nfl_draft_simple %>% 
+nfl_offense_stat_Conference <- nfl_draft %>% 
   filter(side == "Offense") %>% 
   group_by(conference, drafted) %>% 
   summarise(Weight = mean(weight),
@@ -708,7 +717,7 @@ nfl_offense_stat_Conference <- nfl_draft_simple %>%
   gather(Weight, Forty, BroadJump, Bench,
          key = "Measure", value = "Stat")
 # - plot
-gg_Offense_Conference_drafted <- nfl_offense_stat_Conference %>% 
+nfl_offense_stat_Conference %>% 
   ggplot(aes(conference, Stat, fill = drafted)) +
   geom_col(position = "dodge") +
   facet_wrap(~Measure, scales = "free_y") +
@@ -720,11 +729,9 @@ gg_Offense_Conference_drafted <- nfl_offense_stat_Conference %>%
     legend.position = "none"
   ) +
   scale_fill_manual(values = c("grey80","forestgreen"))
-# - visual
-gg_Offense_Conference_drafted
 
 # By Position
-nfl_offense_stat_Position <- nfl_draft_simple %>% 
+nfl_offense_stat_Position <- nfl_draft %>% 
   filter(side == "Offense") %>% 
   group_by(position, drafted) %>% 
   summarise(Weight = mean(weight),
@@ -734,7 +741,7 @@ nfl_offense_stat_Position <- nfl_draft_simple %>%
   gather(Weight, Forty, BroadJump, Bench,
          key = "Measure", value = "Stat")
 # - plot
-gg_Offense_Position_drafted <-  nfl_offense_stat_Position %>% 
+nfl_offense_stat_Position %>% 
   ggplot(aes(position, Stat, fill = drafted)) +
   geom_col(position = "dodge") +
   facet_wrap(~Measure, scales = "free_y") +
@@ -745,11 +752,9 @@ gg_Offense_Position_drafted <-  nfl_offense_stat_Position %>%
     legend.position = "none"
   ) +
   scale_fill_manual(values = c("grey80","forestgreen"))
-# - visual
-gg_Offense_Position_drafted
 
 # Statistical Test
-nfl_df %>% 
+nfl_draft %>% 
   filter(side == "Offense") %>% 
   mutate(drafted = ifelse(drafted == "Yes", 1, 0)) %>% 
   glm(drafted ~ weight + forty + broad_jump + bench, family = "binomial", data = .) %>% 
@@ -757,7 +762,7 @@ nfl_df %>%
   mutate(estimate = plogis(estimate),
          p.value = round(p.value,3))
 
-nfl_df %>% 
+nfl_draft %>% 
   filter(side == "Offense") %>% 
   mutate(drafted = ifelse(drafted == "Yes", 1, 0)) %>% 
   glm(drafted ~ conference + weight + forty + broad_jump + bench, family = "binomial", data = .) %>% 
@@ -765,7 +770,7 @@ nfl_df %>%
   mutate(estimate = plogis(estimate),
          p.value = round(p.value,3))
 
-nfl_df %>% 
+nfl_draft %>% 
   filter(side == "Offense") %>% 
   mutate(drafted = ifelse(drafted == "Yes", 1, 0)) %>%
   glm(drafted ~ position + weight + forty + broad_jump + bench, family = "binomial", data = .) %>% 
@@ -773,7 +778,7 @@ nfl_df %>%
   mutate(estimate = plogis(estimate),
          p.value = round(p.value,3))
 
-nfl_df %>% 
+nfl_draft %>% 
   filter(side == "Offense") %>% 
   mutate(drafted = ifelse(drafted == "Yes", 1, 0)) %>%
   glm(drafted ~ position + conference + weight + forty + broad_jump + bench, family = "binomial", data = .) %>% 
