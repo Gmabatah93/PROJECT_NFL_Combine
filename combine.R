@@ -9,7 +9,7 @@ library(FactoMineR)
 library(factoextra)
 library(probably)
 library(vip)
-library(DALEX)
+library(DALEXtra)
 library(doParallel)
 
 # Data ----
@@ -1328,9 +1328,10 @@ log_fit_F <-
 # Modeling: Fit - Random Forest ----
 
 # Start Parallel Processing
+set.seed(101)
 cl_6 <- makeCluster(6)
 registerDoParallel(cl_6)
-set.seed(101)
+
 # Normal
 rf_tune_normal <-
   rf_wflow %>% 
@@ -2064,6 +2065,7 @@ rf_F_FINAL_Metrics <-
          Recall = recall(rf_FINAL_Results, truth = Drafted, estimate = RF_F_Pred) %>% pull(.estimate) %>% round(3),
          F1 = f_meas(rf_FINAL_Results, truth = Drafted, estimate = RF_F_Pred) %>% pull(.estimate) %>% round(3))
 
+
 rf_Metrics_FINAL <- rf_Acc_FINAL_Metrics %>% 
   bind_rows(rf_Acc60_FINAL_Metrics, rf_F_FINAL_Metrics)
 
@@ -2071,7 +2073,8 @@ rf_Metrics_FINAL <- rf_Acc_FINAL_Metrics %>%
 metrics_FINAL <- log_Metrics_FINAL %>% 
   bind_rows(rf_Metrics_FINAL)
 
-# Feature Selection ----
+#
+# Feature Selection: VIP ----
 
 
 # Top Models: 
@@ -2164,3 +2167,37 @@ exp_LOG.F_test <- explain(model = log_fit_F,
 
 # - Variable Importance
 vip_RF <- model_parts(exp_RF.F_test, type = "difference")
+
+# DALEX
+# Feature Selection: DALEX ----
+
+# Explainer
+rf_EXP <- 
+  explain_tidymodels(model = rf_fit_Acc, 
+                     data = select(nfl_test, -drafted),
+                     y = ifelse(nfl_test$drafted == "Yes", 1,0),
+                     type = "classification"
+  )
+
+log_EXP <- 
+  explain_tidymodels(model = log_fit_F, 
+                     data = select(nfl_test, -drafted),
+                     y = ifelse(nfl_test$drafted == "Yes", 1,0),
+                     type = "classification"
+                    )
+
+# Feature Importance
+# - Random Forrest
+feature_importance()
+# Partial Dependency Plots
+# - Random Forrest
+model_profile(explainer = rf_EXP,
+              variables = "forty",
+              N = NULL,
+              groups = "side") %>% plot()
+# - Random Forrest
+model_profile(explainer = rf_EXP,
+              variables = "forty",
+              N = NULL,
+              groups = "side") %>% plot()
+
