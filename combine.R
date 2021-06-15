@@ -933,6 +933,7 @@ nfl_log_recipe_normal %>%
 
 
 # PCA
+set.seed(101)
 nfl_log_recipe_pca <- 
   recipe(drafted ~ .,
          data = nfl_train) %>% 
@@ -1026,6 +1027,7 @@ nfl_rf_recipe_normal %>%
   glimpse()
 
 # PCA
+set.seed(101)
 nfl_rf_recipe_pca <- 
   recipe(drafted ~ .,
          data = nfl_train) %>% 
@@ -2099,9 +2101,9 @@ metrics_FINAL <- log_Metrics_FINAL %>%
 # Variable Importance: Impurity
 # - Random Forrest.F (Mtry = 1 | Min = 1)
 # - vip
-rf_fit_F %>% 
+log_fit_Acc %>% 
   pull_workflow_fit() %>% 
-  vip(num_features = 10) +
+  vip(num_features = 20) +
   theme_bw()
 
 # - Logistic Regression.F (Penalty = 0.006 | Mix = 1)
@@ -2109,106 +2111,107 @@ rf_fit_F %>%
 # - vip
 log_fit_F %>% 
   pull_workflow_fit() %>% 
-  vip(num_features = 10) + 
+  vip(num_features = 20) + 
   theme_bw()
-
-# DALEX
-nfl_test_num 
-nfl_test %>%
-  select(-player) %>% 
-  mutate(drafted = ifelse(drafted == "Yes", 1,0))
-
-bake(prep(nfl_rf_recipe_simple), new_data = nfl_test) %>% 
-  select(-player, -school, -team) %>%
-  count(conference)
-
-nfl_test_num <- 
-  bake(prep(nfl_rf_recipe_simple), new_data = nfl_test) %>% 
-  select(-player, -school, -team) %>% 
-  mutate(position = case_when(
-              position == "C"    ~ 1,
-              position == "CB"   ~ 2,
-              position == "DE"   ~ 3,
-              position == "DT"   ~ 4 ,
-              position == "EDGE" ~ 5,
-              position == "FB"   ~ 6,
-              position == "FS"   ~ 7,
-              position == "ILB"  ~ 8,
-              position == "LS"   ~ 9,
-              position == "OG"   ~ 10,
-              position == "OLB"  ~ 11,
-              position == "OT"   ~ 12,
-              position == "QB"   ~ 13,
-              position == "RB"   ~ 14,
-              position == "SS"   ~ 15,
-              position == "TE"   ~ 16,
-              position == "WR"   ~ 17),
-         conference = case_when(
-             conference == "Division I-A (ACC)"             ~ 1,
-             conference == "Division I-A (American)"        ~ 2,
-             conference == "Division I-A (Big 10)"          ~ 3,
-             conference == "Division I-A (Big 12)"          ~ 4,
-             conference == "Division I-A (Conference USA)" ~ 5,
-             conference == "Division I-A (MAC)"             ~ 6,
-             conference == "Division I-A (Mountain West)"   ~ 7,
-             conference == "Division I-A (Pac-12)"          ~ 8,
-             conference == "Division I-A (SEC)"             ~ 9,
-             conference == "Division I-A (Sunbelt)"         ~ 10,
-             conference == "Division I-AA"                  ~ 11,
-             conference == "Division II & III"              ~ 12
-         ),
-         drafted = ifelse(drafted == "Yes",1,0))
-
-model_performance(exp_RF.F_test)
-# - Random Forrest (Mtry = 1 | Min_n = 1)
-exp_RF.F_test <- explain(model = rf_fit_F,
-                         data = nfl_test_num, y = nfl_test_num$drafted,
-                         type = "classification",
-                         label = "Random Forrest (Mtry = 1 | Min_n = 1)")
-
-# - Logistic Regression (Penalty = 0.006 | Mix = 1)
-exp_LOG.F_test <- explain(model = log_fit_F,
-                          data = nfl_test_num, y = nfl_test_num$drafted,
-                          type = "classification",
-                          label = "Logistic Regression (Penalty = 0.006 | Mix = 1)")
-
-# - Variable Importance
-vip_RF <- model_parts(exp_RF.F_test, type = "difference")
 
 # DALEX
 # Feature Selection: DALEX ----
 
-# Data
-nfl_test_prep <- bake(object = prep(nfl_log_recipe_normal), new_data = nfl_test) %>% 
-  select(-player, -school, -team)
-
-predict(log_fit_Acc, new_data = nfl_test)
-
-custom_predict <- function(m, newdata) {
-  
-   ifelse(predict(m, newdata) == "Yes",1,0)
+# Preprocess
+custom_func_Prob <- function(object, newdata) {
+  predict(log_fit_Acc, new_data = newdata, type = "prob")$.pred_Yes
 }
 
-predict_func(log_fit_Acc)
-predict(rf_fit_F, new_data = nfl_test)
-predict(log_fit_F, new_data = nfl_test)
+custom_func_Pred <- function(object, newdata) {
+  ifelse(predict(log_fit_Acc, new_data = newdata)$.pred_class == "Yes",1,0)
+}
 
-glm_delete <- glmnet(x = drafted ~ forty + bench + conference, data = nfl_train,family = "binomial")
-# Explainer
 
-log_EXP_Acc <- explain(model = log_fit_Acc$fit,
-                       data = nfl_test,
-                       y = ifelse(nfl_test$drafted == "Yes", 1,0),
-                       predict_function = 
-                       )
+# Explainer 
+EXP_log_Acc_Prob <- explain_tidymodels(model = log_fit_Acc,
+                                       data = nfl_test,
+                                       y = nfl_test$drafted == "Yes",
+                                       predict_function = custom_func_Prob,
+                                       label = "Logistic Regression (Prob)")
+EXP_log_Acc_Pred <- explain_tidymodels(model = log_fit_Acc,
+                                       data = nfl_test,
+                                       y = nfl_test$drafted == "Yes",
+                                       predict_function = custom_func_Pred,
+                                       label = "Logistic Regression (Pred)")
 
-# Feature Importance
-# - Visual
-plot(vip_rf_Acc, vip_rf_F,
-     max_vars = 20, show_boxplots = FALSE)
+# Dataset-Level
+# model
+# - performance
+mp_log_Prob <- model_performance(EXP_log_Acc_Prob)
+mp_log_Pred <- model_performance(EXP_log_Acc_Pred)
 
-# Partial-Dependence
-pd_rf_Acc <- model_profile(explainer = rf_EXP, 
-                           variables = c("forty","weight","broad_jump","bench","height"),
-                           groups = "side")
-plot(pd_rf_Acc)
+# - feature importance
+set.seed(101)
+vip_log_Prob <- model_parts(explainer = EXP_log_Acc_Prob,
+                            type = "variable_importance",
+                            B = 20)
+set.seed(101)
+vip_log_Pred <- model_parts(explainer = EXP_log_Acc_Pred,
+                            type = "difference",
+                            B = 20)
+
+plot(vip_log_Prob, vip_log_Pred, show_boxplots = FALSE)
+
+# - partial dependency
+vip_variables <- c("forty","weight")
+
+set.seed(101)
+pdp_log_Prob <- model_profile(explainer = EXP_log_Acc_Prob)
+set.seed(101)
+pdp_log_Pred <- model_profile(explainer = EXP_log_Acc_Pred)
+
+pdp_pos_log_Prob <- model_profile(explainer = EXP_log_Acc_Prob,
+                                  variables = vip_variables,
+                                  groups = "position")
+pdp_pos_log_Pred <- model_profile(explainer = EXP_log_Acc_Pred,
+                                  variables = vip_variables,
+                                  groups = "position")
+
+pdp_conf_log_Prob <- model_profile(explainer = EXP_log_Acc_Prob,
+                                   variables = vip_variables,
+                                   groups = "conference")
+
+pdp_conf_log_Pred <- model_profile(explainer = EXP_log_Acc_Pred,
+                                   variables = vip_variables,
+                                   groups = "conference")
+
+plot(pdp_log_Prob, pdp_log_Pred)
+
+plot(pdp_pos_log_Prob)
+plot(pdp_pos_log_Pred)
+
+plot(pdp_conf_log_Prob)
+plot(pdp_conf_log_Pred)
+
+# Instance-Level: Running Backs
+nfl_test_DC <- nfl_test %>% filter(player == "Dalvin Cook")
+
+# - breakdown
+bd_log_DC_Prob <- predict_parts(explainer = EXP_log_Acc_Prob,
+                                new_observation = nfl_test_DC,
+                                type = "break_down")
+
+bd_log_DC_Pred <- predict_parts(explainer = EXP_log_Acc_Pred,
+                                new_observation = nfl_test_DC,
+                                type = "break_down")
+
+plot(bd_log_DC_Prob)
+
+# Instance-Level: Offensive Takles
+nfl_test_KM <- nfl_test %>% filter(player == "Kolton Miller")
+
+# - breakdown
+bd_log_KM_Prob <- predict_parts(explainer = EXP_log_Acc_Prob,
+                                new_observation = nfl_test_KM,
+                                type = "break_down")
+bd_log_KM_Pred <- predict_parts(explainer = EXP_log_Acc_Pred,
+                                new_observation = nfl_test_KM,
+                                type = "break_down")
+
+plot(bd_log_KM_Prob)
+plot(bd_log_KM_Pred)
