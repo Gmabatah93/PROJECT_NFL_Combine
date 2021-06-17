@@ -2115,103 +2115,218 @@ log_fit_F %>%
   theme_bw()
 
 # DALEX
-# Feature Selection: DALEX ----
+# Feature Selection: DALEX (Explainer) ----
 
 # Preprocess
-custom_func_Prob <- function(object, newdata) {
-  predict(log_fit_Acc, new_data = newdata, type = "prob")$.pred_Yes
+custom_func_Prob <- function(model, newdata) {
+  predict(object = model, new_data = newdata, type = "prob")$.pred_Yes
 }
 
-custom_func_Pred <- function(object, newdata) {
-  ifelse(predict(log_fit_Acc, new_data = newdata)$.pred_class == "Yes",1,0)
+custom_func_Pred <- function(model, newdata) {
+  ifelse(predict(object = model, new_data = newdata)$.pred_class == "Yes",1,0)
 }
 
 
 # Explainer 
-EXP_log_Acc_Prob <- explain_tidymodels(model = log_fit_Acc,
-                                       data = nfl_test,
-                                       y = nfl_test$drafted == "Yes",
-                                       predict_function = custom_func_Prob,
-                                       label = "Logistic Regression (Prob)")
-EXP_log_Acc_Pred <- explain_tidymodels(model = log_fit_Acc,
-                                       data = nfl_test,
-                                       y = nfl_test$drafted == "Yes",
-                                       predict_function = custom_func_Pred,
-                                       label = "Logistic Regression (Pred)")
+# - Logistic Regression FULL (Acc): P = 0.001, M = 0.5
+EXP_log_Acc <- explain_tidymodels(model = log_fit_Acc,
+                                  data = nfl_test,
+                                  y = nfl_test$drafted == "Yes",
+                                  predict_function = custom_func_Prob,
+                                  label = "LOG-Acc")
+# Random Forrest SIMPLE (F): Mtry = 6, Min = 9
+EXP_rf_F <- explain_tidymodels(model = rf_fit_F,
+                               data = nfl_test,
+                               y = nfl_test$drafted == "Yes",
+                               predict_function = custom_func_Prob,
+                               label = "RF-F")
+# Logistic Regression (F Score): P = 1, P = 9
+EXP_log_F <- explain_tidymodels(model = log_fit_F,
+                                data = nfl_test,
+                                y = nfl_test$drafted == "Yes",
+                                predict_function = custom_func_Prob,
+                                label = "LOG-F")
+#
+# Feature Selection: DALEX (Dataset) ----
 
-# Dataset-Level
-# model
-# - performance
-mp_log_Prob <- model_performance(EXP_log_Acc_Prob)
-mp_log_Pred <- model_performance(EXP_log_Acc_Pred)
+# Model Performance
+mp_log_Acc <- model_performance(EXP_log_F)
+mp_rf_F <- model_performance(EXP_rf_F)
+mp_log_F <- model_performance(EXP_log_F)
 
-# - feature importance
+# Feature Importance
 set.seed(101)
-vip_log_Prob <- model_parts(explainer = EXP_log_Acc_Prob,
-                            type = "variable_importance",
-                            B = 20)
+vip_log_Acc <- model_parts(explainer = EXP_log_Acc_Prob,
+                           type = "variable_importance",
+                           B = 20)
 set.seed(101)
-vip_log_Pred <- model_parts(explainer = EXP_log_Acc_Pred,
-                            type = "difference",
-                            B = 20)
+vip_rf_F <- model_parts(explainer = EXP_rf_F_Prob,
+                        type = "variable_importance",
+                        B = 20)
+set.seed(101)
+vip_log_F <- model_parts(explainer = EXP_log_F_Prob,
+                         type = "variable_importance",
+                         B = 20)
 
-plot(vip_log_Prob, vip_log_Pred, show_boxplots = FALSE)
+plot(vip_log_Acc, vip_rf_F, vip_log_F,
+     max_vars = 10)
 
-# - partial dependency
-vip_variables <- c("forty","weight")
+
+# Partial Dependency
+vip_variables <- c("forty","weight","bench")
 
 set.seed(101)
-pdp_log_Prob <- model_profile(explainer = EXP_log_Acc_Prob)
+pdp_log_Acc <- model_profile(explainer = EXP_log_Acc_Prob,
+                             variables = vip_variables)
+pdp_rf <- model_profile(explainer = EXP_rf_F_Prob,
+                        variables = vip_variables)
+pdp_log_F <- model_profile(explainer = EXP_log_F_Prob,
+                           variables = vip_variables)
+
+plot(pdp_log_Acc, geom = "profiles")
+plot(pdp_rf, geom = "profiles")
+plot(pdp_log_F, geom = "profiles")
+
+plot(pdp_log_Acc, pdp_rf, pdp_log_F)
+
+# Partial Dependency (Clustered)
+pdp_rf_k2 <- model_profile(explainer = EXP_rf_F_Prob,
+                           variables = vip_variables,
+                           k = 3)
+pdp_log_F_k2 <- model_profile(explainer = EXP_log_Acc_Prob,
+                              variables = vip_variables,
+                              k = 3)
+
+plot(pdp_rf_k2, geom = "profiles")
+plot(pdp_log_F_k2, geom = "profiles")
+
+# Partial Dependency (Grouped)
+# - Side
 set.seed(101)
-pdp_log_Pred <- model_profile(explainer = EXP_log_Acc_Pred)
+pdp_side_rf <- model_profile(explainer = EXP_rf_F,
+                             variables = vip_variables,
+                             groups = "side")
+pdp_side_log_F <- model_profile(explainer = EXP_log_F,
+                                variables = vip_variables,
+                                groups = "side")
+plot(pdp_side_rf)
+plot(pdp_side_log_F)
 
-pdp_pos_log_Prob <- model_profile(explainer = EXP_log_Acc_Prob,
-                                  variables = vip_variables,
-                                  groups = "position")
-pdp_pos_log_Pred <- model_profile(explainer = EXP_log_Acc_Pred,
-                                  variables = vip_variables,
-                                  groups = "position")
+# - Position
+set.seed(101)
+pdp_pos_rf_F <- model_profile(explainer = EXP_rf_F,
+                              variables = vip_variables,
+                              groups = "position")
 
-pdp_conf_log_Prob <- model_profile(explainer = EXP_log_Acc_Prob,
-                                   variables = vip_variables,
-                                   groups = "conference")
+pdp_pos_log_F <- model_profile(explainer = EXP_log_F,
+                               variables = vip_variables,
+                               groups = "position")
 
-pdp_conf_log_Pred <- model_profile(explainer = EXP_log_Acc_Pred,
-                                   variables = vip_variables,
-                                   groups = "conference")
+plot(pdp_pos_rf_F, geom = "profiles")
+plot(pdp_pos_log_F, geom = "profiles")
 
-plot(pdp_log_Prob, pdp_log_Pred)
+# - Conference
+set.seed(101)
+pdp_conf_rf <- model_profile(explainer = EXP_rf_F,
+                             variables = vip_variables,
+                             groups = "conference")
+pdp_conf_log_F <- model_profile(explainer = EXP_log_F,
+                                variables = vip_variables,
+                                groups = "conference")
 
-plot(pdp_pos_log_Prob)
-plot(pdp_pos_log_Pred)
+plot(pdp_conf_rf, geom = "profiles")
+plot(pdp_conf_log_F, geom = "profiles")
 
-plot(pdp_conf_log_Prob)
-plot(pdp_conf_log_Pred)
+# Local-Dependence Profile
+ld_rf_F <- model_profile(explainer = EXP_rf_F,
+                         type = "conditional",
+                         variables = vip_variables)
+ld_log_F <- model_profile(explainer = EXP_log_F,
+                          type = "conditional",
+                          variables = vip_variables)
 
-# Instance-Level: Running Backs
-nfl_test_DC <- nfl_test %>% filter(player == "Dalvin Cook")
+plot(ld_rf_F)
+plot(ld_log_F)
+#
+# Feature Selection: DALEX (WR) ----
+nfl_test_DHB <- nfl_test %>% filter(player == "Darrius Heyward-Bey")
 
-# - breakdown
-bd_log_DC_Prob <- predict_parts(explainer = EXP_log_Acc_Prob,
-                                new_observation = nfl_test_DC,
-                                type = "break_down")
+# Breakdown
+bd_log_Acc_DHB <- predict_parts(explainer = EXP_log_Acc_Prob,
+                                new_observation = nfl_test_DHB,
+                                type = "break_down",
+                                keep_distributions = TRUE)
+bd_rf_F_DHB <- predict_parts(explainer = EXP_rf_F_Prob,
+                             new_observation = nfl_test_DHB,
+                             type = "break_down",
+                             keep_distributions = TRUE)
+bd_log_F_DHB <- predict_parts(explainer = EXP_log_F_Prob,
+                              new_observation = nfl_test_DHB,
+                              type = "break_down",
+                              keep_distributions = TRUE)
 
-bd_log_DC_Pred <- predict_parts(explainer = EXP_log_Acc_Pred,
-                                new_observation = nfl_test_DC,
-                                type = "break_down")
+plot(bd_log_Acc_DHB)
+plot(bd_rf_F_DHB)
+plot(bd_log_F_DHB)
 
-plot(bd_log_DC_Prob)
+plot(bd_log_Acc_DHB, plot_distributions = TRUE)
+plot(bd_rf_F_DHB, plot_distributions = TRUE)
 
-# Instance-Level: Offensive Takles
-nfl_test_KM <- nfl_test %>% filter(player == "Kolton Miller")
+# - shapley
+shap_log_Acc_DHB <- predict_parts(explainer = EXP_log_Acc_Prob,
+                                  new_observation = nfl_test_DHB,
+                                  type = "shap",
+                                  B = 20)
+shap_rf_F_DHB <- predict_parts(explainer = EXP_rf_F_Prob,
+                               new_observation = nfl_test_DHB,
+                               type = "shap",
+                               B = 20)
+shap_log_F_DHB <- predict_parts(explainer = EXP_log_F_Prob,
+                                new_observation = nfl_test_DHB,
+                                type = "shap",
+                                B = 20)
 
-# - breakdown
-bd_log_KM_Prob <- predict_parts(explainer = EXP_log_Acc_Prob,
-                                new_observation = nfl_test_KM,
-                                type = "break_down")
-bd_log_KM_Pred <- predict_parts(explainer = EXP_log_Acc_Pred,
-                                new_observation = nfl_test_KM,
-                                type = "break_down")
+plot(shap_log_Acc_DHB, show_boxplots = FALSE)
+plot(shap_rf_F_DHB)
+plot(shap_log_F_DHB)
 
-plot(bd_log_KM_Prob)
-plot(bd_log_KM_Pred)
+# Ceteris-Paribus
+cp_log_Acc_DHB <- predict_profile(explainer = EXP_log_Acc_Prob,
+                                  new_observation = nfl_test_DHB)
+
+plot(cp_log_Acc_DHB, variables = "forty")
+plot(cp_log_Acc_DHB, variables = "bench")
+plot(cp_log_Acc_DHB, variables = "height")
+plot(cp_log_Acc_DHB, variables = "side",
+     variable_type = "categorical", categorical_type = "bars")
+# - Oscillations
+osc_log_Acc_DHB <- predict_parts(explainer = EXP_log_Acc_Prob,
+                                 new_observation = nfl_test_DHB,
+                                 type = "oscillations_uni")
+
+# Local-Diagnostic
+ld_log_Acc_DHB <- predict_diagnostics(explainer = EXP_log_Acc_Prob,
+                                      new_observation = nfl_test_DHB,
+                                      neighbors = 50)
+plot(ld_log_Acc_DHB)
+
+ld_log_Acc_40_DHB <- predict_diagnostics(explainer = EXP_log_Acc_Prob,
+                                         new_observation = nfl_test_DHB,
+                                         neighbors = 10,
+                                         variables = "forty")
+plot(ld_log_Acc_40_DHB)
+
+ld_log_Acc_conf_DHB <- predict_diagnostics(explainer = EXP_log_Acc_Prob,
+                                           new_observation = nfl_test_DHB,
+                                           neighbors = 10,
+                                           variables = "conference")
+plot(ld_log_Acc_conf_DHB)
+#
+# Feature Selection: DALEX (RB) ----
+nfl_test_NC <- nfl_test %>% filter(player == "Nick Chubb")
+# Feature Selection: DALEX (OG) ----
+nfl_test_ML <- nfl_test %>% filter(player == "Matt Lehr")
+# Feature Selection: DALEX (CB) ----
+nfl_test_PA <- nfl_test %>% filter(player == "Prince Amukamara")
+# Feature Selection: DALEX (DE) ----
+nfl_test_AQM <- nfl_test %>% filter(player == "Al-Quadin Muhammad")
