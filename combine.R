@@ -1063,7 +1063,7 @@ log_spec <-
     penalty = tune(),
     mixture = tune()
   ) %>% 
-  set_engine("glmnet", seed = 101, importance = "impurity") %>% 
+  set_engine("glmnet", seed = 101, importance = "permutation") %>% 
   set_mode("classification")
 # Workflow
 log_wflow <- 
@@ -1104,7 +1104,7 @@ rf_spec <-
     trees = 1000,
     min_n = tune()
   ) %>% 
-  set_engine("ranger", seed = 101, importance = "impurity") %>% # or permutation
+  set_engine("ranger", seed = 101, importance = "permutation") %>% # or permutation
   set_mode("classification")
 
 # Workflow
@@ -2085,30 +2085,16 @@ metrics_FINAL <- log_Metrics_FINAL %>%
 #
 # Feature Selection: VIP ----
 
-
-# Top Models: 
-# - F Score
-#       1) 80.2%: Random Forrest.Acc
-#       2) 79.8%: Random Forrest.F
-# - Accuracy
-#       1) 71.7%: Random Forrest.Acc
-#       2) 71.4%: Random Forrest.F
-# - Sensitivity
-#       1) 94.7%: Random Forrest.F
-#       2) 89.9%: Logistic Regression.F
-
-
-# Variable Importance: Impurity
-# - Random Forrest.F (Mtry = 1 | Min = 1)
-# - vip
 log_fit_Acc %>% 
   pull_workflow_fit() %>% 
   vip(num_features = 20) +
   theme_bw()
 
-# - Logistic Regression.F (Penalty = 0.006 | Mix = 1)
-# - vo[
-# - vip
+rf_fit_F %>% 
+  pull_workflow_fit() %>% 
+  vip(num_features = 20) + 
+  theme_bw()
+
 log_fit_F %>% 
   pull_workflow_fit() %>% 
   vip(num_features = 20) + 
@@ -2150,21 +2136,33 @@ EXP_log_F <- explain_tidymodels(model = log_fit_F,
 # Feature Selection: DALEX (Dataset) ----
 
 # Model Performance
-mp_log_Acc <- model_performance(EXP_log_F)
+mp_log_Acc <- model_performance(EXP_log_Acc)
 mp_rf_F <- model_performance(EXP_rf_F)
 mp_log_F <- model_performance(EXP_log_F)
 
+plot(mp_log_Acc, mp_rf_F, mp_log_F)
+plot(mp_log_Acc, mp_rf_F, mp_log_F, geom = "histogram")
+
+
+md_log_Acc <- model_diagnostics(explainer = EXP_log_Acc)
+md_rf_F <- model_diagnostics(explainer = EXP_rf_F)
+md_log_F <- model_diagnostics(explainer = EXP_log_F)
+
+plot(md_log_Acc, variable = "y", yvariable = "residuals")
+plot(md_log_Acc, variable = "y", yvariable = "y_hat")
+plot(md_log_Acc, md_rf_F, md_log_F,
+     variable = "ids", yvariable = "residuals")
 # Feature Importance
 set.seed(101)
-vip_log_Acc <- model_parts(explainer = EXP_log_Acc_Prob,
+vip_log_Acc <- model_parts(explainer = EXP_log_Acc,
                            type = "variable_importance",
                            B = 20)
 set.seed(101)
-vip_rf_F <- model_parts(explainer = EXP_rf_F_Prob,
+vip_rf_F <- model_parts(explainer = EXP_rf_F,
                         type = "variable_importance",
                         B = 20)
 set.seed(101)
-vip_log_F <- model_parts(explainer = EXP_log_F_Prob,
+vip_log_F <- model_parts(explainer = EXP_log_F,
                          type = "variable_importance",
                          B = 20)
 
@@ -2176,11 +2174,11 @@ plot(vip_log_Acc, vip_rf_F, vip_log_F,
 vip_variables <- c("forty","weight","bench")
 
 set.seed(101)
-pdp_log_Acc <- model_profile(explainer = EXP_log_Acc_Prob,
+pdp_log_Acc <- model_profile(explainer = EXP_log_Acc,
                              variables = vip_variables)
-pdp_rf <- model_profile(explainer = EXP_rf_F_Prob,
+pdp_rf <- model_profile(explainer = EXP_rf_F,
                         variables = vip_variables)
-pdp_log_F <- model_profile(explainer = EXP_log_F_Prob,
+pdp_log_F <- model_profile(explainer = EXP_log_F,
                            variables = vip_variables)
 
 plot(pdp_log_Acc, geom = "profiles")
@@ -2189,41 +2187,37 @@ plot(pdp_log_F, geom = "profiles")
 
 plot(pdp_log_Acc, pdp_rf, pdp_log_F)
 
-# Partial Dependency (Clustered)
-pdp_rf_k2 <- model_profile(explainer = EXP_rf_F_Prob,
-                           variables = vip_variables,
-                           k = 3)
-pdp_log_F_k2 <- model_profile(explainer = EXP_log_Acc_Prob,
-                              variables = vip_variables,
-                              k = 3)
-
-plot(pdp_rf_k2, geom = "profiles")
-plot(pdp_log_F_k2, geom = "profiles")
-
 # Partial Dependency (Grouped)
 # - Side
 set.seed(101)
+pdp_side_log_Acc <- model_profile(explainer = EXP_log_Acc,
+                                  variables = vip_variables,
+                                  groups = "side")
 pdp_side_rf <- model_profile(explainer = EXP_rf_F,
                              variables = vip_variables,
                              groups = "side")
 pdp_side_log_F <- model_profile(explainer = EXP_log_F,
                                 variables = vip_variables,
                                 groups = "side")
+plot(pdp_side_log_Acc)
 plot(pdp_side_rf)
 plot(pdp_side_log_F)
 
 # - Position
 set.seed(101)
+pdp_pos_log_Acc <- model_profile(explainer = EXP_log_Acc,
+                                 variables = vip_variables,
+                                 groups = "position")
 pdp_pos_rf_F <- model_profile(explainer = EXP_rf_F,
                               variables = vip_variables,
                               groups = "position")
-
 pdp_pos_log_F <- model_profile(explainer = EXP_log_F,
                                variables = vip_variables,
                                groups = "position")
 
-plot(pdp_pos_rf_F, geom = "profiles")
-plot(pdp_pos_log_F, geom = "profiles")
+plot(pdp_pos_log_Acc)
+plot(pdp_pos_rf_F)
+plot(pdp_pos_log_F)
 
 # - Conference
 set.seed(101)
@@ -2234,19 +2228,9 @@ pdp_conf_log_F <- model_profile(explainer = EXP_log_F,
                                 variables = vip_variables,
                                 groups = "conference")
 
-plot(pdp_conf_rf, geom = "profiles")
+plot(pdp_conf_rf)
 plot(pdp_conf_log_F, geom = "profiles")
 
-# Local-Dependence Profile
-ld_rf_F <- model_profile(explainer = EXP_rf_F,
-                         type = "conditional",
-                         variables = vip_variables)
-ld_log_F <- model_profile(explainer = EXP_log_F,
-                          type = "conditional",
-                          variables = vip_variables)
-
-plot(ld_rf_F)
-plot(ld_log_F)
 #
 # Feature Selection: DALEX (WR) ----
 nfl_test_DHB <- nfl_test %>% filter(player == "Darrius Heyward-Bey")
