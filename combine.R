@@ -928,7 +928,7 @@ nfl_log_recipe_normal <-
   step_dummy(side, position, conference)
 # - model data
 nfl_log_recipe_normal %>% 
-  juice() %>% 
+  prep() %>% juice() %>% 
   glimpse()
 
 
@@ -986,7 +986,7 @@ nfl_log_recipe_pca %>%
 
 # Data
 nfl_log_recipe_pca %>% 
-  juice() %>% 
+  prep() %>% juice() %>% 
   glimpse()
 
 
@@ -1009,7 +1009,7 @@ nfl_log_recipe_simple <-
   step_dummy(position, conference)
 # - model data
 nfl_log_recipe_simple %>% 
-  juice() %>% 
+  prep() %>% juice() %>% 
   glimpse()
 
 #
@@ -1023,7 +1023,7 @@ nfl_rf_recipe_normal <-
   update_role(team, new_role = "team") 
 # - model data
 nfl_rf_recipe_normal %>% 
-  juice() %>% 
+  prep() %>% juice() %>% 
   glimpse()
 
 # PCA
@@ -1038,7 +1038,7 @@ nfl_rf_recipe_pca <-
   step_pca(all_numeric(), num_comp = 2, id = "pca")
 # - model data
 nfl_rf_recipe_pca %>% 
-  juice() %>% 
+  prep() %>% juice() %>% 
   glimpse()
 
 # Simple
@@ -1051,7 +1051,7 @@ nfl_rf_recipe_simple <-
   update_role(team, new_role = "team") 
 # - model data
 nfl_rf_recipe_simple %>% 
-  juice() %>% 
+  prep() %>% juice() %>% 
   glimpse()
 
 #
@@ -1379,7 +1379,7 @@ gg_RF_tune_normal_Acc <- rf_tune_normal %>%
   mutate(mtry = factor(mtry)) %>% 
   ggplot(aes(min_n, mean)) +
   geom_line(aes(color = mtry)) + geom_point() +
-  labs(title = "Radnom Forrest",
+  labs(title = "Random Forrest",
        subtitle = "None",
        y = "Accuracy") +
   ylim(c(0.63, 0.71)) +
@@ -1640,11 +1640,11 @@ rf_Results <-
 # - Accuracy
 rf_ROC_Acc <- rf_Results %>%
   roc_curve(Drafted, RF_Acc_Prob) %>% 
-  mutate(Model = "None_Acc_mtry6_min9")
+  mutate(Model = "Simple_Acc_mtry6_min9")
 # - F Score
 rf_ROC_F <- rf_Results %>%
   roc_curve(Drafted, RF_F_Prob) %>% 
-  mutate(Model = "Simple_F_mtry1_min9")
+  mutate(Model = "None_F_mtry1_min9")
 # - Visual
 rf_ROC_Acc %>% 
   bind_rows(rf_ROC_Acc, rf_ROC_F) %>% 
@@ -1660,7 +1660,7 @@ rf_ROC_Acc %>%
         axis.title.y = element_text(face = "bold", color = "tomato"),
         axis.title.x = element_text(face = "bold", color = "tomato"), 
         legend.position = "bottom") +
-  scale_color_manual(values = c("seagreen","seagreen1"))
+  scale_color_manual(values = c("seagreen1","seagreen"))
 
 
 # CONF MATRIX
@@ -1668,7 +1668,7 @@ rf_ROC_Acc %>%
 rf_CM_Acc <- rf_Results %>% 
   conf_mat(truth = Drafted, estimate = RF_Acc_Pred) %>% 
   autoplot(type = "heatmap") +
-  labs(title = "Accuracy", subtitle = "(None): mtry = 6 | min_n = 9") +
+  labs(title = "Accuracy", subtitle = "(Simple): mtry = 6 | min_n = 9") +
   theme_bw() +
   theme(plot.title = element_text(hjust = 0.5, color = "seagreen", face = "bold"),
         plot.subtitle = element_text(hjust = 0.5, color = "orchid4"),
@@ -1679,7 +1679,7 @@ rf_CM_Acc <- rf_Results %>%
 rf_CM_F <- rf_Results %>% 
   conf_mat(truth = Drafted, estimate = RF_F_Pred) %>% 
   autoplot(type = "heatmap") +
-  labs(title = "F Score", subtitle = "(Simple): mtry = 1 | min_n = 9") +
+  labs(title = "F Score", subtitle = "(None): mtry = 1 | min_n = 9") +
   theme_bw() +
   theme(plot.title = element_text(hjust = 0.5, color = "seagreen1", face = "bold"),
         plot.subtitle = element_text(hjust = 0.5, color = "orchid4"),
@@ -1893,10 +1893,10 @@ Log_ROC_F_FINAL <- Log_FINAL_Results %>%
 # - Random Forrest
 rf_ROC_Acc_FINAL <- rf_FINAL_Results %>%
   roc_curve(Drafted, RF_Acc_Prob) %>% 
-  mutate(Model = "RF_None_Acc_mtry6_min9")
+  mutate(Model = "RF_Simple_Acc_mtry6_min9")
 rf_ROC_F_FINAL <- rf_FINAL_Results %>%
   roc_curve(Drafted, RF_F_Prob) %>% 
-  mutate(Model = "RF_Simple_F_mtry1_min9")
+  mutate(Model = "RF_None_F_mtry1_min9")
 # - Visual
 Log_ROC_Acc_FINAL %>% 
   bind_rows(Log_ROC_F_FINAL, rf_ROC_Acc_FINAL, rf_ROC_F_FINAL) %>% 
@@ -1913,7 +1913,7 @@ Log_ROC_Acc_FINAL %>%
         axis.title.y = element_text(face = "bold", color = "tomato"),
         axis.title.x = element_text(face = "bold", color = "tomato"), 
         legend.position = "bottom") +
-  scale_color_manual(values = c("midnightblue","lightskyblue","seagreen","seagreen1"))
+  scale_color_manual(values = c("midnightblue","lightskyblue","seagreen1","seagreen"))
 
 
 # CM
@@ -2135,23 +2135,6 @@ EXP_log_F <- explain_tidymodels(model = log_fit_F,
 #
 # Feature Selection: DALEX (Dataset) ----
 
-# Model Performance
-mp_log_Acc <- model_performance(EXP_log_Acc)
-mp_rf_F <- model_performance(EXP_rf_F)
-mp_log_F <- model_performance(EXP_log_F)
-
-plot(mp_log_Acc, mp_rf_F, mp_log_F)
-plot(mp_log_Acc, mp_rf_F, mp_log_F, geom = "histogram")
-
-
-md_log_Acc <- model_diagnostics(explainer = EXP_log_Acc)
-md_rf_F <- model_diagnostics(explainer = EXP_rf_F)
-md_log_F <- model_diagnostics(explainer = EXP_log_F)
-
-plot(md_log_Acc, variable = "y", yvariable = "residuals")
-plot(md_log_Acc, variable = "y", yvariable = "y_hat")
-plot(md_log_Acc, md_rf_F, md_log_F,
-     variable = "ids", yvariable = "residuals")
 # Feature Importance
 set.seed(101)
 vip_log_Acc <- model_parts(explainer = EXP_log_Acc,
@@ -2174,40 +2157,30 @@ plot(vip_log_Acc, vip_rf_F, vip_log_F,
 vip_variables <- c("forty","weight","bench")
 
 set.seed(101)
-pdp_log_Acc <- model_profile(explainer = EXP_log_Acc,
-                             variables = vip_variables)
 pdp_rf <- model_profile(explainer = EXP_rf_F,
                         variables = vip_variables)
 pdp_log_F <- model_profile(explainer = EXP_log_F,
                            variables = vip_variables)
 
-plot(pdp_log_Acc, geom = "profiles")
 plot(pdp_rf, geom = "profiles")
 plot(pdp_log_F, geom = "profiles")
 
-plot(pdp_log_Acc, pdp_rf, pdp_log_F)
+plot(pdp_rf, pdp_log_F)
 
 # Partial Dependency (Grouped)
 # - Side
 set.seed(101)
-pdp_side_log_Acc <- model_profile(explainer = EXP_log_Acc,
-                                  variables = vip_variables,
-                                  groups = "side")
 pdp_side_rf <- model_profile(explainer = EXP_rf_F,
                              variables = vip_variables,
                              groups = "side")
 pdp_side_log_F <- model_profile(explainer = EXP_log_F,
                                 variables = vip_variables,
                                 groups = "side")
-plot(pdp_side_log_Acc)
 plot(pdp_side_rf)
 plot(pdp_side_log_F)
 
 # - Position
 set.seed(101)
-pdp_pos_log_Acc <- model_profile(explainer = EXP_log_Acc,
-                                 variables = vip_variables,
-                                 groups = "position")
 pdp_pos_rf_F <- model_profile(explainer = EXP_rf_F,
                               variables = vip_variables,
                               groups = "position")
@@ -2215,7 +2188,6 @@ pdp_pos_log_F <- model_profile(explainer = EXP_log_F,
                                variables = vip_variables,
                                groups = "position")
 
-plot(pdp_pos_log_Acc)
 plot(pdp_pos_rf_F)
 plot(pdp_pos_log_F)
 
@@ -2229,7 +2201,7 @@ pdp_conf_log_F <- model_profile(explainer = EXP_log_F,
                                 groups = "conference")
 
 plot(pdp_conf_rf)
-plot(pdp_conf_log_F, geom = "profiles")
+plot(pdp_conf_log_F)
 
 #
 # Feature Selection: DALEX (WR) ----
