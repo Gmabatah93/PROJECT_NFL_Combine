@@ -292,47 +292,63 @@ Simple | F Score | 1 | 3 | 79.6%
 
 
 ## Validation Metrics
-Optimization | AUC | Accuracy | Sensitivity | Specificity | Precision | Recall | F1
+Model | AUC | Accuracy | Sensitivity | Specificity | Precision | Recall | F1
 --- | --- | --- | --- | --- | --- | --- | ---
-Accuracy (P = 0.001, M = 0.5) | 0.695 | 0.707 | 0.88 | 0.377 | 0.728 | 0.88 | 0.797
-F Score (P = 0.006, M = 1) | 0.697 | 0.707 | 0.914 | 0.314 | 0.716 | 0.914 | 0.803
-Accuracy (mtry = 2, min = 9) | 0.705 | 0.696 | 0.834 | 0.434 | 0.736 | 0.834 | 0.782
-F Score (mtry = 1, min = 9) | 0.715 | 0.698 | 0.884 | 0.346 | 0.719 | 0.884 | 0.793
+**_LOG-Acc NORMAL (P = 0.001, M = 0.5)_** | **_0.737_** | **_0.72_** | **_0.907_** | **_0.365_** | **_0.73_** | **_0.907_** | **_0.809_**
+LOG-F SIMPLE (P = 0.011, M = 0) | 0.725 | 0.696 | 0.914 | 0.283 | 0.707 | 0.914 | 0.797
+RF-Acc SIMPLE (mtry = 6, min = 9) | 0.703 | 0.698 | 0.85 | 0.409 | 0.731 | 0.85 | 0.786
+RF-F NONE (mtry = 1, min = 9) | 0.737 | 0.707 | 0.944 | 0.258 | 0.706 | 0.944 | 0.808
 
 ---
 # Test Results
 
 ## ROC Curve
-<img src="Images/ROC_FINAL.PNG" width="  700">
+<img src="Images/MODEL/roc_final.PNG" width="  700">
 
 ## Confusion Matrix
 **Logistic Regression**
 
-<img src="Images/CM_Log_final.PNG" width="  700">
+<img src="Images/MODEL/cm_log_final.PNG" width="  700">
 
 
 **Random Forrest**
 
-<img src="Images/CM_RF_final.PNG" width="  700">
+<img src="Images/MODEL/cm_rf_final.PNG" width="  700">
 
 
 ## Metrics  
 
-Optimization | AUC | Accuracy | Sensitivity | Specificity | Precision | Recall | F1
+Model | AUC | Accuracy | Sensitivity | Specificity | Precision | Recall | F1
 --- | --- | --- | --- | --- | --- | --- | ---
-LOG Acc-50% (p=0.001, m=0.5) | 0.729 | 0.698 | 0.878 | 0.357 | 0.721 | 0.878 | 0.792
-LOG Acc-70% (p=0.001, m=0.5) | 0.729 | 0.682 | 0.764 | 0.528 | 0.754 | 0.764 | 0.759  
-LOG F (p=0.006, m=1) | 0.727 | 0.675 |**_0.899_** | 0.251 | 0.695 | 0.899 | 0.784
-RF Acc-50% (mtry=2, min=9) | **_0.746_** | **_0.72_** | 0.867 | 0.442 | 0.747 | 0.867 | **_0.802_**
-RF Acc-60% (mtry=2, min=9) | 0.746 | 0.715 | 0.769 | 0.613 | **_0.79_** | 0.769 | 0.78
-RF F (mtry=1, min=9) | 0.742 | 0.707 | 0.886 | 0.367 | 0.726 | 0.886 | 0.798
+**_LOG-Acc NORMAL (P = 0.001, M = 0.5)_** | 0.711 | 0.719 | 0.899 | 0.377 | 0.732 | 0.899 | **_0.807_**
+LOG-F SIMPLE (P = 0.011, M = 0) | 0.688 | 0.691 | 0.907 | 0.281 | 0.705 | 0.907 | 0.794
+RF-Acc SIMPLE (mtry = 6, min = 9) | 0.697 | 0.679 | 0.809 | 0.432 | 0.73 | 0.809 | 0.767
+**_RF-F NONE (mtry = 1, min = 9)_** | 0.7 | 0.693 | **_0.926_** | 0.251 | 0.701 | 0.926 | 0.798
 
-**Top (AUC):** Random Forrest _(mtry = 2, min = 9)_ - **74.6%**
+**Top (AUC):** Logistic Regression-Acc _(NORMAL: P = 0.001, M = 0.5)_ - **71.1%**
 
-**Top (Accuracy):** Random Forrest _(mtry = 2, min = 9)_ - **72%**
+**Top (Accuracy):** Logistic Regression-Acc _(NORMAL: P = 0.001, M = 0.5)_ - **71.9%**
 
-**Top (Sensitivity):** Logistic Regression _(penalty = 0.006, mix = 1)_ - **89.9%**
+**Top (Sensitivity):** Random Forrest-F _(NONE: mtry = 1, min = 9)_ - **92.6%**
 
-**Top (Precision):** Random Forrest(60%) _(mtry = 2, min = 9)_ - **79%**
+**Top (Precision):** Logistic Regression-Acc _(NORMAL: P = 0.001, M = 0.5)_ - **78.6%**
 
-**Top (F Score):** Random Forrest _(mtry = 2, min = 9)_ - **80.2%**
+**Top (F Score):** Logistic Regression-Acc _(NORMAL: P = 0.001, M = 0.5)_ - **80.7%**
+
+# Prescriptive Analysis
+
+## Feature Importance
+<img src="Images/PA/vip.PNG" width="  700">
+
+## Partial Dependency
+<img src="Images/PA/pdp.PNG" width="  700">
+<img src="Images/PA/cp.PNG" width="  700">
+
+**SIDE**
+<img src="Images/PA/pdp_side.PNG" width="  700">
+
+**POSITION**
+<img src="Images/PA/pdp_pos.PNG" width="  700">
+
+**CONFERENCE**
+<img src="Images/PA/pdp_conf.PNG" width="  700">

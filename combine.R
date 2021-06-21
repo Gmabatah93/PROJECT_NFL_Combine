@@ -1660,7 +1660,7 @@ rf_ROC_Acc %>%
         axis.title.y = element_text(face = "bold", color = "tomato"),
         axis.title.x = element_text(face = "bold", color = "tomato"), 
         legend.position = "bottom") +
-  scale_color_manual(values = c("seagreen1","seagreen"))
+  scale_color_manual(values = c("seagreen","seagreen1"))
 
 
 # CONF MATRIX
@@ -1670,7 +1670,7 @@ rf_CM_Acc <- rf_Results %>%
   autoplot(type = "heatmap") +
   labs(title = "Accuracy", subtitle = "(Simple): mtry = 6 | min_n = 9") +
   theme_bw() +
-  theme(plot.title = element_text(hjust = 0.5, color = "seagreen", face = "bold"),
+  theme(plot.title = element_text(hjust = 0.5, color = "seagreen1", face = "bold"),
         plot.subtitle = element_text(hjust = 0.5, color = "orchid4"),
         axis.title.y = element_text(color = "tomato"),
         axis.title.x = element_text(face = "bold", color = "cyan4"), 
@@ -1681,7 +1681,7 @@ rf_CM_F <- rf_Results %>%
   autoplot(type = "heatmap") +
   labs(title = "F Score", subtitle = "(None): mtry = 1 | min_n = 9") +
   theme_bw() +
-  theme(plot.title = element_text(hjust = 0.5, color = "seagreen1", face = "bold"),
+  theme(plot.title = element_text(hjust = 0.5, color = "seagreen", face = "bold"),
         plot.subtitle = element_text(hjust = 0.5, color = "orchid4"),
         axis.title.y = element_text(color = "tomato"),
         axis.title.x = element_text(face = "bold", color = "cyan4"), 
@@ -1924,7 +1924,7 @@ log_CM_FINAL_Acc <- Log_FINAL_Results %>%
   labs(title = "Accuracy 50%",
        subtitle = "(Normal): penalty = 0.001 | mix = 0.5") +
   theme_bw() +
-  theme(plot.title = element_text(hjust = 0.5, color = "darkolivegreen", face = "bold"),
+  theme(plot.title = element_text(hjust = 0.5, color = "midnightblue", face = "bold"),
         plot.subtitle = element_text(hjust = 0.5, color = "orchid4"),
         axis.title.y = element_text(color = "tomato"),
         axis.title.x = element_text(face = "bold", color = "cyan4"),
@@ -1949,7 +1949,7 @@ log_CM_FINAL_F <- Log_FINAL_Results %>%
   labs(title = "F Score",
        subtitle = "(Simple): penalty = 0.011 | mix = 0") +
   theme_bw() +
-  theme(plot.title = element_text(hjust = 0.5, color = "darkolivegreen", face = "bold"),
+  theme(plot.title = element_text(hjust = 0.5, color = "lightskyblue", face = "bold"),
         plot.subtitle = element_text(hjust = 0.5, color = "orchid4"),
         axis.title = element_blank(), 
         axis.title.y = element_blank(),
@@ -1957,6 +1957,7 @@ log_CM_FINAL_F <- Log_FINAL_Results %>%
         axis.title.x = element_text(face = "bold", color = "cyan4"),
         legend.position = "none")
 
+ggarrange(log_CM_FINAL_Acc, log_CM_FINAL_F, nrow = 1)
 ggarrange(log_CM_FINAL_Acc, log_CM_FINAL_Acc65, log_CM_FINAL_F, nrow = 1)
 
 # - Random Forrest
@@ -1964,9 +1965,9 @@ rf_CM_FINAL_Acc <- rf_FINAL_Results %>%
   conf_mat(truth = Drafted, estimate = RF_Acc_Pred) %>% 
   autoplot(type = "heatmap") +
   labs(title = "Accuracy 50%",
-       subtitle = "(None): mtry = 6 | min = 9") +
+       subtitle = "(Simple): mtry = 6 | min = 9") +
   theme_bw() +
-  theme(plot.title = element_text(hjust = 0.5, color = "darkolivegreen", face = "bold"),
+  theme(plot.title = element_text(hjust = 0.5, color = "seagreen", face = "bold"),
         plot.subtitle = element_text(hjust = 0.5, color = "orchid4"),
         axis.title.y = element_text(color = "tomato"),
         axis.title.x = element_text(face = "bold", color = "cyan4"),
@@ -1976,7 +1977,7 @@ rf_CM_FINAL_Acc65 <- rf_FINAL_Results %>%
   conf_mat(truth = Drafted, estimate = RF_Acc65_Pred) %>% 
   autoplot(type = "heatmap") +
   labs(title = "Accuracy 65%",
-       subtitle = "(None): mtry = 6 | min = 9") +
+       subtitle = "(Simple): mtry = 6 | min = 9") +
   theme_bw() +
   theme(plot.title = element_text(hjust = 0.5, color = "darkolivegreen", face = "bold"),
         plot.subtitle = element_text(hjust = 0.5, color = "orchid4"),
@@ -1989,9 +1990,9 @@ rf_CM_FINAL_F <- rf_FINAL_Results %>%
   conf_mat(truth = Drafted, estimate = RF_F_Pred) %>% 
   autoplot(type = "heatmap") +
   labs(title = "F Score",
-       subtitle = "(Simple): mtry = 1 | min = 9") +
+       subtitle = "(Normal): mtry = 1 | min = 9") +
   theme_bw() +
-  theme(plot.title = element_text(hjust = 0.5, color = "darkolivegreen", face = "bold"),
+  theme(plot.title = element_text(hjust = 0.5, color = "seagreen1", face = "bold"),
         plot.subtitle = element_text(hjust = 0.5, color = "orchid4"),
         axis.title = element_blank(), 
         axis.title.y = element_blank(),
@@ -1999,7 +2000,9 @@ rf_CM_FINAL_F <- rf_FINAL_Results %>%
         axis.title.x = element_text(face = "bold", color = "cyan4"),
         legend.position = "none")
 
+ggarrange(rf_CM_FINAL_Acc, rf_CM_FINAL_F, nrow = 1)
 ggarrange(rf_CM_FINAL_Acc, rf_CM_FINAL_Acc65, rf_CM_FINAL_F, nrow = 1)
+
 
 
 
@@ -2150,9 +2153,14 @@ vip_log_F <- model_parts(explainer = EXP_log_F,
                          B = 20)
 
 plot(vip_log_Acc, vip_rf_F, vip_log_F,
-     max_vars = 10)
+     max_vars = 10) +
+  theme(
+    plot.title = element_text(hjust = 0.5, face = "bold", color = "darkolivegreen"),
+    plot.subtitle = element_blank(),
+    axis.title.x = element_text(color = "tomato")
+  )
 
-
+# model
 # Partial Dependency
 vip_variables <- c("forty","weight","bench")
 
@@ -2162,10 +2170,35 @@ pdp_rf <- model_profile(explainer = EXP_rf_F,
 pdp_log_F <- model_profile(explainer = EXP_log_F,
                            variables = vip_variables)
 
-plot(pdp_rf, geom = "profiles")
-plot(pdp_log_F, geom = "profiles")
+plot(pdp_rf, pdp_log_F) +
+  geom_hline(yintercept = 0.5, linetype = 2, color = "tomato", alpha = 0.7) +
+  theme(
+    plot.title = element_text(hjust = 0.5, face = "bold", color = "darkolivegreen"),
+    plot.subtitle = element_blank(),
+    axis.title.y = element_text(color = "tomato")
+  )
 
-plot(pdp_rf, pdp_log_F)
+
+gg_pdp_rf <- plot(pdp_rf, geom = "profiles") +
+  geom_hline(yintercept = 0.5, linetype = 2, color = "tomato", alpha = 0.7) +
+  labs(title = "CP Profile: Random Forrest",
+       subtitle = "(NONE: mtry = 1, min = 9)") +
+  theme(
+    plot.title = element_text(hjust = 0.5, face = "bold", color = "seagreen1"),
+    plot.subtitle = element_text(hjust = 0.5, face = "italic", color = "orchid4"),
+    axis.title.y = element_text(color = "tomato")
+  )
+gg_pdp_log <- plot(pdp_log_F, geom = "profiles") +
+  geom_hline(yintercept = 0.5, linetype = 2, color = "tomato", alpha = 0.7) +
+  labs(title = "CP Profile: Logistic Regression",
+       subtitle = '(SIMPLE: penalty = 0.011, mix = 0 "LASSO"') +
+  theme(
+    plot.title = element_text(hjust = 0.5, face = "bold", color = "lightskyblue"),
+    plot.subtitle = element_text(hjust = 0.5, face = "italic", color = "orchid4"),
+    axis.title.y = element_text(color = "tomato")
+  ) 
+
+ggarrange(gg_pdp_log, gg_pdp_rf, ncol = 1)
 
 # Partial Dependency (Grouped)
 # - Side
@@ -2176,8 +2209,24 @@ pdp_side_rf <- model_profile(explainer = EXP_rf_F,
 pdp_side_log_F <- model_profile(explainer = EXP_log_F,
                                 variables = vip_variables,
                                 groups = "side")
-plot(pdp_side_rf)
-plot(pdp_side_log_F)
+gg_pdp_side_rf <- plot(pdp_side_rf) +
+  labs(title = "Partial Dependency: Random Forrest",
+       subtitle = "(NONE: mtry = 1, min = 9)") +
+  theme(
+    plot.title = element_text(hjust = 0.5, face = "bold", color = "seagreen1"),
+    plot.subtitle = element_text(hjust = 0.5, face = "italic", color = "orchid4"),
+    axis.title.y = element_text(color = "tomato")
+  )
+gg_pdp_side_log <- plot(pdp_side_log_F) +
+  labs(title = "Partial Dependency: Logistic Regression",
+       subtitle = '(SIMPLE: penalty = 0.011, mix = 0 "LASSO")') +
+  theme(
+    plot.title = element_text(hjust = 0.5, face = "bold", color = "lightskyblue"),
+    plot.subtitle = element_text(hjust = 0.5, face = "italic", color = "orchid4"),
+    axis.title.y = element_text(color = "tomato")
+  )
+
+ggarrange(gg_pdp_side_log, gg_pdp_side_rf, ncol = 1)
 
 # - Position
 set.seed(101)
@@ -2188,8 +2237,27 @@ pdp_pos_log_F <- model_profile(explainer = EXP_log_F,
                                variables = vip_variables,
                                groups = "position")
 
-plot(pdp_pos_rf_F)
-plot(pdp_pos_log_F)
+gg_pdp_pos_rf <- plot(pdp_pos_rf_F) +
+  labs(title = "Partial Dependency: Random Forrest",
+       subtitle = "(NONE: mtry = 1, min = 9)") +
+  theme(
+    plot.title = element_text(hjust = 0.5, face = "bold", color = "seagreen1"),
+    plot.subtitle = element_text(hjust = 0.5, face = "italic", color = "orchid4"),
+    axis.title.y = element_text(color = "tomato"),
+    legend.position = "none"
+  )
+
+gg_pdp_pos_log <- plot(pdp_pos_log_F) +
+  labs(title = "Partial Dependency: Logistic Regression",
+       subtitle = '(SIMPLE: penalty = 0.011, mix = 0 "LASSO")') +
+  theme(
+    plot.title = element_text(hjust = 0.5, face = "bold", color = "lightskyblue"),
+    plot.subtitle = element_text(hjust = 0.5, face = "italic", color = "orchid4"),
+    axis.title.y = element_text(color = "tomato"),
+    legend.position = "bottom"
+  )
+
+ggarrange(gg_pdp_pos_log, gg_pdp_pos_rf, ncol = 1)
 
 # - Conference
 set.seed(101)
@@ -2200,8 +2268,27 @@ pdp_conf_log_F <- model_profile(explainer = EXP_log_F,
                                 variables = vip_variables,
                                 groups = "conference")
 
-plot(pdp_conf_rf)
-plot(pdp_conf_log_F)
+gg_pdp_conf_rf <- plot(pdp_conf_rf) +
+  labs(title = "Partial Dependency: Random Forrest",
+       subtitle = "(NONE: mtry = 1, min = 9)") +
+  theme(
+    plot.title = element_text(hjust = 0.5, face = "bold", color = "seagreen1"),
+    plot.subtitle = element_text(hjust = 0.5, face = "italic", color = "orchid4"),
+    axis.title.y = element_text(color = "tomato"),
+    legend.position = "none"
+  )
+
+gg_pdp_conf_log <- plot(pdp_conf_log_F) +
+  labs(title = "Partial Dependency: Logistic Regression",
+       subtitle = '(SIMPLE: penalty = 0.011, mix = 0 "LASSO")') +
+  theme(
+    plot.title = element_text(hjust = 0.5, face = "bold", color = "lightskyblue"),
+    plot.subtitle = element_text(hjust = 0.5, face = "italic", color = "orchid4"),
+    axis.title.y = element_text(color = "tomato"),
+    legend.position = "bottom"
+  )
+
+ggarrange(gg_pdp_conf_log, gg_pdp_conf_rf, ncol = 1)
 
 #
 # Feature Selection: DALEX (WR) ----
