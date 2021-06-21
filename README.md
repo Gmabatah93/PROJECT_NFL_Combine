@@ -93,8 +93,10 @@ drafted | chr | What NFL team drafted player / Round / Pick / Year
 ## Combine Summary
 
 ### Weight
-<img src="Images/COMBINE_weight.PNG" width="700">
+<img src="Images/COMBINE_weight.PNG" width=" 700">
+
 <img src="Images/COMBINE_weight_side.PNG" width="  700">
+
 <img src="Images/COMBINE_weight_conference.PNG" width="  700">
 
 **Note (Weight)**: Average weight for players in this dataset is **_252lbs_**
