@@ -304,28 +304,6 @@ Accuracy (mtry = 2, min = 9) | 0.705 | 0.696 | 0.834 | 0.434 | 0.736 | 0.834 | 0
 F Score (mtry = 1, min = 9) | 0.715 | 0.698 | 0.884 | 0.346 | 0.719 | 0.884 | 0.793
 
 ---
-# Refit: Probability Threshold
-
-## Logistic Regression
-<img src="Images/ThRES_LOG.PNG" width="  700">
-<img src="Images/CM_Log_thres.PNG" width="  700">
-
-### Metrics
-Optimization | AUC | Accuracy | Sensitivity | Specificity | Precision | Recall| F1
---- | --- | --- | --- | --- | --- | --- | ---
-Acc-60% (P = 0.001, M = 0.5) | 0.695 | 0.667 | 0.738 | 0.535 | 0.75 | 0.738 | 0.744
-
-## Random Forrest
-
-<img src="Images/ThRES_RF.PNG" width="  700">
-<img src="Images/CM_RF_thres.PNG" width="  700">
-
-### Metrics
-Optimization | AUC | Accuracy | Sensitivity | Specificity | Precision | Recall | F1
---- | --- | --- | --- | --- | --- | --- | ---
-Acc-60%  (mtry = 2, min = 9) | 0.705 | 0.659 | 0.684 | 0.61 | 0.769 | 0.684 | 0.724
-
----
 # Test Results
 
 ## ROC Curve
