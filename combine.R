@@ -2129,12 +2129,31 @@ EXP_rf_F <- explain_tidymodels(model = rf_fit_F,
                                y = nfl_test$drafted == "Yes",
                                predict_function = custom_func_Prob,
                                label = "RF-F")
+
+EXP_rf_F$data
 # Logistic Regression (F Score): P = 1, P = 9
 EXP_log_F <- explain_tidymodels(model = log_fit_F,
                                 data = nfl_test,
                                 y = nfl_test$drafted == "Yes",
                                 predict_function = custom_func_Prob,
                                 label = "LOG-F")
+
+# Model-Performance
+md_rf <- model_diagnostics(explainer = EXP_rf_F)
+md_log <- model_diagnostics(explainer = EXP_log_F)
+
+nfl_test_pred <- nfl_test %>% 
+  mutate(
+    rf_prob = md_rf$y_hat %>% round(3),
+    log_prob = md_log$y_hat %>% round(3)
+  ) %>% 
+  mutate(
+    rf_pred = ifelse(rf_prob > 0.5, "Yes","No"),
+    log_pred = ifelse(log_prob > 0.5, "Yes","No")
+  ) %>% 
+  select(player, drafted, rf_prob, rf_pred, log_prob, log_pred,side:team)
+  
+
 #
 # Feature Selection: DALEX (Dataset) ----
 
@@ -2292,18 +2311,28 @@ ggarrange(gg_pdp_conf_log, gg_pdp_conf_rf, ncol = 1)
 
 #
 # Feature Selection: DALEX (WR) ----
-nfl_test_DHB <- nfl_test %>% filter(player == "Darrius Heyward-Bey")
+
+# Data
+
+# - CM
+
+# - drafted
+nfl_test_pred %>% filter(position == "WR" & drafted == "Yes") %>% view()
+nfl_test_SW <- nfl_test %>% filter(player == "Sammy Watkins")
+nfl_test_RC <- nfl_test %>% filter(player == "Randall Cobb")
+nfl_test_RK <- nfl_test %>% filter(player == "Ryan Krause")
+nfl_test_MC <- nfl_test %>% filter(player == "Marques Colston")
+# - not drafted
+nfl_test_pred %>% filter(position == "WR" & drafted == "No") %>% view()
+nfl_test_ML <- nfl_test %>% filter(player == "Marcus Lucas")
+nfl_test_LS <- nfl_test %>% filter(player == "Lorne Sam")
 
 # Breakdown
-bd_log_Acc_DHB <- predict_parts(explainer = EXP_log_Acc_Prob,
-                                new_observation = nfl_test_DHB,
-                                type = "break_down",
-                                keep_distributions = TRUE)
-bd_rf_F_DHB <- predict_parts(explainer = EXP_rf_F_Prob,
+bd_rf_F_DHB <- predict_parts(explainer = EXP_rf_F,
                              new_observation = nfl_test_DHB,
                              type = "break_down",
                              keep_distributions = TRUE)
-bd_log_F_DHB <- predict_parts(explainer = EXP_log_F_Prob,
+bd_log_F_DHB <- predict_parts(explainer = EXP_log_F,
                               new_observation = nfl_test_DHB,
                               type = "break_down",
                               keep_distributions = TRUE)
@@ -2366,10 +2395,62 @@ ld_log_Acc_conf_DHB <- predict_diagnostics(explainer = EXP_log_Acc_Prob,
 plot(ld_log_Acc_conf_DHB)
 #
 # Feature Selection: DALEX (RB) ----
+
+# Data
+
+#- CM
+
+# - drafted
+nfl_test_pred %>% filter(position == "RB" & drafted == "Yes") %>% view()
 nfl_test_NC <- nfl_test %>% filter(player == "Nick Chubb")
+nfl_test_MJD <- nfl_test %>% filter(player == "Maurice Jones-Drew")
+nfl_test_MD <- nfl_test %>% filter(player == "Mike Davis")
+nfl_test_NI <- nfl_test %>% filter(player == "Nate Ilaoa")
+# - not drafted
+nfl_test_pred %>% filter(position == "RB" & drafted == "No") %>% view()
+nfl_test_LB <- nfl_test %>% filter(player == "LeGarrette Blount")
+#
 # Feature Selection: DALEX (OG) ----
-nfl_test_ML <- nfl_test %>% filter(player == "Matt Lehr")
+
+# Data
+# - CM
+# - drafted
+nfl_test_pred %>% filter(position == "OG" & drafted == "Yes")
+nfl_test_SS <- nfl_test %>% filter(player == "Steve Schilling")
+nfl_test_DD <- nfl_test %>% filter(player == "Dion Dawkins")
+nfl_test_LJ <- nfl_test %>% filter(player == "Leander Jordan")
+nfl_test_MI <- nfl_test %>% filter(player == "Mike Iupati")
+# - not drafted
+nfl_test_pred %>% filter(position == "OG" & drafted == "No")
+nfl_test_RG <- nfl_test %>% filter(player == "Ryan Groy")
+nfl_test_TT <- nfl_test %>% filter(player == "Tony Tella")
+
+#
 # Feature Selection: DALEX (CB) ----
+
+# Data
+# - drafted
+nfl_test_pred %>% filter(position == "CB" & drafted == "Yes")
+nfl_test_ER <- nfl_test %>% filter(player == "Eric Rowe")
 nfl_test_PA <- nfl_test %>% filter(player == "Prince Amukamara")
+nfl_test_BD <- nfl_test %>% filter(player == "Brandon Dixon")
+nfl_test_QD <- nfl_test %>% filter(player == "Quandre Diggs")
+# - not drafted
+nfl_test_pred %>% filter(position == "CB" & drafted == "No")
+nfl_test_TB <- nfl_test %>% filter(player == "Tony Brown")
+nfl_test_CS <- nfl_test %>% filter(player == "Channing Stribling")
+
+#
 # Feature Selection: DALEX (DE) ----
-nfl_test_AQM <- nfl_test %>% filter(player == "Al-Quadin Muhammad")
+
+# Data
+# - drafted
+nfl_test_pred %>% filter(position == "DE" & drafted == "Yes")
+nfl_test_RK <- nfl_test %>% filter(player == "Ryan Kerrigan")
+nfl_test_BK <- nfl_test %>% filter(player == "Brett Keisel")
+nfl_test_MS <- nfl_test %>% filter(player == "Michael Sam")
+# - not drafted
+nfl_test_pred %>% filter(position == "DE" & drafted == "No")
+nfl_test_JF <- nfl_test %>% filter(player == "John Frank")
+nfl_test_MK <- nfl_test %>% filter(player == "Mike Kudla")
+nfl_test_JC <- nfl_test %>% filter(player == "James Cowser")

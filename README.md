@@ -345,10 +345,13 @@ RF-Acc SIMPLE (mtry = 6, min = 9) | 0.697 | 0.679 | 0.809 | 0.432 | 0.73 | 0.809
 <img src="Images/PA/cp.PNG" width="  700">
 
 **SIDE**
+
 <img src="Images/PA/pdp_side.PNG" width="  700">
 
 **POSITION**
+
 <img src="Images/PA/pdp_pos.PNG" width="  700">
 
 **CONFERENCE**
+
 <img src="Images/PA/pdp_conf.PNG" width="  700">
