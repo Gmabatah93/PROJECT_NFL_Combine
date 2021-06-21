@@ -49,38 +49,38 @@ drafted | chr | What NFL team drafted player / Round / Pick / Year
 # Exploratory Data Analysis
 
 ## Summary
-<img src="Images/EDA_drafted.PNG" width="700">
+<img src="Images/EDA/drafted.PNG" width="700">
 
 **Note (Target)**: Of all the players in this data **_65%_** of players in this dataset was Drafted
 
-<img src="Images/EDA_draft_side.PNG" width="700">
+<img src="Images/EDA/drafted_side.PNG" width="700">
 
-<img src="Images/EDA_draft_position.PNG" width="700">
+<img src="Images/EDA/drafted_position.PNG" width="700">
 
 **Note (Position)**: There are _1459_ Defensive and _1426_ Offensive players in this dataset
 - Of the _1459_ Defensive players **70%** was Drafted. Of the _1426_ Offensive players **61%** was Drafted.
 - Top 3 Offensive Positions Drafted: **_OT | WR | RB_**
 - Top 3 Defensive Positions Drafted: **_CB | DE | OLB_**
 
-<img src="Images/EDA_draft_conference.PNG" width="700" />
+<img src="Images/EDA/drafted_conference.PNG" width="700" />
 
 **Note (Conference)**: The majority of players Drafted came from the **_[ SEC | ACC | Big 10 ]_** Conferences
 
 ## Correlation
-<img src="Images/EDA_corr.PNG" width="700">
+<img src="Images/EDA/corr.PNG" width="700">
 
-<img src="Images/EDA_corr_sig.PNG" width="700">
+<img src="Images/EDA/corr_sig.PNG" width="700">
 
 **Note (Correlation)**: Alot of the Combine metrics are **_Highly_** Corelated
 
 ## Principal Component Analysis
 <p float="left">
-  <img src="Images/PCA_biplot.PNG" width="500">
-  <img src="Images/PCA_biplot_drafted.PNG" width="500">
+  <img src="Images/EDA/pca_biplot.PNG" width="500">
+  <img src="Images/EDA/pca_biplot_drafted.PNG" width="500">
 </p>
 
-<img src="Images/PCA_eig.PNG" width="700">
-<img src="Images/PCA_pc.PNG" width="700">
+<img src="Images/EDA/pca_eig.PNG" width="700">
+<img src="Images/EDA/pca_pc.PNG" width="700">
 **Note (PCA)**:
 - **PC1**: Represents Agility/Explosiveness
   + Agility: forty | three_cone | shuttle
@@ -93,11 +93,9 @@ drafted | chr | What NFL team drafted player / Round / Pick / Year
 ## Combine Summary
 
 ### Weight
-<img src="Images/COMBINE_weight.PNG" width=" 700">
-
-<img src="Images/COMBINE_weight_side.PNG" width="  700">
-
-<img src="Images/COMBINE_weight_conference.PNG" width="  700">
+<img src="Images/EDA/combine_weight.PNG" width=" 700">
+<img src="Images/EDA/combine_weight_side.PNG" width="  700">
+<img src="Images/EDA/combine_weight_conference.PNG" width="  700">
 
 **Note (Weight)**: Average weight for players in this dataset is **_252lbs_**
 - Offense: **_262lbs_**
@@ -112,9 +110,9 @@ drafted | chr | What NFL team drafted player / Round / Pick / Year
   + Elite = **_253lbs_** | Division I-A = **_246lbs_** | Division I-AA = **_252_** | Division II & II = **_266lbs_**
 
 ### Forty
-<img src="Images/COMBINE_40.PNG" width="  700">
-<img src="Images/COMBINE_40_side.PNG" width="  700">
-<img src="Images/COMBINE_40_conference.PNG" width="  700">
+<img src="Images/EDA/combine_40.PNG" width="  700">
+<img src="Images/EDA/combine_40_side.PNG" width="  700">
+<img src="Images/EDA/combine_40_conference.PNG" width="  700">
 
 **Note (Forty):** Average forty for players in this dataset is **_4.81secs_**
 - Offense: **_4.72secs_**
@@ -129,9 +127,9 @@ drafted | chr | What NFL team drafted player / Round / Pick / Year
   + Elite = **_4.81secs_** | Division I-A = **_4.78secs_** | Division I-AA = **_4.82secs_** | Division II & II = **_4.89secs_**
 
 ### Bench
-<img src="Images/COMBINE_bench.PNG" width="  700">
-<img src="Images/COMBINE_bench_side.PNG" width="  700">
-<img src="Images/COMBINE_Bench_conference.PNG" width="  700">
+<img src="Images/EDA/combine_bench.PNG" width="  700">
+<img src="Images/EDA/combine_bench_side.PNG" width="  700">
+<img src="Images/EDA/combine_bench_conference.PNG" width="  700">
 
 **Note (Bench):** Average bench for players in this dataset is **_21reps_**
 - Offense: **_21reps_**
@@ -146,9 +144,9 @@ drafted | chr | What NFL team drafted player / Round / Pick / Year
   + Elite = **_21reps_** | Division I-A = **_21reps_** | Division I-AA = **_21reps_** | Division II & II = **_23reps_**
 
 ### Broad Jump
-<img src="Images/COMBINE_jump.PNG" width="  700">
-<img src="Images/COMBINE_jump_side.PNG" width="  700">
-<img src="Images/COMBINE_jump_conference.PNG" width="  700">
+<img src="Images/EDA/combine_jump.PNG" width="  700">
+<img src="Images/EDA/combine_jump_side.PNG" width="  700">
+<img src="Images/EDA/combine_jump_conference.PNG" width="  700">
 
 **Note (Jump):** Average broad jump for players in this dataset is **_113inches**
 - Offense: **_110inches_**
@@ -167,7 +165,7 @@ drafted | chr | What NFL team drafted player / Round / Pick / Year
 # Modeling
 
 ## Preprocess
-<img src="Images/NFL_Split.PNG" width=" 500">
+<img src="Images/MODEL/split.PNG" width=" 500">
 
 **Split**
 
@@ -183,23 +181,23 @@ drafted | chr | What NFL team drafted player / Round / Pick / Year
 
 **Model Data**
 
-<img src="Images/PREPROCESS_LOG_normal.PNG" width=" 700">
+<img src="Images/MODEL/prep_log_normal.PNG" width=" 700">
 
 #### PCA
 
 **Components**
 
-<img src="Images/PREPROCESS_LOG_pca_pc.PNG" width=" 700">
+<img src="Images/MODEL/prep_log_pca_fig.PNG" width=" 700">
 
 **Model Data**
 
-<img src="Images/PREPROCESS_LOG_pca.PNG" width=" 700">
+<img src="Images/MODEL/prep_log_pca.PNG" width=" 700">
 
 ### Simple
 
 **Model Data**  
 
-<img src="Images/PREPROCESS_LOG_simple.PNG" width=" 700">
+<img src="Images/MODEL/prep_log_simple.PNG" width=" 700">
 
 
 ## Preprocess - Random Forrest
@@ -208,19 +206,19 @@ drafted | chr | What NFL team drafted player / Round / Pick / Year
 
 **Model Data**
 
-<img src="Images/PREPROCESS_RF_none.PNG" width=" 700">
+<img src="Images/MODEL/prep_rf_none.PNG" width=" 700">
 
 #### PCA
 
 **Model Data**
 
-<img src="Images/PREPROCESS_RF_pca.PNG" width=" 700">
+<img src="Images/MODEL/prep_rf_pca.PNG" width=" 700">
 
 #### Simple
 
 **Model Data**
 
-<img src="Images/PREPROCESS_RF_simple.PNG" width=" 700">
+<img src="Images/MODEL/prep_rf_simple.PNG" width=" 700">
 
 ### Control
 - **Parallel Processing**
@@ -237,40 +235,40 @@ drafted | chr | What NFL team drafted player / Round / Pick / Year
 
 ### Logistic Regression
 
-<img src="Images/GRID_log.PNG" width="  600">
-<img src="Images/FIT_LOG_acc.PNG" width="  600">
-<img src="Images/FIT_LOG_f.PNG" width="  600">
+<img src="Images/MODEL/grid_log.PNG" width="  600">
+<img src="Images/MODEL/fit_log_acc.PNG" width="  600">
+<img src="Images/MODEL/fit_log_f.PNG" width="  600">
 
 ### **Best Metrics**
 
 Preprocess | Metric | Penalty | Mixture | Stat
 --- | --- | --- | --- | ---
-Normal | Accuracy | 0.006 | 0.5 | 71.5%
-PCA  |  Accuracy | 0.001 | 0.5 | 69.1%
-Simple |  Accuracy | 0.001 | 0.5 | 71.1%
-Normal | F Score | 0.006 | 1 | 71.5%
-PCA  |  F Score | 0.036 | 0.5 | 80%
-Simple |  F Score | 0.006 | 1 | 80.5%
+**_Normal_** | **_Accuracy_** | **_0.001_** | **_0.5_** | **_71.7%_**
+PCA  |  Accuracy | 0.021 | 0 | 69.9%
+Simple |  Accuracy | 0.001 | 0 | 70.7%
+Normal | F Score | 0.006 | 0.5 | 80.3%
+PCA  |  F Score | 0.051 | 0.5 | 80.1%
+**_Simple_** |  **_F Score_** | **_0.011_** | **_0_** | **_80.5%_**
 
 
 ### Random Forest
 
 **Grid**
 
-<img src="Images/TUNE_RF_grid.PNG" width="  600">
-<img src="Images/FIT_RF_acc.PNG" width="  600">
-<img src="Images/FIT_RF_f.PNG" width="  600">
+<img src="Images/MODEL/grid_rf.PNG" width="  600">
+<img src="Images/MODEL/fit_rf_acc.PNG" width="  600">
+<img src="Images/MODEL/fit_rf_f.PNG" width="  600">
 
 #### **Best Metrics**
 
 Preprocess | Metric | mtry | min_n | Stat
 --- | --- | --- | --- | ---
-None | Accuracy | 5 | 7 | 70%
-PCA  | Accuracy | 1 | 5 | 67%
-Simple | Accuracy | 2 | 9 | 70.4%
-None | F Score | 1 | 5 | 79.7%
-PCA  | F Score | 1 | 5 | 78.5%
-Simple | F Score | 1 | 9 | 79.6%
+None | Accuracy | 1 | 9 | 69.6%
+PCA  | Accuracy | 1 | 5 | 68.2%
+**_Simple_** | **_Accuracy_** | **_6_** | **_9_** | **_70.5%_**
+**_None_** | **_F Score_** | **_1_** | **_9_** | **_79.9%_**
+PCA  | F Score | 1 | 5 | 79.1%
+Simple | F Score | 1 | 3 | 79.6%
 
 ---
 
@@ -279,29 +277,25 @@ Simple | F Score | 1 | 9 | 79.6%
 ## Logistic Regression
 
 ### ROC Curve
-<img src="Images/ROC_Log.PNG" width="  700">
+<img src="Images/MODEL/roc_log.PNG" width="  700">
 
 ### Confusion Matrix
-<img src="Images/CM_Log.PNG" width="  700">
-
-### Metrics
-Optimization | AUC | Accuracy | Sensitivity | Specificity | Precision | Recall | F1
---- | --- | --- | --- | --- | --- | --- | ---
-Accuracy (P = 0.001, M = 0.5) | 0.695 | 0.707 | 0.88 | 0.377 | 0.728 | 0.88 | 0.797
-F Score (P = 0.006, M = 1) | 0.697 | 0.707 | 0.914 | 0.314 | 0.716 | 0.914 | 0.803
+<img src="Images/MODEL/cm_log.PNG" width="  700">
 
 ## Random Forrest
 
 ### ROC Curve
-<img src="Images/ROC_RF.PNG" width="  700">
+<img src="Images/MODEL/roc_rf.PNG" width="  700">
 
 ### Confusion Matrix
-<img src="Images/CM_RF.PNG" width="  700">
+<img src="Images/MODEL/cm_rf.PNG" width="  700">
 
-### Metrics
 
+## Validation Metrics
 Optimization | AUC | Accuracy | Sensitivity | Specificity | Precision | Recall | F1
 --- | --- | --- | --- | --- | --- | --- | ---
+Accuracy (P = 0.001, M = 0.5) | 0.695 | 0.707 | 0.88 | 0.377 | 0.728 | 0.88 | 0.797
+F Score (P = 0.006, M = 1) | 0.697 | 0.707 | 0.914 | 0.314 | 0.716 | 0.914 | 0.803
 Accuracy (mtry = 2, min = 9) | 0.705 | 0.696 | 0.834 | 0.434 | 0.736 | 0.834 | 0.782
 F Score (mtry = 1, min = 9) | 0.715 | 0.698 | 0.884 | 0.346 | 0.719 | 0.884 | 0.793
 
