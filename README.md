@@ -355,3 +355,22 @@ RF-Acc SIMPLE (mtry = 6, min = 9) | 0.697 | 0.679 | 0.809 | 0.432 | 0.73 | 0.809
 **CONFERENCE**
 
 <img src="Images/PA/pdp_conf.PNG" width="  700">
+
+## Instance-Level
+<img src="Images/PA/rf_cm.PNG" width="  700">
+<img src="Images/PA/log_cm.PNG" width="  700">
+
+### Wide Receivers
+<img src="Images/PA/data_wr.PNG" width="  700">
+
+### Running Backs
+<img src="Images/PA/data_rb.PNG" width="  700">
+
+### Offensive Guards
+<img src="Images/PA/data_og.PNG" width="  700">
+
+### Cornerbacks
+<img src="Images/PA/data_cb.PNG" width="  700">
+
+### Defensive Ends
+<img src="Images/PA/data_de.PNG" width="  700">

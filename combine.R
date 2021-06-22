@@ -1518,7 +1518,7 @@ rf_fit_Acc <-
   finalize_workflow(rf_best_Acc) %>% 
   fit(nfl_train)
 
-# F Score (Simple) 79.9%: Mtry = 1, Min_n = 9
+# F Score (NONE) 79.9%: Mtry = 1, Min_n = 9
 # - hyperparameter
 rf_best_F <- rf_tune_normal %>% select_best(metric = "f_meas")
 # - fit
@@ -2130,7 +2130,6 @@ EXP_rf_F <- explain_tidymodels(model = rf_fit_F,
                                predict_function = custom_func_Prob,
                                label = "RF-F")
 
-EXP_rf_F$data
 # Logistic Regression (F Score): P = 1, P = 9
 EXP_log_F <- explain_tidymodels(model = log_fit_F,
                                 data = nfl_test,
@@ -2310,12 +2309,165 @@ gg_pdp_conf_log <- plot(pdp_conf_log_F) +
 ggarrange(gg_pdp_conf_log, gg_pdp_conf_rf, ncol = 1)
 
 #
+# Feature Selection: DALEX (Instance) ----
+
+# Wide Recievers
+# - Random Forrest-(NONE: mtry=1 | min = 9)
+gg_CM_WR_RF <- nfl_test_pred %>% 
+  filter(position == "WR") %>%
+  mutate(rf_pred = factor(rf_pred,levels = c("Yes","No"))) %>% 
+  conf_mat(truth = drafted, estimate = rf_pred) %>% 
+  autoplot(type = "heatmap") +
+  labs(title = "Random Forrest", subtitle = "Wide Receivers") +
+  theme_bw() +
+  theme(plot.title = element_text(hjust = 0.5, color = "seagreen1", face = "bold"),
+        plot.subtitle = element_text(hjust = 0.5, color = "orchid4"),
+        axis.title.y = element_blank(),
+        axis.title.x = element_text(face = "bold", color = "cyan4"), 
+        legend.position = "none")
+
+# - Logistic Regression-(SIMPLE: penaly=0.011 | mix=0)
+gg_CM_WR_LOG <- nfl_test_pred %>% 
+  filter(position == "WR") %>%
+  mutate(rf_pred = factor(log_pred,levels = c("Yes","No"))) %>% 
+  conf_mat(truth = drafted, estimate = rf_pred) %>% 
+  autoplot(type = "heatmap") +
+  labs(title = "Logistic Regression", subtitle = "Wide Receivers") +
+  theme_bw() +
+  theme(plot.title = element_text(hjust = 0.5, color = "midnightblue", face = "bold"),
+        plot.subtitle = element_text(hjust = 0.5, color = "orchid4"),
+        axis.title.y = element_blank(),
+        axis.title.x = element_text(face = "bold", color = "cyan4"), 
+        legend.position = "none")
+
+# Running Backs
+# - Random Forrest-(NONE: mtry=1 | min = 9)
+gg_CM_RB_RF <- nfl_test_pred %>% 
+  filter(position == "RB") %>%
+  mutate(rf_pred = factor(rf_pred,levels = c("Yes","No"))) %>% 
+  conf_mat(truth = drafted, estimate = rf_pred) %>% 
+  autoplot(type = "heatmap") +
+  labs(title = "Random Forrest", subtitle = "Running Backs") +
+  theme_bw() +
+  theme(plot.title = element_text(hjust = 0.5, color = "seagreen1", face = "bold"),
+        plot.subtitle = element_text(hjust = 0.5, color = "orchid4"),
+        axis.title.y = element_blank(),
+        axis.title.x = element_text(face = "bold", color = "cyan4"), 
+        legend.position = "none")
+
+# - Logistic Regression-(SIMPLE: penaly=0.011 | mix=0)
+gg_CM_RB_LOG <- nfl_test_pred %>% 
+  filter(position == "WR") %>%
+  mutate(rf_pred = factor(log_pred,levels = c("Yes","No"))) %>% 
+  conf_mat(truth = drafted, estimate = rf_pred) %>% 
+  autoplot(type = "heatmap") +
+  labs(title = "Logistic Regression", subtitle = "Running Backs") +
+  theme_bw() +
+  theme(plot.title = element_text(hjust = 0.5, color = "midnightblue", face = "bold"),
+        plot.subtitle = element_text(hjust = 0.5, color = "orchid4"),
+        axis.title.y = element_blank(),
+        axis.title.x = element_text(face = "bold", color = "cyan4"), 
+        legend.position = "none")
+
+# Offensive Guards
+# - Random Forrest-(NONE: mtry=1 | min = 9)
+gg_CM_OG_RF <- nfl_test_pred %>% 
+  filter(position == "OG") %>%
+  mutate(rf_pred = factor(rf_pred,levels = c("Yes","No"))) %>% 
+  conf_mat(truth = drafted, estimate = rf_pred) %>% 
+  autoplot(type = "heatmap") +
+  labs(title = "Random Forrest", subtitle = "Offensive Guards") +
+  theme_bw() +
+  theme(plot.title = element_text(hjust = 0.5, color = "seagreen1", face = "bold"),
+        plot.subtitle = element_text(hjust = 0.5, color = "orchid4"),
+        axis.title.y = element_blank(),
+        axis.title.x = element_text(face = "bold", color = "cyan4"), 
+        legend.position = "none")
+
+# - Logistic Regression-(SIMPLE: penaly=0.011 | mix=0)
+gg_CM_OG_LOG <- nfl_test_pred %>% 
+  filter(position == "OG") %>%
+  mutate(rf_pred = factor(log_pred,levels = c("Yes","No"))) %>% 
+  conf_mat(truth = drafted, estimate = rf_pred) %>% 
+  autoplot(type = "heatmap") +
+  labs(title = "Logistic Regression", subtitle = "Offensive Guards") +
+  theme_bw() +
+  theme(plot.title = element_text(hjust = 0.5, color = "midnightblue", face = "bold"),
+        plot.subtitle = element_text(hjust = 0.5, color = "orchid4"),
+        axis.title.y = element_blank(),
+        axis.title.x = element_text(face = "bold", color = "cyan4"), 
+        legend.position = "none")
+
+
+# Cornerbacks
+# - Random Forrest-(NONE: mtry=1 | min = 9)
+gg_CM_CB_RF <- nfl_test_pred %>% 
+  filter(position == "CB") %>%
+  mutate(rf_pred = factor(rf_pred,levels = c("Yes","No"))) %>% 
+  conf_mat(truth = drafted, estimate = rf_pred) %>% 
+  autoplot(type = "heatmap") +
+  labs(title = "Random Forrest", subtitle = "Cornerbacks") +
+  theme_bw() +
+  theme(plot.title = element_text(hjust = 0.5, color = "seagreen1", face = "bold"),
+        plot.subtitle = element_text(hjust = 0.5, color = "orchid4"),
+        axis.title.y = element_blank(),
+        axis.title.x = element_text(face = "bold", color = "cyan4"), 
+        legend.position = "none")
+
+# - Logistic Regression-(SIMPLE: penaly=0.011 | mix=0)
+gg_CM_CB_LOG <- nfl_test_pred %>% 
+  filter(position == "CB") %>%
+  mutate(rf_pred = factor(log_pred,levels = c("Yes","No"))) %>% 
+  conf_mat(truth = drafted, estimate = rf_pred) %>% 
+  autoplot(type = "heatmap") +
+  labs(title = "Logistic Regression", subtitle = "Cornerbacks") +
+  theme_bw() +
+  theme(plot.title = element_text(hjust = 0.5, color = "midnightblue", face = "bold"),
+        plot.subtitle = element_text(hjust = 0.5, color = "orchid4"),
+        axis.title.y = element_blank(),
+        axis.title.x = element_text(face = "bold", color = "cyan4"), 
+        legend.position = "none")
+
+
+# Defensive Ends
+# - Random Forrest-(NONE: mtry=1 | min = 9)
+gg_CM_DE_RF <- nfl_test_pred %>% 
+  filter(position == "DE") %>%
+  mutate(rf_pred = factor(rf_pred,levels = c("Yes","No"))) %>% 
+  conf_mat(truth = drafted, estimate = rf_pred) %>% 
+  autoplot(type = "heatmap") +
+  labs(title = "Random Forrest", subtitle = "Defensive End") +
+  theme_bw() +
+  theme(plot.title = element_text(hjust = 0.5, color = "seagreen1", face = "bold"),
+        plot.subtitle = element_text(hjust = 0.5, color = "orchid4"),
+        axis.title.y = element_blank(),
+        axis.title.x = element_text(face = "bold", color = "cyan4"), 
+        legend.position = "none")
+
+# - Logistic Regression-(SIMPLE: penaly=0.011 | mix=0)
+gg_CM_DE_LOG <- nfl_test_pred %>% 
+  filter(position == "DE") %>%
+  mutate(rf_pred = factor(log_pred,levels = c("Yes","No"))) %>% 
+  conf_mat(truth = drafted, estimate = rf_pred) %>% 
+  autoplot(type = "heatmap") +
+  labs(title = "Logistic Regression", subtitle = "Defensive End") +
+  theme_bw() +
+  theme(plot.title = element_text(hjust = 0.5, color = "midnightblue", face = "bold"),
+        plot.subtitle = element_text(hjust = 0.5, color = "orchid4"),
+        axis.title.y = element_blank(),
+        axis.title.x = element_text(face = "bold", color = "cyan4"), 
+        legend.position = "none")
+
+
+# Visual
+ggarrange(gg_CM_WR_RF, gg_CM_RB_RF, gg_CM_OG_RF, gg_CM_CB_RF, gg_CM_DE_RF, nrow = 1)
+ggarrange(gg_CM_WR_LOG, gg_CM_RB_LOG, gg_CM_OG_LOG, gg_CM_CB_LOG, gg_CM_DE_LOG, nrow = 1)
+#
 # Feature Selection: DALEX (WR) ----
 
 # Data
-
-# - CM
-
+nfl_test_pred_WR <- nfl_test_pred %>% 
+  filter(player %in% c("Sammy Watkins","Randall Cobb","Ryan Krause","Marques Colston","Marcus Lucas","Lorne Sam"))
 # - drafted
 nfl_test_pred %>% filter(position == "WR" & drafted == "Yes") %>% view()
 nfl_test_SW <- nfl_test %>% filter(player == "Sammy Watkins")
@@ -2397,9 +2549,8 @@ plot(ld_log_Acc_conf_DHB)
 # Feature Selection: DALEX (RB) ----
 
 # Data
-
-#- CM
-
+nfl_test_pred_RB <- nfl_test_pred %>% 
+  filter(player %in% c("Nick Chubb","Maurice Jones-Drew","Mike Davis","Nate Ilaoa","LeGarrette Blount","Mike Bell"))
 # - drafted
 nfl_test_pred %>% filter(position == "RB" & drafted == "Yes") %>% view()
 nfl_test_NC <- nfl_test %>% filter(player == "Nick Chubb")
@@ -2409,10 +2560,13 @@ nfl_test_NI <- nfl_test %>% filter(player == "Nate Ilaoa")
 # - not drafted
 nfl_test_pred %>% filter(position == "RB" & drafted == "No") %>% view()
 nfl_test_LB <- nfl_test %>% filter(player == "LeGarrette Blount")
+nfl_test_MB <- nfl_test %>% filter(player == "Mike Bell")
 #
 # Feature Selection: DALEX (OG) ----
 
 # Data
+nfl_test_pred_OG <- nfl_test_pred %>%
+  filter(player %in% c("Steve Schilling","Dion Dawkins","Leander Jordan","Mike Iupati","Ryan Groy","Tony Tella"))
 # - CM
 # - drafted
 nfl_test_pred %>% filter(position == "OG" & drafted == "Yes")
@@ -2429,6 +2583,8 @@ nfl_test_TT <- nfl_test %>% filter(player == "Tony Tella")
 # Feature Selection: DALEX (CB) ----
 
 # Data
+nfl_test_pred_CB <- nfl_test_pred %>%
+  filter(player %in% c("Eric Rowe","Prince Amukamara","Brandon Dixon","Quandre Diggs","Tony Brown","Channing Stribling"))
 # - drafted
 nfl_test_pred %>% filter(position == "CB" & drafted == "Yes")
 nfl_test_ER <- nfl_test %>% filter(player == "Eric Rowe")
@@ -2444,6 +2600,8 @@ nfl_test_CS <- nfl_test %>% filter(player == "Channing Stribling")
 # Feature Selection: DALEX (DE) ----
 
 # Data
+nfl_test_pred_DE <- nfl_test_pred %>%
+  filter(player %in% c("Ryan Kerrigan","Brett Keisel","Michael Sam","John Frank","Mike Kudla","James Cowser"))
 # - drafted
 nfl_test_pred %>% filter(position == "DE" & drafted == "Yes")
 nfl_test_RK <- nfl_test %>% filter(player == "Ryan Kerrigan")
