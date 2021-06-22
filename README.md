@@ -367,6 +367,10 @@ RF-Acc SIMPLE (mtry = 6, min = 9) | 0.697 | 0.679 | 0.809 | 0.432 | 0.73 | 0.809
 <img src="Images/PA/bd_rf_WR.PNG" width="  1200">
 <img src="Images/PA/bd_log_WR.PNG" width="  1200">
 
+**SHAP**
+<img src="Images/PA/shap_rf_WR.PNG" width="  1200">
+<img src="Images/PA/shap_log_WR.PNG" width="  1200">
+
 ### Running Backs
 <img src="Images/PA/data_rb.PNG" width="  1500">
 
