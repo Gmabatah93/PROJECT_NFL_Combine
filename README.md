@@ -361,16 +361,16 @@ RF-Acc SIMPLE (mtry = 6, min = 9) | 0.697 | 0.679 | 0.809 | 0.432 | 0.73 | 0.809
 <img src="Images/PA/log_cm.PNG" width="  800">
 
 ### Wide Receivers
-<img src="Images/PA/data_wr.PNG" width="  800">
+<img src="Images/PA/data_wr.PNG" width="  1000">
 
 ### Running Backs
-<img src="Images/PA/data_rb.PNG" width="  800">
+<img src="Images/PA/data_rb.PNG" width="  1000">
 
 ### Offensive Guards
-<img src="Images/PA/data_og.PNG" width="  800">
+<img src="Images/PA/data_og.PNG" width="  1000">
 
 ### Cornerbacks
-<img src="Images/PA/data_cb.PNG" width="  800">
+<img src="Images/PA/data_cb.PNG" width="  1000">
 
 ### Defensive Ends
-<img src="Images/PA/data_de.PNG" width="  800">
+<img src="Images/PA/data_de.PNG" width="  1000">
