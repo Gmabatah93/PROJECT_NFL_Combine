@@ -338,39 +338,39 @@ RF-Acc SIMPLE (mtry = 6, min = 9) | 0.697 | 0.679 | 0.809 | 0.432 | 0.73 | 0.809
 # Prescriptive Analysis
 
 ## Feature Importance
-<img src="Images/PA/vip.PNG" width="  800">
+<img src="Images/PA/vip.PNG" width="  1000">
 
 ## Partial Dependency
-<img src="Images/PA/pdp.PNG" width="  800">
-<img src="Images/PA/cp.PNG" width="  800">
+<img src="Images/PA/pdp.PNG" width="  1000">
+<img src="Images/PA/cp.PNG" width="  1000">
 
 **SIDE**
 
-<img src="Images/PA/pdp_side.PNG" width="  800">
+<img src="Images/PA/pdp_side.PNG" width="  1000">
 
 **POSITION**
 
-<img src="Images/PA/pdp_pos.PNG" width="  800">
+<img src="Images/PA/pdp_pos.PNG" width="  1000">
 
 **CONFERENCE**
 
-<img src="Images/PA/pdp_conf.PNG" width="  800">
+<img src="Images/PA/pdp_conf.PNG" width="  1000">
 
 ## Instance-Level
-<img src="Images/PA/rf_cm.PNG" width="  800">
-<img src="Images/PA/log_cm.PNG" width="  800">
+<img src="Images/PA/rf_cm.PNG" width="  1000">
+<img src="Images/PA/log_cm.PNG" width="  1000">
 
 ### Wide Receivers
-<img src="Images/PA/data_wr.PNG" width="  1000">
+<img src="Images/PA/data_wr.PNG" width="  1500">
 
 ### Running Backs
-<img src="Images/PA/data_rb.PNG" width="  1000">
+<img src="Images/PA/data_rb.PNG" width="  1500">
 
 ### Offensive Guards
-<img src="Images/PA/data_og.PNG" width="  1000">
+<img src="Images/PA/data_og.PNG" width="  1500">
 
 ### Cornerbacks
-<img src="Images/PA/data_cb.PNG" width="  1000">
+<img src="Images/PA/data_cb.PNG" width="  1500">
 
 ### Defensive Ends
-<img src="Images/PA/data_de.PNG" width="  1000">
+<img src="Images/PA/data_de.PNG" width="  1500">
