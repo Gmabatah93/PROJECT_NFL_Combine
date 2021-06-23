@@ -2797,7 +2797,8 @@ osc_log_Acc_DHB <- predict_parts(explainer = EXP_log_Acc_Prob,
                                  new_observation = nfl_test_DHB,
                                  type = "oscillations_uni")
 
-# Local-Diagnostic
+# LOCAL-DIAGNOSTICS
+# - Marcus Lucas
 ld_rf_ML <- predict_diagnostics(explainer = EXP_rf_F,
                                 new_observation = nfl_test_ML,
                                 neighbors = 100)
@@ -2814,6 +2815,19 @@ ld_rf_ML_conf <- predict_diagnostics(explainer = EXP_rf_F,
                                      neighbors = 100,
                                      variables = "conference")
 plot(ld_rf_ML_conf)
+
+# - Sammy Watkins
+predict(EXP_rf_F, nfl_test_SW)
+
+ld_rf_SW <- predict_diagnostics(explainer = EXP_rf_F,
+                                new_observation = nfl_test_SW,
+                                neighbors = 100) # statistically different distributions
+ld_rf_SW_40 <- predict_diagnostics(explainer = EXP_rf_F,
+                                   new_observation = nfl_test_SW,
+                                   neighbors = 100,
+                                   variables = "forty") # statistically different distributions
+plot(ld_rf_SW)
+plot(ld_rf_SW_40)
 #
 # Feature Selection: DALEX (RB) ----
 
