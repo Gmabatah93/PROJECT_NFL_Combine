@@ -2159,26 +2159,26 @@ nfl_test_pred <- nfl_test %>%
 # Feature Importance
 set.seed(101)
 vip_log_Acc <- model_parts(explainer = EXP_log_Acc,
-                           type = "variable_importance",
+                           type = "difference",
                            B = 20)
 set.seed(101)
 vip_rf_F <- model_parts(explainer = EXP_rf_F,
-                        type = "variable_importance",
+                        type = "difference",
                         B = 20)
 set.seed(101)
 vip_log_F <- model_parts(explainer = EXP_log_F,
-                         type = "variable_importance",
+                         type = "difference",
                          B = 20)
 
 plot(vip_log_Acc, vip_rf_F, vip_log_F,
      max_vars = 10) +
+  labs(y = "Loss in AUC after permutations") +
   theme(
     plot.title = element_text(hjust = 0.5, face = "bold", color = "darkolivegreen"),
     plot.subtitle = element_blank(),
     axis.title.x = element_text(color = "tomato")
   )
 
-# model
 # Partial Dependency
 vip_variables <- c("forty","weight","bench")
 
@@ -2218,34 +2218,71 @@ gg_pdp_log <- plot(pdp_log_F, geom = "profiles") +
 
 ggarrange(gg_pdp_log, gg_pdp_rf, ncol = 1)
 
-# Partial Dependency (Grouped)
-# - Side
-set.seed(101)
-pdp_side_rf <- model_profile(explainer = EXP_rf_F,
-                             variables = vip_variables,
-                             groups = "side")
-pdp_side_log_F <- model_profile(explainer = EXP_log_F,
-                                variables = vip_variables,
-                                groups = "side")
-gg_pdp_side_rf <- plot(pdp_side_rf) +
-  labs(title = "Partial Dependency: Random Forrest",
-       subtitle = "(NONE: mtry = 1, min = 9)") +
+# - Categorical
+pdp_rf_Position <- model_profile(explainer = EXP_rf_F,
+                                 variables = "position",
+                                 variable_type = "categorical")
+pdp_log_F_Poistion <- model_profile(explainer = EXP_log_F,
+                                    variables = "position",
+                                    variable_type = "categorical")
+pdp_rf_Conference <- model_profile(explainer = EXP_rf_F,
+                                   variables = "conference",
+                                   variable_type = "categorical")
+pdp_log_F_Conference <- model_profile(explainer = EXP_log_F,
+                                     variables = "conference",
+                                     variable_type = "categorical")
+
+gg_pdp_rf_Position <- plot(pdp_rf_Position) +
+  geom_hline(yintercept = 0.5, linetype = 2, color = "tomato", alpha = 0.7) +
+  labs(title = "Random Forrest",
+       subtitle = '(NONE: mtry = 1, min = 9)') +
+  ylim(c(0,0.8)) +
   theme(
     plot.title = element_text(hjust = 0.5, face = "bold", color = "seagreen1"),
     plot.subtitle = element_text(hjust = 0.5, face = "italic", color = "orchid4"),
-    axis.title.y = element_text(color = "tomato")
-  )
-gg_pdp_side_log <- plot(pdp_side_log_F) +
-  labs(title = "Partial Dependency: Logistic Regression",
-       subtitle = '(SIMPLE: penalty = 0.011, mix = 0 "LASSO")') +
+    axis.title.y = element_text(color = "tomato"),
+    axis.text.x = element_text(angle = 45, hjust = 0.8),
+    strip.text = element_blank())
+
+gg_pdp_log_Position <- plot(pdp_log_F_Poistion) +
+  geom_hline(yintercept = 0.5, linetype = 2, color = "tomato", alpha = 0.7) +
+  ylim(c(0,0.8)) +
+  labs(title = "Logistic Regression",
+       subtitle = '(SIMPLE: penalty = 0.011, mix = 0 "LASSO"') +
   theme(
     plot.title = element_text(hjust = 0.5, face = "bold", color = "lightskyblue"),
     plot.subtitle = element_text(hjust = 0.5, face = "italic", color = "orchid4"),
-    axis.title.y = element_text(color = "tomato")
-  )
+    axis.title.y = element_blank(),
+    axis.text.x = element_text(angle = 45),
+    strip.text = element_blank())
 
-ggarrange(gg_pdp_side_log, gg_pdp_side_rf, ncol = 1)
+gg_pdp_rf_Conference <- plot(pdp_rf_Conference) +
+  geom_hline(yintercept = 0.5, linetype = 2, color = "tomato", alpha = 0.7) +
+  ylim(c(0,0.8)) +
+  labs(title = "Random Forrest",
+       subtitle = '(NONE: mtry = 1, min = 9)') +
+  theme(
+    plot.title = element_text(hjust = 0.5, face = "bold", color = "seagreen1"),
+    plot.subtitle = element_text(hjust = 0.5, face = "italic", color = "orchid4"),
+    axis.title.y = element_text(color = "tomato"),
+    axis.text.x = element_text(angle = 45, hjust = 0.8),
+    strip.text = element_blank())
+gg_pdp_log_Conference <- plot(pdp_log_F_Conference) +
+  geom_hline(yintercept = 0.5, linetype = 2, color = "tomato", alpha = 0.7) +
+  ylim(c(0,0.8)) +
+  labs(title = "Logistic Regression",
+       subtitle = '(SIMPLE: penalty = 0.011, mix = 0 "LASSO"') +
+  theme(
+    plot.title = element_text(hjust = 0.5, face = "bold", color = "lightskyblue"),
+    plot.subtitle = element_text(hjust = 0.5, face = "italic", color = "orchid4"),
+    axis.title.y = element_blank(),
+    axis.text.x = element_text(angle = 45, hjust = 0.8),
+    strip.text = element_blank())
 
+ggarrange(gg_pdp_rf_Position, gg_pdp_log_Position, nrow = 1)
+ggarrange(gg_pdp_rf_Conference, gg_pdp_log_Conference, nrow = 1)
+
+# Partial Dependency (Grouped)
 # - Position
 set.seed(101)
 pdp_pos_rf_F <- model_profile(explainer = EXP_rf_F,
@@ -2255,18 +2292,20 @@ pdp_pos_log_F <- model_profile(explainer = EXP_log_F,
                                variables = vip_variables,
                                groups = "position")
 
-gg_pdp_pos_rf <- plot(pdp_pos_rf_F) +
-  labs(title = "Partial Dependency: Random Forrest",
+plot(pdp_pos_rf_F) +
+  geom_hline(yintercept = 0.5, linetype = 2, color = "tomato", alpha = 0.7) +
+  labs(title = "Random Forrest",
        subtitle = "(NONE: mtry = 1, min = 9)") +
   theme(
     plot.title = element_text(hjust = 0.5, face = "bold", color = "seagreen1"),
     plot.subtitle = element_text(hjust = 0.5, face = "italic", color = "orchid4"),
     axis.title.y = element_text(color = "tomato"),
-    legend.position = "none"
+    legend.position = "bottom"
   )
 
-gg_pdp_pos_log <- plot(pdp_pos_log_F) +
-  labs(title = "Partial Dependency: Logistic Regression",
+plot(pdp_pos_log_F) +
+  geom_hline(yintercept = 0.5, linetype = 2, color = "tomato", alpha = 0.7) +
+  labs(title = "Logistic Regression",
        subtitle = '(SIMPLE: penalty = 0.011, mix = 0 "LASSO")') +
   theme(
     plot.title = element_text(hjust = 0.5, face = "bold", color = "lightskyblue"),
@@ -2274,8 +2313,6 @@ gg_pdp_pos_log <- plot(pdp_pos_log_F) +
     axis.title.y = element_text(color = "tomato"),
     legend.position = "bottom"
   )
-
-ggarrange(gg_pdp_pos_log, gg_pdp_pos_rf, ncol = 1)
 
 # - Conference
 set.seed(101)
@@ -2286,18 +2323,20 @@ pdp_conf_log_F <- model_profile(explainer = EXP_log_F,
                                 variables = vip_variables,
                                 groups = "conference")
 
-gg_pdp_conf_rf <- plot(pdp_conf_rf) +
-  labs(title = "Partial Dependency: Random Forrest",
+plot(pdp_conf_rf) +
+  geom_hline(yintercept = 0.5, linetype = 2, color = "tomato", alpha = 0.7) +
+  labs(title = "Random Forrest",
        subtitle = "(NONE: mtry = 1, min = 9)") +
   theme(
     plot.title = element_text(hjust = 0.5, face = "bold", color = "seagreen1"),
     plot.subtitle = element_text(hjust = 0.5, face = "italic", color = "orchid4"),
     axis.title.y = element_text(color = "tomato"),
-    legend.position = "none"
+    legend.position = "bottom"
   )
 
-gg_pdp_conf_log <- plot(pdp_conf_log_F) +
-  labs(title = "Partial Dependency: Logistic Regression",
+ plot(pdp_conf_log_F) +
+   geom_hline(yintercept = 0.5, linetype = 2, color = "tomato", alpha = 0.7) +
+   labs(title = "Logistic Regression",
        subtitle = '(SIMPLE: penalty = 0.011, mix = 0 "LASSO")') +
   theme(
     plot.title = element_text(hjust = 0.5, face = "bold", color = "lightskyblue"),
