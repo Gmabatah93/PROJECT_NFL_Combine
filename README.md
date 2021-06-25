@@ -372,31 +372,15 @@ RF-Acc SIMPLE (mtry = 6, min = 9) | 0.697 | 0.679 | 0.809 | 0.432 | 0.73 | 0.809
 > - **FORTY**:  In general **Both Models** show that as 40 time increases the probability of a player being drafted decreases. **Random Forrest** shows that relationship is monotonic showing a bit of a sharp decrease as 40 time approaches 5.0 seconds. However the **Random Forrest** still predicts in on average all players to be drafted just based on 40 time. **Logistic Regression** also captures the general relationship of 40 time and the probability of being drafted. However as 40 time approaches 5.0 seconds **Logistic Regression** starts to predict players not being drafted.
 > - **WEIGHT:** In general **Both Models** show that in general as weight increases so those the probability of a player being drafted. **Random Forrest** shows that the relationship between weight and the probability of being drafted is monotonic.**Random Forrest** also predicts on average all players to be drafted to be drafted just based on weight. **Logistic Regression** also captures the general shpae that as weight increases so those the probaility of a player being drafted. However, if a certain player weighs below 200 **Logistic Regression** just based on wieght will predict that player as not being drafted.
 
+<img src="Images/PA/pdp_Conference.PNG" width="  1000">
+
+> **Note (pdp Conference)**
+> - **CONFERENCE:** **Random Forrest**, just based on conference, shows no matter which conference the player plays for the model will predict them as being drafted, However Division I-AA, II, III the probability decreases. **Logistic Regression** predicts if the player plays for the Sunbelt Conference will have the highest probability of being drafted. If the player plays for the Division I-AA, II, III the player will probably not be drafted.
+
 <img src="Images/PA/pdp_Position.PNG" width="  1000">
 
 > **Note (pdp Position)**
 > - **POSITION:** For **_Random Forrest_** in general if your just differentiating by position the model predicts all position to be drafted. You also don't see a lot a variability in the probability of being drafted factored by position all around 60%. For **_Logistic Regression_** you see all lot a variability in the probability of being drafted factored by position. _Offensive Guards & Tackles_ have the highest probability of being drafted at around 70-80%. Edge Rushers, Long Snappers, Quarterbacks, and Safety have lowest probability of being drafted at around 20%
-
-<img src="Images/PA/pdp_Conference.PNG" width="  1000">
-
-> **Note (pdp Conference)**
-> - **CONFERENCE:** **Random Forrest**, just based on conference, shows no matter which conference the player plays for the model will predict them as being drafted, However Division I-AA, II, III the probability decreases. **Logistic Regression** predicts if the player plays for the Sunbelt Conference will have the highest probability of being drafted. If the player plays for the Division I-AA, II, III the the player will probably not be drafted.
-
-### Partial Dependency: (Position)
-
-<img src="Images/PA/pdp_Cont_Position_RF.PNG" width="  1000">
-
-> **Note (Random Forrest - Position)**
-> - **BENCH:** When you look a bench factored by Position is still sticks with the same general relationship, As you bench reps increase so those the probability of a player being drafted. It looks like no matter the position if your able to bench over 20 reps the probability of you being drafted increase to above 50%
-> - **FORTY:** When you look at 40 times factored by Position
-> - **WEIGHT:**
-
-<img src="Images/PA/pdp_Cont_Position_LOG.PNG" width="  1000">
-
-> **Note (Logistic Regression - Position)**
-> - **BENCH:**
-> - **FORTY:**
-> - **WEIGHT:**
 
 ### Partial Dependency: (Conference)
 
@@ -410,6 +394,22 @@ RF-Acc SIMPLE (mtry = 6, min = 9) | 0.697 | 0.679 | 0.809 | 0.432 | 0.73 | 0.809
 <img src="Images/PA/pdp_Cont_Conference_LOG.PNG" width="  1000">
 
 > **Note (Logistic Regression - Conference)**
+> - **BENCH:**
+> - **FORTY:**
+> - **WEIGHT:**
+
+### Partial Dependency: (Position)
+
+<img src="Images/PA/pdp_Cont_Position_RF_Filtered.PNG" width="  1000">
+
+> **Note (Random Forrest - Position)**
+> - **BENCH:** When you look a bench factored by Position is still sticks with the same general relationship, As you bench reps increase so those the probability of a player being drafted. It looks like no matter the position if your able to bench over 20 reps the probability of you being drafted increase to above 50%
+> - **FORTY:** When you look at 40 times factored by Position
+> - **WEIGHT:**
+
+<img src="Images/PA/pdp_Cont_Position_LOG_Filtered.PNG" width="  1000">
+
+> **Note (Logistic Regression - Position)**
 > - **BENCH:**
 > - **FORTY:**
 > - **WEIGHT:**

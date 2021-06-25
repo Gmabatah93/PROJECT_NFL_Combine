@@ -2137,6 +2137,23 @@ EXP_log_F <- explain_tidymodels(model = log_fit_F,
                                 predict_function = custom_func_Prob,
                                 label = "LOG-F")
 
+# Explainer (WR | RB | OG | CB | DE)
+# - Data
+nfl_test_Positions <- nfl_test %>% 
+  filter(position %in% c("WR","RB","OG","CB","DE"))
+# - Random Forrest
+EXP_rf_F_Positions <- explain_tidymodels(model = rf_fit_F,
+                                         data = nfl_test_Positions,
+                                         y = nfl_test$drafted == "Yes",
+                                         predict_function = custom_func_Prob,
+                                         label = "RF-F")
+# - Logistic Regression
+EXP_log_F_Positions <- explain_tidymodels(model = log_fit_F,
+                                          data = nfl_test_Positions,
+                                          y = nfl_test$drafted == "Yes",
+                                          predict_function = custom_func_Prob,
+                                          label = "LOG-F")
+
 # Model-Performance
 md_rf <- model_diagnostics(explainer = EXP_rf_F)
 md_log <- model_diagnostics(explainer = EXP_log_F)
@@ -2282,7 +2299,40 @@ gg_pdp_log_Conference <- plot(pdp_log_F_Conference) +
 ggarrange(gg_pdp_rf_Position, gg_pdp_log_Position, nrow = 1)
 ggarrange(gg_pdp_rf_Conference, gg_pdp_log_Conference, nrow = 1)
 
+
 # Partial Dependency (Grouped)
+# - Conference
+set.seed(101)
+pdp_conf_rf <- model_profile(explainer = EXP_rf_F,
+                             variables = vip_variables,
+                             groups = "conference")
+pdp_conf_log_F <- model_profile(explainer = EXP_log_F,
+                                variables = vip_variables,
+                                groups = "conference")
+
+plot(pdp_conf_rf) +
+  geom_hline(yintercept = 0.5, linetype = 2, color = "tomato", alpha = 0.7) +
+  labs(title = "Random Forrest",
+       subtitle = "(NONE: mtry = 1, min = 9)") +
+  theme(
+    plot.title = element_text(hjust = 0.5, face = "bold", color = "seagreen1"),
+    plot.subtitle = element_text(hjust = 0.5, face = "italic", color = "orchid4"),
+    axis.title.y = element_text(color = "tomato"),
+    legend.position = "bottom"
+  )
+
+plot(pdp_conf_log_F) +
+  geom_hline(yintercept = 0.5, linetype = 2, color = "tomato", alpha = 0.7) +
+  labs(title = "Logistic Regression",
+       subtitle = '(SIMPLE: penalty = 0.011, mix = 0 "LASSO")') +
+  theme(
+    plot.title = element_text(hjust = 0.5, face = "bold", color = "lightskyblue"),
+    plot.subtitle = element_text(hjust = 0.5, face = "italic", color = "orchid4"),
+    axis.title.y = element_text(color = "tomato"),
+    legend.position = "bottom"
+  )
+
+
 # - Position
 set.seed(101)
 pdp_pos_rf_F <- model_profile(explainer = EXP_rf_F,
@@ -2314,16 +2364,16 @@ plot(pdp_pos_log_F) +
     legend.position = "bottom"
   )
 
-# - Conference
+# - Positions (Filtered)
 set.seed(101)
-pdp_conf_rf <- model_profile(explainer = EXP_rf_F,
-                             variables = vip_variables,
-                             groups = "conference")
-pdp_conf_log_F <- model_profile(explainer = EXP_log_F,
-                                variables = vip_variables,
-                                groups = "conference")
+pdp_pos_rf_F_Filtered <- model_profile(explainer = EXP_rf_F_Positions,
+                                       variables = vip_variables,
+                                       groups = "position")
+pdp_pos_log_F_Filtered <- model_profile(explainer = EXP_log_F_Positions,
+                                        variables = vip_variables,
+                                        groups = "position")
 
-plot(pdp_conf_rf) +
+plot(pdp_pos_rf_F_Filtered) +
   geom_hline(yintercept = 0.5, linetype = 2, color = "tomato", alpha = 0.7) +
   labs(title = "Random Forrest",
        subtitle = "(NONE: mtry = 1, min = 9)") +
@@ -2334,9 +2384,9 @@ plot(pdp_conf_rf) +
     legend.position = "bottom"
   )
 
- plot(pdp_conf_log_F) +
-   geom_hline(yintercept = 0.5, linetype = 2, color = "tomato", alpha = 0.7) +
-   labs(title = "Logistic Regression",
+plot(pdp_pos_log_F_Filtered) +
+  geom_hline(yintercept = 0.5, linetype = 2, color = "tomato", alpha = 0.7) +
+  labs(title = "Logistic Regression",
        subtitle = '(SIMPLE: penalty = 0.011, mix = 0 "LASSO")') +
   theme(
     plot.title = element_text(hjust = 0.5, face = "bold", color = "lightskyblue"),
@@ -2344,7 +2394,7 @@ plot(pdp_conf_rf) +
     axis.title.y = element_text(color = "tomato"),
     legend.position = "bottom"
   )
- 
+
 #
 # Feature Selection: DALEX (Instance) ----
 
