@@ -51,43 +51,44 @@ drafted | chr | What NFL team drafted player / Round / Pick / Year
 ## Summary
 <img src="Images/EDA/drafted.PNG" width="700">
 
-**Note (Target)**: Of all the players in this data **_65%_** of players in this dataset was Drafted
+>**Note (Target)**: Of all the players in this data **_65%_** of players in this dataset was Drafted
 
 <img src="Images/EDA/drafted_side.PNG" width="700">
 
 <img src="Images/EDA/drafted_position.PNG" width="700">
 
-**Note (Position)**: There are _1459_ Defensive and _1426_ Offensive players in this dataset
-- Of the _1459_ Defensive players **70%** was Drafted. Of the _1426_ Offensive players **61%** was Drafted.
-- Top 3 Offensive Positions Drafted: **_OT | WR | RB_**
-- Top 3 Defensive Positions Drafted: **_CB | DE | OLB_**
+> **Note (Position)**: There are _1459_ Defensive and _1426_ Offensive players in this dataset
+> - Of the _1459_ Defensive players **70%** was Drafted. Of the _1426_ Offensive players **61%** was Drafted.
+> - Top 3 Offensive Positions Drafted: **_OT | WR | RB_**
+> - Top 3 Defensive Positions Drafted: **_CB | DE | OLB_**
 
 <img src="Images/EDA/drafted_conference.PNG" width="700" />
 
-**Note (Conference)**: The majority of players Drafted came from the **_[ SEC | ACC | Big 10 ]_** Conferences
+> **Note (Conference)**: The majority of players Drafted came from the **_[ SEC | ACC | Big 10 ]_** Conferences
 
 ## Correlation
 <img src="Images/EDA/corr.PNG" width="700">
 
 <img src="Images/EDA/corr_sig.PNG" width="700">
 
-**Note (Correlation)**: Alot of the Combine metrics are **_Highly_** Corelated
+> **Note (Correlation)**: Alot of the Combine metrics are **_Highly_** Corelated
 
 ## Principal Component Analysis
 <p float="left">
-  <img src="Images/EDA/pca_biplot.PNG" width="500">
-  <img src="Images/EDA/pca_biplot_drafted.PNG" width="500">
+  <img src="Images/EDA/pca_biplot.PNG" width="400">
+  <img src="Images/EDA/pca_biplot_drafted.PNG" width="400">
 </p>
 
 <img src="Images/EDA/pca_eig.PNG" width="700">
 <img src="Images/EDA/pca_pc.PNG" width="700">
-**Note (PCA)**:
-- **PC1**: Represents Agility/Explosiveness
+
+> **Note (PCA)**:
+> - **PC1**: Represents Agility/Explosiveness
   + Agility: forty | three_cone | shuttle
     + generally if your fast in one your fast in the others
   + Explosiveness: vertical | broad_jump
     + generally if you can jump well vertically you can jump well horizontally
-- **PC2**: Represents overall strength
+> - **PC2**: Represents overall strength
 
 
 ## Combine Summary
@@ -470,10 +471,26 @@ Defensive Ends | 0.656 | 0.860 | 0.167 | 0.712 | 0.779
 
 **Break-Down**
 <img src="Images/PA/bd_rf_OG.PNG" width="  1200">
-<img src="Images/PA/bd_log_.PNG" width="  1200">
+<img src="Images/PA/bd_log_OG.PNG" width="  1200">
 
 ### Cornerbacks
 <img src="Images/PA/data_cb.PNG" width="  1500">
 
+**SHAP**
+<img src="Images/PA/shap_rf_CB.PNG" width="  1200">
+<img src="Images/PA/shap_log_CB.PNG" width="  1200">
+
+**Break-Down**
+<img src="Images/PA/bd_rf_CB.PNG" width="  1200">
+<img src="Images/PA/bd_log_CB.PNG" width="  1200">
+
 ### Defensive Ends
 <img src="Images/PA/data_de.PNG" width="  1500">
+
+**SHAP**
+<img src="Images/PA/shap_rf_DE.PNG" width="  1200">
+<img src="Images/PA/shap_log_DE.PNG" width="  1200">
+
+**Break-Down**
+<img src="Images/PA/bd_rf_DE.PNG" width="  1200">
+<img src="Images/PA/bd_log_DE.PNG" width="  1200">
