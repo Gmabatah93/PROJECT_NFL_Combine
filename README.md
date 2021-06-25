@@ -415,24 +415,62 @@ RF-Acc SIMPLE (mtry = 6, min = 9) | 0.697 | 0.679 | 0.809 | 0.432 | 0.73 | 0.809
 
 ## Instance-Level
 <img src="Images/PA/rf_cm.PNG" width="  1000">
+
+Position | Accuracy | Sensitivity | Specificity | Precision | F1
+--- | --- | --- | --- | --- | ---
+Wide Receivers | 0.774 | 0.97 | 0.45 | 0.744 | 0.842
+Running Backs | 0.75 | 0.9 | 0.5 | 0.75 | 0.818
+Offensive Guards | 0.646 | 0.92 | 0.348 | 0.605 | 0.730
+Corner Backs | 0.696 | 0.974 | 0.059 | 0.704 | 0.817
+Defensive Ends | 0.656 | 0.884 | 0.111 | 0.704 | 0.784
+
+
+> **Note (Random Forrest - Metrics)**
+
 <img src="Images/PA/log_cm.PNG" width="  1000">
+
+Position | Accuracy | Sensitivity | Specificity | Precision | F1
+--- | --- | --- | --- | --- | ---
+Wide Receivers | 0.736 | 0.879 | 0.5 | 0.744 | 0.806
+Running Backs | 0.75 | 0.9 | 0.5 | 0.75 | 0.818
+Offensive Guards | 0.583 | 0.8 | 0.348 | 0.571 | 0.667
+Corner Backs | 0.679 | 0.974 | 0 | 0.691 | 0.809
+Defensive Ends | 0.656 | 0.860 | 0.167 | 0.712 | 0.779
+
+> **Note (Logistic Regression - Metrics)**
 
 ### Wide Receivers
 <img src="Images/PA/data_wr.PNG" width="  1500">
-
-**Break-Down**
-<img src="Images/PA/bd_rf_WR.PNG" width="  1200">
-<img src="Images/PA/bd_log_WR.PNG" width="  1200">
 
 **SHAP**
 <img src="Images/PA/shap_rf_WR.PNG" width="  1200">
 <img src="Images/PA/shap_log_WR.PNG" width="  1200">
 
+**Break-Down**
+<img src="Images/PA/bd_rf_WR.PNG" width="  1200">
+<img src="Images/PA/bd_log_WR.PNG" width="  1200">
+
 ### Running Backs
 <img src="Images/PA/data_rb.PNG" width="  1500">
 
+**SHAP**
+<img src="Images/PA/shap_rf_RB.PNG" width="  1200">
+<img src="Images/PA/shap_log_RB.PNG" width="  1200">
+
+**Break-Down**
+<img src="Images/PA/bd_rf_RB.PNG" width="  1200">
+<img src="Images/PA/bd_log_RB.PNG" width="  1200">
+
 ### Offensive Guards
 <img src="Images/PA/data_og.PNG" width="  1500">
+
+**SHAP**
+<img src="Images/PA/shap_rf_OG.PNG" width="  1200">
+<img src="Images/PA/shap_log_OG.PNG" width="  1200">
+
+**Break-Down**
+<img src="Images/PA/bd_rf_OG.PNG" width="  1200">
+<img src="Images/PA/bd_log_.PNG" width="  1200">
 
 ### Cornerbacks
 <img src="Images/PA/data_cb.PNG" width="  1500">
