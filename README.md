@@ -46,7 +46,7 @@ three_cone | dbl | primarily run to evaluate the agility, quickness and fluidity
 shuttle | dbl | The shuttle (20yards), much like the 3-cone drill, test speed and acceleration. The only difference is that players are running laterally instead of forming a right angle.  _(seconds)_
 drafted | chr | What NFL team drafted player / Round / Pick / Year
 
-***
+
 ---
 
 # Exploratory Data Analysis
