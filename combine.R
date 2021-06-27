@@ -141,7 +141,7 @@ nfl_draft %>%
     legend.title = element_text(face = "bold", size = 15),
     plot.caption = element_text(color = "gray70", face = "italic")
   ) + 
-  scale_fill_manual(values = c("grey80", "forestgreen"))
+  scale_fill_manual(values = c("forestgreen","grey80"))
 
 # By Side
 gg_draft_Side <- nfl_draft %>%
@@ -161,12 +161,12 @@ gg_draft_Side <- nfl_draft %>%
     axis.text = element_blank(),
     legend.position = "none"
   ) +
-  scale_fill_manual(values = c("grey80","forestgreen"))
+  scale_fill_manual(values = c("forestgreen", "grey80"))
 gg_draft_Side_prop <- nfl_draft %>%
   group_by(drafted) %>% 
   count(side) %>% 
   mutate(side = fct_reorder(side, n)) %>% 
-  ggplot(aes(side, n, fill = drafted)) +
+  ggplot(aes(side, n, fill = relevel(drafted, ref = "No"))) +
   geom_col(position = "fill") + geom_hline(yintercept = 0.66, color = "red") +
   labs(caption = "Year: 2000 - 2018") +
   theme(
@@ -178,7 +178,7 @@ gg_draft_Side_prop <- nfl_draft %>%
     plot.caption = element_text(color = "gray70", face = "italic")
   ) +
   scale_y_continuous(labels = scales::percent_format()) +
-  scale_fill_manual(values = c("grey80","forestgreen"))
+  scale_fill_manual(values = c("grey80", "forestgreen"))
 # - visual
 ggarrange(gg_draft_Side, gg_draft_Side_prop, 
           ncol = 1)
@@ -200,13 +200,13 @@ gg_draft_Position <- nfl_draft %>%
     legend.position = "none",
     plot.caption = element_text(color = "gray70", face = "italic")
   ) +
-  scale_fill_manual(values = c("grey80","forestgreen"))
+  scale_fill_manual(values = c("forestgreen", "grey80"))
 gg_draft_position_Offense_prop <- nfl_draft %>%
   filter(side == "Offense") %>% 
   group_by(drafted, side) %>% 
   count(position) %>% 
   mutate(position = fct_reorder(position, n)) %>% 
-  ggplot(aes(position, n, fill = drafted)) +
+  ggplot(aes(position, n, fill = relevel(drafted, ref = "No"))) +
   geom_col(position = "fill") + geom_hline(yintercept = 0.66, color = "red") +
   labs(title = "Offense") +
   theme(
@@ -224,7 +224,7 @@ gg_draft_position_Defense_prop <- nfl_draft %>%
   group_by(drafted, side) %>% 
   count(position) %>% 
   mutate(position = fct_reorder(position, n)) %>% 
-  ggplot(aes(position, n, fill = drafted)) +
+  ggplot(aes(position, n, fill = relevel(drafted, ref = "No"))) +
   geom_col(position = "fill") + geom_hline(yintercept = 0.66, color = "red") +
   labs(title = "Defense") +
   theme(
@@ -257,12 +257,12 @@ gg_draft_conference <- nfl_draft %>%
     axis.text.x = element_blank(),
     legend.position = "none"
   ) +
-  scale_fill_manual(values = c("grey80","forestgreen"))
+  scale_fill_manual(values = c("forestgreen", "grey80"))
 gg_draft_conference_prop <- nfl_draft %>%
   group_by(drafted) %>% 
   count(conference) %>% 
   mutate(conference = fct_reorder(conference, n)) %>% 
-  ggplot(aes(conference, n, fill = drafted)) +
+  ggplot(aes(conference, n, fill = relevel(drafted, ref = "No"))) +
   geom_col(position = "fill") +
   geom_hline(yintercept = 0.66, color = "red") +
   labs(caption = "Year: 2000 - 2018") +
@@ -295,63 +295,63 @@ nfl_draft %>%
 # - Weight ~ Forty: 89
 gg_drafted_Weight_Forty <- nfl_draft %>% 
   ggplot(aes(weight, forty, color = drafted)) +
-  geom_point(alpha = 0.3) +
+  geom_point(alpha = 0.1) +
   theme(
     plot.title = element_text(face = "bold", hjust = 0.5, size = 12),
     axis.title = element_text(face = "bold", size = 14),
     legend.position = "none"
   ) +
-  scale_color_manual(values = c("grey80","forestgreen"))
+  scale_color_manual(values = c("forestgreen","grey80"))
 # - Three Cone ~ Shuttle: 85
 gg_drafted_3cone_Shuttle <- nfl_draft %>% 
   ggplot(aes(three_cone, shuttle, color = drafted)) +
-  geom_point(alpha = 0.3) +
+  geom_point(alpha = 0.1) +
   theme(
     plot.title = element_text(face = "bold", hjust = 0.5, size = 12),
     axis.title = element_text(face = "bold", size = 14),
     legend.position = "none"
   ) +
-  scale_color_manual(values = c("grey80","forestgreen"))
+  scale_color_manual(values = c("forestgreen","grey80"))
 # - Forty ~ Broad Jump: -84
 gg_drafted_Forty_BJump <- nfl_draft %>% 
   ggplot(aes(forty, broad_jump, color = drafted)) +
-  geom_point(alpha = 0.3) +
+  geom_point(alpha = 0.1) +
   theme(
     plot.title = element_text(face = "bold", hjust = 0.5, size = 12),
     axis.title = element_text(face = "bold", size = 14),
     legend.position = "none"
   ) +
-  scale_color_manual(values = c("grey80","forestgreen"))
+  scale_color_manual(values = c("forestgreen","grey80"))
 # - Forty ~ Three Cone: 83
 gg_drafted_Forty_3cone <- nfl_draft %>% 
   ggplot(aes(forty, three_cone, color = drafted)) +
-  geom_point(alpha = 0.3) +
+  geom_point(alpha = 0.1) +
   theme(
     plot.title = element_text(face = "bold", hjust = 0.5, size = 12),
     axis.title = element_text(face = "bold", size = 14),
     legend.position = "none"
   ) +
-  scale_color_manual(values = c("grey80","forestgreen"))
+  scale_color_manual(values = c("forestgreen","grey80"))
 # - Vertical ~ Broad Jump: 82
 gg_drafted_Vertical_BJump <- nfl_draft %>% 
   ggplot(aes(vertical, broad_jump, color = drafted)) +
-  geom_point(alpha = 0.3) +
+  geom_point(alpha = 0.1) +
   theme(
     plot.title = element_text(face = "bold", hjust = 0.5, size = 12),
     axis.title = element_text(face = "bold", size = 14),
     legend.position = "none"
   ) +
-  scale_color_manual(values = c("grey80","forestgreen"))
+  scale_color_manual(values = c("forestgreen","grey80"))
 # - Weight ~ Three Cone: 81
 gg_drafted_Weight_3cone <- nfl_draft %>% 
   ggplot(aes(weight, three_cone, color = drafted)) +
-  geom_point(alpha = 0.3) +
+  geom_point(alpha = 0.1) +
   theme(
     plot.title = element_text(face = "bold", hjust = 0.5, size = 12),
     axis.title = element_text(face = "bold", size = 14),
     legend.position = "none"
   ) +
-  scale_color_manual(values = c("grey80","forestgreen"))
+  scale_color_manual(values = c("forestgreen","grey80"))
 
 # Multiplot
 ggarrange(gg_drafted_Weight_Forty, gg_drafted_3cone_Shuttle, gg_drafted_Forty_BJump, 
@@ -455,7 +455,7 @@ gg_Combine_Weight_Offense_draft <- nfl_draft %>%
         axis.title.y = element_text(color = "red"),
         axis.title.x = element_blank(),
         legend.position = "none") +
-  scale_fill_manual(values = c("gray80", "forestgreen"))
+  scale_fill_manual(values = c("forestgreen", "gray80"))
 gg_Combine_Weight_Defense_draft <- nfl_draft %>% 
   filter(side == "Defense") %>% 
   ggplot(aes(position, weight, fill = drafted)) +
@@ -465,7 +465,7 @@ gg_Combine_Weight_Defense_draft <- nfl_draft %>%
   theme(plot.title = element_text(hjust = 0.5, face = "bold", size = 18),
         axis.title = element_blank(),
         axis.text.y = element_blank()) +
-  scale_fill_manual(values = c("gray80", "forestgreen"))
+  scale_fill_manual(values = c("forestgreen", "gray80"))
 # -- visual
 ggarrange(gg_Combine_Weight_Offense_draft, gg_Combine_Weight_Defense_draft, nrow = 1)  
 
@@ -522,7 +522,7 @@ gg_Combine_40_Offense_draft <- nfl_draft %>%
         axis.title.x = element_blank(),
         legend.position = "none") +
   ylim(c(4,6)) +
-  scale_fill_manual(values = c("gray80", "forestgreen")) 
+  scale_fill_manual(values = c("forestgreen", "gray80")) 
 gg_Combine_40_Defense_draft <- nfl_draft %>% 
   filter(side == "Defense") %>% 
   ggplot(aes(position, forty, fill = drafted)) +
@@ -533,7 +533,7 @@ gg_Combine_40_Defense_draft <- nfl_draft %>%
         axis.title = element_blank(),
         axis.text.y = element_blank()) +
   ylim(c(4,6)) +
-  scale_fill_manual(values = c("gray80", "forestgreen"))
+  scale_fill_manual(values = c("forestgreen", "gray80"))
 # -- visual
 ggarrange(gg_Combine_40_Offense_draft, gg_Combine_40_Defense_draft, nrow = 1)  
 
@@ -589,7 +589,7 @@ gg_Combine_Bench_Offense_draft <- nfl_draft %>%
         axis.title.y = element_text(color = "red"),
         axis.title.x = element_blank(),
         legend.position = "none") +
-  scale_fill_manual(values = c("gray80", "forestgreen"))
+  scale_fill_manual(values = c("forestgreen","gray80"))
 gg_Combine_Bench_Defense_draft <- nfl_draft %>% 
   filter(side == "Defense") %>% 
   ggplot(aes(position, bench, fill = drafted)) +
@@ -599,7 +599,7 @@ gg_Combine_Bench_Defense_draft <- nfl_draft %>%
   theme(plot.title = element_text(hjust = 0.5, face = "bold", size = 18),
         axis.title = element_blank(),
         axis.text.y = element_blank()) +
-  scale_fill_manual(values = c("gray80", "forestgreen"))
+  scale_fill_manual(values = c("forestgreen","gray80"))
 # -- visual
 ggarrange(gg_Combine_Bench_Offense_draft, gg_Combine_Bench_Defense_draft, nrow = 1)  
 
@@ -655,7 +655,7 @@ gg_Combine_Jump_Offense_draft <- nfl_draft %>%
         axis.title.x = element_blank(),
         legend.position = "none") +
   ylim(c(80,140)) +
-  scale_fill_manual(values = c("gray80", "forestgreen"))
+  scale_fill_manual(values = c("forestgreen","gray80"))
 gg_Combine_Jump_Defense_draft <- nfl_draft %>% 
   filter(side == "Defense") %>% 
   ggplot(aes(position, broad_jump, fill = drafted)) +
@@ -666,7 +666,7 @@ gg_Combine_Jump_Defense_draft <- nfl_draft %>%
         axis.title = element_blank(),
         axis.text.y = element_blank()) +
   ylim(c(80,140)) +
-  scale_fill_manual(values = c("gray80", "forestgreen"))
+  scale_fill_manual(values = c("forestgreen", "gray80"))
 # -- visual
 ggarrange(gg_Combine_Jump_Offense_draft, gg_Combine_Jump_Defense_draft, nrow = 1)  
 
@@ -2144,13 +2144,13 @@ nfl_test_Positions <- nfl_test %>%
 # - Random Forrest
 EXP_rf_F_Positions <- explain_tidymodels(model = rf_fit_F,
                                          data = nfl_test_Positions,
-                                         y = nfl_test$drafted == "Yes",
+                                         y = nfl_test_Positions$drafted == "Yes",
                                          predict_function = custom_func_Prob,
                                          label = "RF-F")
 # - Logistic Regression
 EXP_log_F_Positions <- explain_tidymodels(model = log_fit_F,
                                           data = nfl_test_Positions,
-                                          y = nfl_test$drafted == "Yes",
+                                          y = nfl_test_Positions$drafted == "Yes",
                                           predict_function = custom_func_Prob,
                                           label = "LOG-F")
 
