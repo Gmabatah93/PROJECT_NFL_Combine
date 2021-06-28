@@ -46,6 +46,13 @@ three_cone | dbl | primarily run to evaluate the agility, quickness and fluidity
 shuttle | dbl | The shuttle (20yards), much like the 3-cone drill, test speed and acceleration. The only difference is that players are running laterally instead of forming a right angle.  _(seconds)_
 drafted | chr | What NFL team drafted player / Round / Pick / Year
 
+**Feature Engineering**
+
+Feature | Description
+--- | ---
+drafted | split the drafted variable to represent one feature for [Round / Pick / Year] & changed the drafted variable to a factor ["Yes","No"] to represent weather a player was drafted or not.
+side | created a new variable for High Level analysis of just offensive players and defensive players.
+conference | created a variable to view conference by conference instead of school by school
 
 ---
 
@@ -60,8 +67,8 @@ drafted | chr | What NFL team drafted player / Round / Pick / Year
 
 <img src="Images/EDA/drafted_position.PNG" width="700">
 
-> **Note (Position)**: There are _1459_ Defensive and _1426_ Offensive players in this dataset
-> - Of the _1459_ Defensive players **70%** was Drafted. Of the _1426_ Offensive players **61%** was Drafted.
+> **Note (Position)**: There are **1459** Defensive and **1426** Offensive players in this dataset
+> - Of the **1459** Defensive players **70%** was Drafted. Of the **1426** Offensive players **61%** was Drafted.
 > - Top 3 Offensive Positions Drafted: **_OT | WR | RB_**
 > - Top 3 Defensive Positions Drafted: **_CB | DE | OLB_**
 
@@ -77,6 +84,8 @@ drafted | chr | What NFL team drafted player / Round / Pick / Year
 > **Note (Correlation)**: Alot of the Combine metrics are **_Highly_** Corelated
 
 ## Principal Component Analysis
+> Because a lot of the combine features were Highly correlated I will use PCA to hopefully identify related themes between these variables.
+
 <p float="left">
   <img src="Images/EDA/pca_biplot.PNG" width="400">
   <img src="Images/EDA/pca_biplot_drafted.PNG" width="400">
@@ -86,15 +95,16 @@ drafted | chr | What NFL team drafted player / Round / Pick / Year
 <img src="Images/EDA/pca_pc.PNG" width="700">
 
 > **Note (PCA)**:
-> - **PC1**: Represents Agility/Explosiveness
-  + Agility: forty | three_cone | shuttle
+> - **PC1**: _Represents Agility/Explosiveness_
+  + **_Agility_**: forty | three_cone | shuttle
     + generally if your fast in one your fast in the others
-  + Explosiveness: vertical | broad_jump
+  + **_Explosiveness_**: vertical | broad_jump
     + generally if you can jump well vertically you can jump well horizontally
-> - **PC2**: Represents overall strength
+> - **PC2**: _Represents overall strength_
 
 
 ## Combine Summary
+> With the help of PCA I can say that the combine features (weight, Forty, Bench, and Broad Jump) best summaries the athletics ability of players entering the draft. So we'll view these features by Position & Conference.
 
 ### Weight
 <img src="Images/EDA/combine_weight.PNG" width=" 700">
@@ -167,52 +177,35 @@ drafted | chr | What NFL team drafted player / Round / Pick / Year
 ---
 
 # Modeling
+> The Models I'm going to use for this dataset is
+> - **Random Forrest**: because of its versatility _(as you see alot of features in this dataset is correlated, so we'd have to deal with that issue)_ with **RF** you don't even have to preprocess correlated features, it knows how to handle it.
+> - **Logistic Regression**: because it is a more interpretable model and if we can get close to the same metrics as **RF** I'd rather use **LR**, however we would have to do alot of preprocessing.
 
-## Preprocess
+## Data Spending
 <img src="Images/MODEL/split.PNG" width=" 500">
 
-**Split**
-
-- **Train**: 80% stratified by drafted feature
-- **Test**: 20% stratified by drafted feature
-- **Validation**: 10 fold cross-validation using the training set
-
-## Preprocess - Logistic Regression
-
-#### NORMAL
-- **Normalize**: All numeric variables
-- **Dummy**: All categorical variables
-
-**Model Data**
-
-<img src="Images/MODEL/prep_log_normal.PNG" width=" 700">
-
-#### PCA
-
-**Components**
-
-<img src="Images/MODEL/prep_log_pca_fig.PNG" width=" 700">
-
-**Model Data**
-
-<img src="Images/MODEL/prep_log_pca.PNG" width=" 700">
-
-### Simple
-
-**Model Data**  
-
-<img src="Images/MODEL/prep_log_simple.PNG" width=" 700">
-
+> **Note (Split)**
+> - **Split 1**: stratified by drafted feature
+>   + 80%: NFL Other
+>   + 20%: NFL Test **_(This will be the final test set)_**
+> - **Split 2**: splitting _"NFL Other"_ stratified by drafted feature
+>   + 80%: NFL Train **_(This will be the data I use to train the models)_**
+>        + **_I will be 10-Fold CV to tune each model_**
+>   + 20%: NFL Val: **_(Will be the final assessment before using the Test Set)_**
 
 ## Preprocess - Random Forrest
 
-#### NORMAL
+#### NONE
 
 **Model Data**
 
 <img src="Images/MODEL/prep_rf_none.PNG" width=" 700">
 
 #### PCA
+
+**Components**
+
+<img src="Images/MODEL/prep_log_pca_fig.PNG" width=" 700">
 
 **Model Data**
 
@@ -224,8 +217,33 @@ drafted | chr | What NFL team drafted player / Round / Pick / Year
 
 <img src="Images/MODEL/prep_rf_simple.PNG" width=" 700">
 
-### Control
-- **Parallel Processing**
+> **Note (RF - Preprocess):** I will be fitting three different datasets to see how they perform.
+> - One using the raw NFL Train dataset, One using the dataset preprocessed by PCA, and Another simplified dataset taking out the correlated features
+> - _(player, school, team will not be used in the model)_
+
+## Preprocess - Logistic Regression
+
+#### NORMAL
+**Model Data**
+
+<img src="Images/MODEL/prep_log_normal.PNG" width=" 700">
+
+#### PCA
+
+**Model Data**
+
+<img src="Images/MODEL/prep_log_pca.PNG" width=" 700">
+
+### Simple
+
+**Model Data**  
+
+<img src="Images/MODEL/prep_log_simple.PNG" width=" 700">
+
+> **Note (LR - Preprocess)**
+> - LR will need a little bit more preprocessing. 1st I normalized all the numeric features. Then I "dummified" the categorical features (side, position, conference)
+> - I also took the same approach I used for **RF** by fitting one dataset with Minimal "NORMAL" preprocessing, another using PCA, and another taking out the correlated features.  
+> - _(player, school, team will not be used in the model)_
 
 ### Metrics
  - **AUC:** Measure of performance across all possible class
@@ -237,9 +255,37 @@ drafted | chr | What NFL team drafted player / Round / Pick / Year
 
 ## Fit
 
+### Random Forest
+
+**Grid**
+
+<img src="Images/MODEL/grid_rf.PNG" width="  600">
+
+> **Note (RF - Tune):** I fit all Models using 1,000 trees and tried **mtry 1-8** _"Number of random features to try for each split"_ and **min_n 1-10** _"min number of samples to have in leaf node"_
+
+<img src="Images/MODEL/fit_rf_acc.PNG" width="  600">
+<img src="Images/MODEL/fit_rf_f.PNG" width="  600">
+
+
+#### **Best Metrics**
+
+Preprocess | Metric | mtry | min_n | Stat
+--- | --- | --- | --- | ---
+None | Accuracy | 1 | 9 | 69.6%
+PCA  | Accuracy | 1 | 5 | 68.2%
+**_Simple_** | **_Accuracy_** | **_6_** | **_9_** | **_70.5%_**
+**_None_** | **_F Score_** | **_1_** | **_9_** | **_79.9%_**
+PCA  | F Score | 1 | 5 | 79.1%
+Simple | F Score | 1 | 3 | 79.6%
+
+> **Note (RF - CV Metrics):** After fitting all the different models the best model in terms of Accuracy was the one with a **Simple** preprocess with **mtry = 6 & min_n = 9**. The best model in terms of **F Score** was with **No Preprocess** with **mtry = 1 & min_n = 9**
+
 ### Logistic Regression
 
 <img src="Images/MODEL/grid_log.PNG" width="  600">
+
+> **Note (LOG - Tune):** I fit all Models trying **penalty 0.001 - 0.1** _"cost placed for misclassifications"_ and **mixture (0, 0.5, 1)** _"lasso, mix, ridge"_
+
 <img src="Images/MODEL/fit_log_acc.PNG" width="  600">
 <img src="Images/MODEL/fit_log_f.PNG" width="  600">
 
@@ -254,25 +300,7 @@ Normal | F Score | 0.006 | 0.5 | 80.3%
 PCA  |  F Score | 0.051 | 0.5 | 80.1%
 **_Simple_** |  **_F Score_** | **_0.011_** | **_0_** | **_80.5%_**
 
-
-### Random Forest
-
-**Grid**
-
-<img src="Images/MODEL/grid_rf.PNG" width="  600">
-<img src="Images/MODEL/fit_rf_acc.PNG" width="  600">
-<img src="Images/MODEL/fit_rf_f.PNG" width="  600">
-
-#### **Best Metrics**
-
-Preprocess | Metric | mtry | min_n | Stat
---- | --- | --- | --- | ---
-None | Accuracy | 1 | 9 | 69.6%
-PCA  | Accuracy | 1 | 5 | 68.2%
-**_Simple_** | **_Accuracy_** | **_6_** | **_9_** | **_70.5%_**
-**_None_** | **_F Score_** | **_1_** | **_9_** | **_79.9%_**
-PCA  | F Score | 1 | 5 | 79.1%
-Simple | F Score | 1 | 3 | 79.6%
+> **Note (LOG - CV Metrics):** After fitting all the different models the best model in terms of Accuracy was the one with a **Normal** preprocess with **penalty = 0.001 & Mixture = 0.5**. The best model in terms of **F Score** was with **Simple** preprocess with **penalty = 0 & mixture = 0 "LASSO"**
 
 ---
 
@@ -298,10 +326,12 @@ Simple | F Score | 1 | 3 | 79.6%
 ## Validation Metrics
 Model | AUC | Accuracy | Sensitivity | Specificity | Precision | Recall | F1
 --- | --- | --- | --- | --- | --- | --- | ---
-**_LOG-Acc NORMAL (P = 0.001, M = 0.5)_** | **_0.737_** | **_0.72_** | **_0.907_** | **_0.365_** | **_0.73_** | **_0.907_** | **_0.809_**
-LOG-F SIMPLE (P = 0.011, M = 0) | 0.725 | 0.696 | 0.914 | 0.283 | 0.707 | 0.914 | 0.797
-RF-Acc SIMPLE (mtry = 6, min = 9) | 0.703 | 0.698 | 0.85 | 0.409 | 0.731 | 0.85 | 0.786
-RF-F NONE (mtry = 1, min = 9) | 0.737 | 0.707 | 0.944 | 0.258 | 0.706 | 0.944 | 0.808
+**_LOG (NORMAL: P = 0.001, M = 0.5)_** | **_0.737_** | **_0.72_** | **_0.907_** | **_0.365_** | **_0.73_** | **_0.907_** | **_0.809_**
+LOG (SIMPLE: P = 0.011, M = 0) | 0.725 | 0.696 | 0.914 | 0.283 | 0.707 | 0.914 | 0.797
+RF (SIMPLE: mtry = 6, min = 9) | 0.703 | 0.698 | 0.85 | 0.409 | 0.731 | 0.85 | 0.786
+RF (NONE: mtry = 1, min = 9) | 0.737 | 0.707 | 0.944 | 0.258 | 0.706 | 0.944 | 0.808
+
+> **Note (Validation Results):** After comparing the models using the validation set. The best model was **Logistic Regression using NORMAL preprocess (penalty = 0.001, mixture = 0.5)**
 
 ---
 # Test Results
@@ -329,95 +359,154 @@ LOG-F SIMPLE (P = 0.011, M = 0) | 0.688 | 0.691 | 0.907 | 0.281 | 0.705 | 0.907 
 RF-Acc SIMPLE (mtry = 6, min = 9) | 0.697 | 0.679 | 0.809 | 0.432 | 0.73 | 0.809 | 0.767
 **_RF-F NONE (mtry = 1, min = 9)_** | 0.7 | 0.693 | **_0.926_** | 0.251 | 0.701 | 0.926 | 0.798
 
-**Top (AUC):** Logistic Regression-Acc _(NORMAL: P = 0.001, M = 0.5)_ - **71.1%**
 
-**Top (Accuracy):** Logistic Regression-Acc _(NORMAL: P = 0.001, M = 0.5)_ - **71.9%**
+> **Note (Test Results):** After comparing the models using the Test set. Below is the best model for each metric.
+> - **AUC:** Logistic Regression _(NORMAL: P = 0.001, M = 0.5)_ - **71.1%**
+> - **Accuracy:** Logistic Regression _(NORMAL: P = 0.001, M = 0.5)_ - **71.9%**
+> - **Sensitivity:** Random Forrest _(NONE: mtry = 1, min = 9)_ - **92.6%**
+> - **Precision:** Logistic Regression _(NORMAL: P = 0.001, M = 0.5)_ - **78.6%**
+> - **F Score:** Logistic Regression _(NORMAL: P = 0.001, M = 0.5)_ - **80.7%**
 
-**Top (Sensitivity):** Random Forrest-F _(NONE: mtry = 1, min = 9)_ - **92.6%**
-
-**Top (Precision):** Logistic Regression-Acc _(NORMAL: P = 0.001, M = 0.5)_ - **78.6%**
-
-**Top (F Score):** Logistic Regression-Acc _(NORMAL: P = 0.001, M = 0.5)_ - **80.7%**
+---
 
 # Prescriptive Analysis
+> After fitting a model an importance aspect of model assessment is to evaluate which features are important and how they effect the target variable, which in this case is the probability of a player being drafted. For this dataset I will be utilizing the DALEX package which uses a model-agnostic approach to asses feature importance
 
 ## Feature Importance
+> To calculate feature importance the DALEX package first calculates the Loss of the normal model then permutes the variable of the feature in question. And finally takes the difference between the two. _(In this case I used AUC as the Loss Metric)_  
+
 <img src="Images/PA/vip.PNG" width="  1000">
 
 > **Note: (Variable Importance)**
 > - **Logistic Regression (NORMAL)**
-  1. Forty = 0.14
-  2. Weight = 0.135
-  3. Position = 0.064
-  4. Three Cone = 0.033
-  5. Side = 0.026
-  6. Bench = 0.018
+>   1. Forty = 0.14
+>   2. Weight = 0.135
+>   3. Position = 0.064
+>   4. Three Cone = 0.033
+>   5. Side = 0.026
 > - **Logistic Regression (SIMPLE)**
-  1. Forty = 0.121
-  2. Weight = 0.074
-  3. Position = 0.044
-  4. Bench = 0.039
-  5. Broad Jump = 0.02
-  6. Conference = 0.016
+>   1. Forty = 0.121
+>   2. Weight = 0.074
+>   3. Position = 0.044
+>   4. Bench = 0.039
+>   5. Broad Jump = 0.02
 > - **Random Forrest (NONE)**
-  1. Weight = 0.061
-  2. Forty = 0.051
-  3. Bench = 0.027
-  4. Three Cone = 0.016
-  5. Vertical 0.016
-  6. Shuttle = 0.011
+>   1. Weight = 0.061
+>   2. Forty = 0.051
+>   3. Bench = 0.027
+>   4. Three Cone = 0.016
+>   5. Vertical 0.016
+
+> **Note (Final Model Evaluation):** Although Logistic Regresison using NORMAL preprocessing was the best model overall, LR using **SIMPLE** preprocessing was really close and the benefit it is a much simpler model so moving forward I will be evaluating **Logistic Regression SIMPLE and Random Forrest NONE**.
 
 ## Partial Dependency
+> Shows how the expected value of model prediction behave as a function of a selected feature.
+
 <img src="Images/PA/pdp.PNG" width="  1000">
 
 > **Note (pdp Continuous)**
-> - **BENCH:** Looking at all the players in this dataset for **Random Forrest** on average the players on this dataset _based on bench reps_ are predicted to be drafted. It also shows that the relationship between bench reps and the probability of being drafted is monotonic. For **Logistic Regression** players that have a _bench rep below 10 reps_ are predicted on average to not be drafted. **Both Models** captures the general shape that as bench reps increase so those the probability of a certain player being drafted.   
-> - **FORTY**:  In general **Both Models** show that as 40 time increases the probability of a player being drafted decreases. **Random Forrest** shows that relationship is monotonic showing a bit of a sharp decrease as 40 time approaches 5.0 seconds. However the **Random Forrest** still predicts in on average all players to be drafted just based on 40 time. **Logistic Regression** also captures the general relationship of 40 time and the probability of being drafted. However as 40 time approaches 5.0 seconds **Logistic Regression** starts to predict players not being drafted.
-> - **WEIGHT:** In general **Both Models** show that in general as weight increases so those the probability of a player being drafted. **Random Forrest** shows that the relationship between weight and the probability of being drafted is monotonic.**Random Forrest** also predicts on average all players to be drafted to be drafted just based on weight. **Logistic Regression** also captures the general shpae that as weight increases so those the probaility of a player being drafted. However, if a certain player weighs below 200 **Logistic Regression** just based on wieght will predict that player as not being drafted.
+
+> **BENCH:**
+> - **Both Models** captures the general shape that as bench reps increase so those the probability of a certain player being drafted.   
+> - **Random Forrest** on average the players on this dataset _based on bench reps_ are predicted to be drafted. It also shows that the relationship between bench reps and the probability of being drafted is monotonic.
+> - **Logistic Regression** players that have a _bench rep below 10 reps_ are predicted on average to not be drafted. \
+
+> **FORTY**:  
+> - **Both Models** show that as 40 time increases the probability of a player being drafted decreases.
+> - **Random Forrest** shows that relationship is monotonic showing a bit of a sharp decrease as 40 time approaches 5.0 seconds. However **RF** still predicts in on average all players to be drafted just based on 40 time.
+> - **Logistic Regression** also captures the general relationship of 40 time and the probability of being drafted. However as 40 time approaches 5.0 seconds **Logistic Regression** starts to predict players not being drafted.
+
+> **WEIGHT:**
+> - **Both Models** show that in general as weight increases so those the probability of a player being drafted.
+> -**Random Forrest** shows that the relationship between weight and the probability of being drafted is monotonic. **RF** also predicts on average all players to be drafted to be drafted just based on weight.
+> - **Logistic Regression** also captures the general shape that as weight increases so those the probability of a player being drafted. However, if a certain player weighs below 200 **LR** just based on weight will predict that player as not being drafted.
 
 <img src="Images/PA/pdp_Conference.PNG" width="  1000">
 
 > **Note (pdp Conference)**
-> - **CONFERENCE:** **Random Forrest**, just based on conference, shows no matter which conference the player plays for the model will predict them as being drafted, However Division I-AA, II, III the probability decreases. **Logistic Regression** predicts if the player plays for the Sunbelt Conference will have the highest probability of being drafted. If the player plays for the Division I-AA, II, III the player will probably not be drafted.
+
+> **CONFERENCE:**
+> - **Random Forrest**: just based on conference, shows no matter which conference the player plays for the model will predict them as being drafted, However if a player played for a school in Division I-AA, II, III the probability decreases.
+> - **Logistic Regression** predicts if the player plays for the Sunbelt Conference will have the highest probability of being drafted. If the player plays for the Division I-AA, II, III the player will probably not be drafted.
 
 <img src="Images/PA/pdp_Position.PNG" width="  1000">
 
 > **Note (pdp Position)**
-> - **POSITION:** For **_Random Forrest_** in general if your just differentiating by position the model predicts all position to be drafted. You also don't see a lot a variability in the probability of being drafted factored by position all around 60%. For **_Logistic Regression_** you see all lot a variability in the probability of being drafted factored by position. _Offensive Guards & Tackles_ have the highest probability of being drafted at around 70-80%. Edge Rushers, Long Snappers, Quarterbacks, and Safety have lowest probability of being drafted at around 20%
+
+> **POSITION:**
+> - **_Random Forrest_**: in general if your just differentiating by position the model predicts all position to be drafted. You also don't see a lot a variability, All being around 60%. It does dips slightly when you look at positions (QB, RB, S, SS, TE WR).
+> - **_Logistic Regression_**: you see all lot a variability in the probability of being drafted factored by position. _Offensive Guards & Tackles_ have the highest probability of being drafted at around 70-80%. Edge Rushers, Long Snappers, Quarterbacks, and Safety have lowest probability of being drafted at around 20%
 
 ### Partial Dependency: (Conference)
 
 <img src="Images/PA/pdp_Cont_Conference_RF.PNG" width="  1000">
 
 > **Note (Random Forrest- Conference)**
-> - **BENCH:**
-> - **FORTY:**
-> - **WEIGHT:**
+
+> **BENCH:**
+> - At a High-Level no matter which conference a player plays for as there bench reps increases so does the probability of them being drafted.
+> - What stands out is that players that played for a school in the Division I - AA that a bench rep below 18, the model predicts them as not being drafted
+
+> **FORTY:**
+> - At a High-Level no matter which conference a player plays for as there 40 time increases the probability of them being drafted decreases.
+> - What stands out is, for a player that played for a school in Division II or III, does not run a 40 time of at least 4.4. There probability of being drafted decreases significantly.
+
+> **WEIGHT:**
+> - At a High-Level no matter which conference a player plays for as there weight increases so does the probability of them being drafted.
 
 <img src="Images/PA/pdp_Cont_Conference_LOG.PNG" width="  1000">
 
 > **Note (Logistic Regression - Conference)**
-> - **BENCH:**
-> - **FORTY:**
-> - **WEIGHT:**
+
+> **BENCH:**
+> - At a High-Level no matter which conference a player plays for as there bench reps increases so does the probability of them being drafted.
+> - What stands out is **For players that played in the Division II or III conference**. They would need to bench at least 25 for them to be drafted
+
+> **FORTY:**
+> - At a High-Level no matter which conference a player plays for as there 40 time increases the probability of them being drafted decreases.
+
+> **WEIGHT:**
+> - At a High-Level no matter which conference a player plays for as there weight increases so does the probability of them being drafted.
+
+> **GENERAL:** Players that played in the **Division II or III conferences** would need to perform significantly better than average in the combine to have an equal probability of being drafted for players that played in the more "ELITE" conferences
 
 ### Partial Dependency: (Position)
+> After some research I determined that (WR, RB, OG) were the most important/ popular offensive players that teams look for in the draft and (CB, DE) were the most important defensive players.
 
 <img src="Images/PA/pdp_Cont_Position_RF_Filtered.PNG" width="  1000">
 
 > **Note (Random Forrest - Position)**
-> - **BENCH:** When you look a bench factored by Position is still sticks with the same general relationship, As you bench reps increase so those the probability of a player being drafted. It looks like no matter the position if your able to bench over 20 reps the probability of you being drafted increase to above 50%
-> - **FORTY:** When you look at 40 times factored by Position
-> - **WEIGHT:**
+
+> **BENCH:**
+> - At A High- Level it still sticks with the same general relationship, As you bench reps increase so those the probability of a player being drafted.
+> - It looks like no matter the position if your able to bench over 20 reps the probability of you being drafted increase to above 50%
+
+> **FORTY:**
+> - At A High- Level it still sticks with the same general relationship, As you 40 times increase the probability of a player being drafted decreases.
+
+> **WEIGHT:**
+> - At A High- Level it still sticks with the same general relationship, As you weight increase so those the probability of a player being drafted.
+> - What stands out is OG that weight below 300, the model predicts them as probably not being drafted.
 
 <img src="Images/PA/pdp_Cont_Position_LOG_Filtered.PNG" width="  1000">
 
 > **Note (Logistic Regression - Position)**
-> - **BENCH:**
-> - **FORTY:**
-> - **WEIGHT:**
+
+> **BENCH:**
+> - At A High- Level it still sticks with the same general relationship, As you bench reps increase so those the probability of a player being drafted.
+> - What stands out is what a CB benches does not matter to much in terms of getting drafted
+
+> **FORTY:**
+> - At A High- Level it still sticks with the same general relationship, As you 40 times increase the probability of a player being drafted decreases.
+> - What stands out is if a (WR CB) does not run at least around  4.6 secs he will probably not get drafted
+
+> **WEIGHT:**
+> - At A High- Level it still sticks with the same general relationship, As you weight increase so those the probability of a player being drafted.
+> - What stands out is OG must weigh at least 280 to have a chance of being drafted
 
 ## Instance-Level
+> After assessing the models at a dataset level we'll take some samples from each position and do further evaluation
+
 <img src="Images/PA/rf_cm.PNG" width="  1000">
 
 Position | Accuracy | Sensitivity | Specificity | Precision | F1
@@ -427,9 +516,6 @@ Running Backs | 0.75 | 0.9 | 0.5 | 0.75 | 0.818
 Offensive Guards | 0.646 | 0.92 | 0.348 | 0.605 | 0.730
 Corner Backs | 0.696 | 0.974 | 0.059 | 0.704 | 0.817
 Defensive Ends | 0.656 | 0.884 | 0.111 | 0.704 | 0.784
-
-
-> **Note (Random Forrest - Metrics)**
 
 <img src="Images/PA/log_cm.PNG" width="  1000">
 
@@ -441,10 +527,12 @@ Offensive Guards | 0.583 | 0.8 | 0.348 | 0.571 | 0.667
 Corner Backs | 0.679 | 0.974 | 0 | 0.691 | 0.809
 Defensive Ends | 0.656 | 0.860 | 0.167 | 0.712 | 0.779
 
-> **Note (Logistic Regression - Metrics)**
+> **Note (Metrics)**: In terms of **F1 Score** Random Forrest is out performing Logistic Regression, However by a small margin
+
+**Samples**
+<img src="Images/PA/data_Full.PNG" width="  1000">
 
 ### Wide Receivers
-<img src="Images/PA/data_wr.PNG" width="  1500">
 
 **SHAP**
 <img src="Images/PA/shap_rf_WR.PNG" width="  1200">
@@ -455,7 +543,6 @@ Defensive Ends | 0.656 | 0.860 | 0.167 | 0.712 | 0.779
 <img src="Images/PA/bd_log_WR.PNG" width="  1200">
 
 ### Running Backs
-<img src="Images/PA/data_rb.PNG" width="  1500">
 
 **SHAP**
 <img src="Images/PA/shap_rf_RB.PNG" width="  1200">
@@ -466,7 +553,6 @@ Defensive Ends | 0.656 | 0.860 | 0.167 | 0.712 | 0.779
 <img src="Images/PA/bd_log_RB.PNG" width="  1200">
 
 ### Offensive Guards
-<img src="Images/PA/data_og.PNG" width="  1500">
 
 **SHAP**
 <img src="Images/PA/shap_rf_OG.PNG" width="  1200">
@@ -477,7 +563,6 @@ Defensive Ends | 0.656 | 0.860 | 0.167 | 0.712 | 0.779
 <img src="Images/PA/bd_log_OG.PNG" width="  1200">
 
 ### Cornerbacks
-<img src="Images/PA/data_cb.PNG" width="  1500">
 
 **SHAP**
 <img src="Images/PA/shap_rf_CB.PNG" width="  1200">
@@ -488,7 +573,6 @@ Defensive Ends | 0.656 | 0.860 | 0.167 | 0.712 | 0.779
 <img src="Images/PA/bd_log_CB.PNG" width="  1200">
 
 ### Defensive Ends
-<img src="Images/PA/data_de.PNG" width="  1500">
 
 **SHAP**
 <img src="Images/PA/shap_rf_DE.PNG" width="  1200">

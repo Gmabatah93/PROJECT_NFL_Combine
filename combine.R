@@ -1038,6 +1038,27 @@ nfl_rf_recipe_pca <-
   step_pca(all_numeric(), num_comp = 2, id = "pca")
 # - model data
 nfl_rf_recipe_pca %>% 
+  prep() %>% 
+  tidy(id = "pca") %>%
+  filter(component %in% c("PC1", "PC2")) %>% 
+  mutate(terms = tidytext::reorder_within(terms, 
+                                          abs(value),
+                                          component)) %>% 
+  ggplot(aes(abs(value), terms, fill = value > 0)) +
+  geom_col() +
+  facet_wrap(~ component, scales = "free") +
+  tidytext::scale_y_reordered() +
+  scale_fill_manual(values = c("antiquewhite","antiquewhite4")) +
+  labs(
+    title = "Principal Components",
+    x = "Absolute value of contribution",
+    y = NULL,
+    fill = "Positive ?"
+  ) +
+  theme_bw() +
+  theme(plot.title = element_text(face = "bold", hjust = 0.5, color = "grey30"))
+
+nfl_rf_recipe_pca %>% 
   prep() %>% juice() %>% 
   glimpse()
 
@@ -2564,20 +2585,142 @@ cm_DE_LOG %>% summary()
 # Visual
 ggarrange(gg_cm_WR_RF, gg_cm_RB_RF, gg_cm_OG_RF, gg_cm_CB_RF, gg_cm_DE_RF, nrow = 1)
 ggarrange(gg_cm_WR_LOG, gg_cm_RB_LOG, gg_cm_OG_LOG, gg_cm_CB_LOG, gg_cm_DE_LOG, nrow = 1)
+
+
+# DATA
+nfl_test_pred <- nfl_test_pred %>% 
+  filter(player %in% c("Sammy Watkins","Randall Cobb","Marques Colston","Marcus Lucas",
+                       "Nick Chubb","Maurice Jones-Drew","LeGarrette Blount","Mike Bell",
+                       "Steve Schilling","Leander Jordan","Ryan Groy","Tony Tella",
+                       "Eric Rowe","Quandre Diggs","Tony Brown","Channing Stribling",
+                       "Ryan Kerrigan","Brett Keisel","Mike Kudla","James Cowser"))
+# - drafted
+nfl_test_pred %>% filter(position == "WR" & drafted == "Yes") %>% view()
+nfl_test_WR_SW <- nfl_test %>% filter(player == "Sammy Watkins")
+nfl_test_WR_RC <- nfl_test %>% filter(player == "Randall Cobb")
+nfl_test_WR_MC <- nfl_test %>% filter(player == "Marques Colston")
+nfl_test_RB_NC <- nfl_test %>% filter(player == "Nick Chubb")
+nfl_test_RB_MJD <- nfl_test %>% filter(player == "Maurice Jones-Drew")
+nfl_test_OG_SS <- nfl_test %>% filter(player == "Steve Schilling")
+nfl_test_OG_LJ <- nfl_test %>% filter(player == "Leander Jordan")
+nfl_test_CB_ER <- nfl_test %>% filter(player == "Eric Rowe")
+nfl_test_CB_QD <- nfl_test %>% filter(player == "Quandre Diggs")
+nfl_test_DE_RK <- nfl_test %>% filter(player == "Ryan Kerrigan") 
+nfl_test_DE_BK <- nfl_test %>% filter(player == "Brett Keisel") 
+
+# - not drafted
+nfl_test_WR_ML <- nfl_test %>% filter(player == "Marcus Lucas")
+nfl_test_RB_LB <- nfl_test %>% filter(player == "LeGarrette Blount")
+nfl_test_RB_MB <- nfl_test %>% filter(player == "Mike Bell")
+nfl_test_OG_RG <- nfl_test %>% filter(player == "Ryan Groy")
+nfl_test_OG_TT <- nfl_test %>% filter(player == "Tony Tella")
+nfl_test_CB_TB <- nfl_test %>% filter(player == "Tony Brown")
+nfl_test_CB_CS <- nfl_test %>% filter(player == "Channing Stribling")
+nfl_test_DE_MK <- nfl_test %>% filter(player == "Mike Kudla") 
+nfl_test_DE_JC <- nfl_test %>% filter(player == "James Cowser") 
+
+
 #
 # Feature Selection: DALEX (WR) ----
 
-# DATA
-nfl_test_pred_WR <- nfl_test_pred %>% 
-  filter(player %in% c("Sammy Watkins","Randall Cobb","Marques Colston","Marcus Lucas"))
-# - drafted
-nfl_test_pred %>% filter(position == "WR" & drafted == "Yes") %>% view()
-nfl_test_SW <- nfl_test %>% filter(player == "Sammy Watkins")
-nfl_test_RC <- nfl_test %>% filter(player == "Randall Cobb")
-nfl_test_MC <- nfl_test %>% filter(player == "Marques Colston")
-# - not drafted
-nfl_test_ML <- nfl_test %>% filter(player == "Marcus Lucas")
+# SHAP
+# - Marcus Lucas
+shap_rf_ML <- predict_parts(explainer = EXP_rf_F,
+                            new_observation = nfl_test_ML,
+                            type = "shap",
+                            B = 20)
+shap_log_ML <- predict_parts(explainer = EXP_log_F,
+                             new_observation = nfl_test_ML,
+                             type = "shap",
+                             B = 20)
 
+gg_shap_rf_WR_ML <- plot(shap_rf_ML) +
+  labs(title = "Marcus Lucas",
+       subtitle = "Random Forrest") +
+  theme(plot.title = element_text(hjust = 0.5, face = "bold", color = "tomato"),
+        plot.subtitle = element_text(hjust = 0.5, color = "seagreen1"),
+        strip.text = element_blank())
+gg_shap_log_WR_ML <- plot(shap_log_ML) +
+  labs(title = "Marcus Lucas",
+       subtitle = "Logistic Regression") +
+  theme(plot.title = element_text(hjust = 0.5, face = "bold", color = "tomato"),
+        plot.subtitle = element_text(hjust = 0.5, color = "lightskyblue"),
+        strip.text = element_blank())
+
+# - Sammy Watkins
+shap_rf_SW <- predict_parts(explainer = EXP_rf_F,
+                            new_observation = nfl_test_SW,
+                            type = "shap",
+                            B = 20)
+shap_log_SW <- predict_parts(explainer = EXP_log_F,
+                             new_observation = nfl_test_SW,
+                             type = "shap",
+                             B = 20)
+
+gg_shap_rf_WR_SW <- plot(shap_rf_SW) +
+  labs(title = "Sammy Watkins",
+       subtitle = "Random Forrest") +
+  theme(plot.title = element_text(hjust = 0.5, face = "bold", color = "darkolivegreen"),
+        plot.subtitle = element_text(hjust = 0.5, color = "seagreen1"),
+        strip.text = element_blank())
+gg_shap_log_WR_SW <- plot(shap_log_SW) +
+  labs(title = "Sammy Watkins",
+       subtitle = "Logistic Regression") +
+  theme(plot.title = element_text(hjust = 0.5, face = "bold", color = "darkolivegreen"),
+        plot.subtitle = element_text(hjust = 0.5, color = "lightskyblue"),
+        strip.text = element_blank())
+
+# - Randall Cobb
+shap_rf_RC <- predict_parts(explainer = EXP_rf_F,
+                            new_observation = nfl_test_RC,
+                            type = "shap",
+                            B = 20)
+shap_log_RC <- predict_parts(explainer = EXP_log_F,
+                             new_observation = nfl_test_RC,
+                             type = "shap",
+                             B = 20)
+
+gg_shap_rf_WR_RC <- plot(shap_rf_RC) +
+  labs(title = "Randall Cobb",
+       subtitle = "Random Forrest") +
+  theme(plot.title = element_text(hjust = 0.5, face = "bold", color = "darkolivegreen"),
+        plot.subtitle = element_text(hjust = 0.5, color = "seagreen1"),
+        strip.text = element_blank())
+gg_shap_log_WR_RC <- plot(shap_log_RC) +
+  labs(title = "Randall Cobb",
+       subtitle = "Logistic Regression") +
+  theme(plot.title = element_text(hjust = 0.5, face = "bold", color = "darkolivegreen"),
+        plot.subtitle = element_text(hjust = 0.5, color = "lightskyblue"),
+        strip.text = element_blank())
+
+# - Marques Colston
+shap_rf_MC <- predict_parts(explainer = EXP_rf_F,
+                            new_observation = nfl_test_MC,
+                            type = "shap",
+                            B = 20)
+shap_log_MC <- predict_parts(explainer = EXP_log_F,
+                             new_observation = nfl_test_MC,
+                             type = "shap",
+                             B = 20)
+
+gg_shap_rf_WR_MC <- plot(shap_rf_MC) +
+  labs(title = "Marques Colston",
+       subtitle = "Random Forrest") +
+  theme(plot.title = element_text(hjust = 0.5, face = "bold", color = "darkolivegreen"),
+        plot.subtitle = element_text(hjust = 0.5, color = "seagreen1"),
+        strip.text = element_blank())
+gg_shap_log_WR_MC <- plot(shap_log_MC) +
+  labs(title = "Marques Colston",
+       subtitle = "Logistic Regression") +
+  theme(plot.title = element_text(hjust = 0.5, face = "bold", color = "darkolivegreen"),
+        plot.subtitle = element_text(hjust = 0.5, color = "lightskyblue"),
+        strip.text = element_blank())
+
+# VISUAL
+ggarrange(gg_shap_rf_WR_ML, gg_shap_rf_WR_SW, gg_shap_rf_WR_RC, gg_shap_rf_WR_MC,
+          nrow = 1)
+ggarrange(gg_shap_log_WR_ML, gg_shap_log_WR_SW, gg_shap_log_WR_RC, gg_shap_log_WR_MC,
+          nrow = 1)
 
 
 # BREAKDOWN
@@ -2676,131 +2819,13 @@ gg_bd_log_WR_ML <- plot(bd_log_F_ML, max_features = 5) +
         strip.text = element_blank())
 
 # VISUAL
-ggarrange(gg_bd_rf_WR_ML, gg_bd_rf_WR_SW, gg_bd_rf_WR_RC, gg_bd_rf_WR_LS, gg_bd_rf_WR_MC, gg_bd_rf_WR_RK, 
-          nrow = 2, ncol = 3)
-ggarrange(gg_bd_log_WR_ML, gg_bd_log_WR_SW, gg_bd_log_WR_RC, gg_bd_log_WR_LS, gg_bd_log_WR_MC, gg_bd_log_WR_RK, 
-          nrow = 2, ncol = 3)
-
-
-
-
-
-# SHAP
-# - Marcus Lucas
-shap_rf_ML <- predict_parts(explainer = EXP_rf_F,
-                            new_observation = nfl_test_ML,
-                            type = "shap",
-                            B = 20)
-shap_log_ML <- predict_parts(explainer = EXP_log_F,
-                             new_observation = nfl_test_ML,
-                             type = "shap",
-                             B = 20)
-
-gg_shap_rf_WR_ML <- plot(shap_rf_ML) +
-  labs(title = "Marcus Lucas",
-       subtitle = "Random Forrest") +
-  theme(plot.title = element_text(hjust = 0.5, face = "bold", color = "tomato"),
-        plot.subtitle = element_text(hjust = 0.5, color = "seagreen1"),
-        strip.text = element_blank())
-gg_shap_log_WR_ML <- plot(shap_log_ML) +
-  labs(title = "Marcus Lucas",
-       subtitle = "Logistic Regression") +
-  theme(plot.title = element_text(hjust = 0.5, face = "bold", color = "tomato"),
-        plot.subtitle = element_text(hjust = 0.5, color = "lightskyblue"),
-        strip.text = element_blank())
-
-# - Sammy Watkins
-shap_rf_SW <- predict_parts(explainer = EXP_rf_F,
-                            new_observation = nfl_test_SW,
-                            type = "shap",
-                            B = 20)
-shap_log_SW <- predict_parts(explainer = EXP_log_F,
-                             new_observation = nfl_test_SW,
-                             type = "shap",
-                             B = 20)
-
-gg_shap_rf_WR_SW <- plot(shap_rf_SW) +
-  labs(title = "Sammy Watkins",
-       subtitle = "Random Forrest") +
-  theme(plot.title = element_text(hjust = 0.5, face = "bold", color = "darkolivegreen"),
-        plot.subtitle = element_text(hjust = 0.5, color = "seagreen1"),
-        strip.text = element_blank())
-gg_shap_log_WR_SW <- plot(shap_log_SW) +
-  labs(title = "Sammy Watkins",
-       subtitle = "Logistic Regression") +
-  theme(plot.title = element_text(hjust = 0.5, face = "bold", color = "darkolivegreen"),
-        plot.subtitle = element_text(hjust = 0.5, color = "lightskyblue"),
-        strip.text = element_blank())
-
-# - Randall Cobb
-shap_rf_RC <- predict_parts(explainer = EXP_rf_F,
-                            new_observation = nfl_test_RC,
-                            type = "shap",
-                            B = 20)
-shap_log_RC <- predict_parts(explainer = EXP_log_F,
-                             new_observation = nfl_test_RC,
-                             type = "shap",
-                             B = 20)
-
-gg_shap_rf_WR_RC <- plot(shap_rf_RC) +
-  labs(title = "Randall Cobb",
-       subtitle = "Random Forrest") +
-  theme(plot.title = element_text(hjust = 0.5, face = "bold", color = "darkolivegreen"),
-        plot.subtitle = element_text(hjust = 0.5, color = "seagreen1"),
-        strip.text = element_blank())
-gg_shap_log_WR_RC <- plot(shap_log_RC) +
-  labs(title = "Randall Cobb",
-       subtitle = "Logistic Regression") +
-  theme(plot.title = element_text(hjust = 0.5, face = "bold", color = "darkolivegreen"),
-        plot.subtitle = element_text(hjust = 0.5, color = "lightskyblue"),
-        strip.text = element_blank())
-
-# - Marques Colston
-shap_rf_MC <- predict_parts(explainer = EXP_rf_F,
-                            new_observation = nfl_test_MC,
-                            type = "shap",
-                            B = 20)
-shap_log_MC <- predict_parts(explainer = EXP_log_F,
-                             new_observation = nfl_test_MC,
-                             type = "shap",
-                             B = 20)
-
-gg_shap_rf_WR_MC <- plot(shap_rf_MC) +
-  labs(title = "Marques Colston",
-       subtitle = "Random Forrest") +
-  theme(plot.title = element_text(hjust = 0.5, face = "bold", color = "darkolivegreen"),
-        plot.subtitle = element_text(hjust = 0.5, color = "seagreen1"),
-        strip.text = element_blank())
-gg_shap_log_WR_MC <- plot(shap_log_MC) +
-  labs(title = "Marques Colston",
-       subtitle = "Logistic Regression") +
-  theme(plot.title = element_text(hjust = 0.5, face = "bold", color = "darkolivegreen"),
-        plot.subtitle = element_text(hjust = 0.5, color = "lightskyblue"),
-        strip.text = element_blank())
-
-# VISUAL
-ggarrange(gg_shap_rf_WR_ML, gg_shap_rf_WR_SW, gg_shap_rf_WR_RC, gg_shap_rf_WR_LS, gg_shap_rf_WR_MC, gg_shap_rf_WR_RK,
-          nrow = 2, ncol = 3)
-ggarrange(gg_shap_log_WR_ML, gg_shap_log_WR_SW, gg_shap_log_WR_RC, gg_shap_log_WR_LS, gg_shap_log_WR_MC, gg_shap_log_WR_RK,
-          nrow = 2, ncol = 3)
+ggarrange(gg_bd_rf_WR_ML, gg_bd_rf_WR_SW, gg_bd_rf_WR_RC, gg_bd_rf_WR_MC, 
+          nrow = 1)
+ggarrange(gg_bd_log_WR_ML, gg_bd_log_WR_SW, gg_bd_log_WR_RC, gg_bd_log_WR_MC, 
+          nrow = 1)
 
 #
 # Feature Selection: DALEX (RB) ----
-
-# Data
-nfl_test_pred_RB <- nfl_test_pred %>% 
-  filter(player %in% c("Nick Chubb","Maurice Jones-Drew","Mike Davis","Nate Ilaoa","LeGarrette Blount","Mike Bell"))
-# - drafted
-nfl_test_pred %>% filter(position == "RB" & drafted == "Yes") %>% view()
-nfl_test_NC <- nfl_test %>% filter(player == "Nick Chubb")
-nfl_test_MJD <- nfl_test %>% filter(player == "Maurice Jones-Drew")
-nfl_test_MD <- nfl_test %>% filter(player == "Mike Davis")
-nfl_test_NI <- nfl_test %>% filter(player == "Nate Ilaoa")
-# - not drafted
-nfl_test_pred %>% filter(position == "RB" & drafted == "No") %>% view()
-nfl_test_LB <- nfl_test %>% filter(player == "LeGarrette Blount")
-nfl_test_MB <- nfl_test %>% filter(player == "Mike Bell")
-
 
 # SHAP
 # - Nick Chubb
@@ -2826,29 +2851,6 @@ gg_shap_log_WR_NC <- plot(shap_log_NC) +
         plot.subtitle = element_text(hjust = 0.5, color = "lightskyblue"),
         strip.text = element_blank())
 
-# - Mike Davis
-shap_rf_MD <- predict_parts(explainer = EXP_rf_F,
-                            new_observation = nfl_test_MD,
-                            type = "shap",
-                            B = 20)
-shap_log_MD <- predict_parts(explainer = EXP_log_F,
-                             new_observation = nfl_test_MD,
-                             type = "shap",
-                             B = 20)
-
-gg_shap_rf_WR_MD <- plot(shap_rf_MD) +
-  labs(title = "Mike Davis",
-       subtitle = "Random Forrest") +
-  theme(plot.title = element_text(hjust = 0.5, face = "bold", color = "darkolivegreen"),
-        plot.subtitle = element_text(hjust = 0.5, color = "seagreen1"),
-        strip.text = element_blank())
-gg_shap_log_WR_MD <- plot(shap_log_MD) +
-  labs(title = "Mike Davis",
-       subtitle = "Logistic Regression") +
-  theme(plot.title = element_text(hjust = 0.5, face = "bold", color = "darkolivegreen"),
-        plot.subtitle = element_text(hjust = 0.5, color = "lightskyblue"),
-        strip.text = element_blank())
-
 # - LaGarrette Blount
 shap_rf_LB <- predict_parts(explainer = EXP_rf_F,
                             new_observation = nfl_test_LB,
@@ -2869,29 +2871,6 @@ gg_shap_log_WR_LB <- plot(shap_log_LB) +
   labs(title = "LaGarrette Blount",
        subtitle = "Logistic Regression") +
   theme(plot.title = element_text(hjust = 0.5, face = "bold", color = "tomato"),
-        plot.subtitle = element_text(hjust = 0.5, color = "lightskyblue"),
-        strip.text = element_blank())
-
-# - Nate Ilaoa
-shap_rf_NI <- predict_parts(explainer = EXP_rf_F,
-                            new_observation = nfl_test_NI,
-                            type = "shap",
-                            B = 20)
-shap_log_NI <- predict_parts(explainer = EXP_log_F,
-                             new_observation = nfl_test_NI,
-                             type = "shap",
-                             B = 20)
-
-gg_shap_rf_WR_NI <- plot(shap_rf_NI) +
-  labs(title = "Nate Ilaoa",
-       subtitle = "Random Forrest") +
-  theme(plot.title = element_text(hjust = 0.5, face = "bold", color = "darkolivegreen"),
-        plot.subtitle = element_text(hjust = 0.5, color = "seagreen1"),
-        strip.text = element_blank())
-gg_shap_log_WR_NI <- plot(shap_log_NI) +
-  labs(title = "Nate Ilaoa",
-       subtitle = "Logistic Regression") +
-  theme(plot.title = element_text(hjust = 0.5, face = "bold", color = "darkolivegreen"),
         plot.subtitle = element_text(hjust = 0.5, color = "lightskyblue"),
         strip.text = element_blank())
 
@@ -2929,23 +2908,23 @@ shap_log_MJD <- predict_parts(explainer = EXP_log_F,
                               B = 20)
 
 gg_shap_rf_WR_MJD <- plot(shap_rf_MJD) +
-  labs(title = "Maurice Jones-Drew",
+  labs(title = "MJD",
        subtitle = "Random Forrest") +
   theme(plot.title = element_text(hjust = 0.5, face = "bold", color = "darkolivegreen"),
         plot.subtitle = element_text(hjust = 0.5, color = "seagreen1"),
         strip.text = element_blank())
 gg_shap_log_WR_MJD <- plot(shap_log_MJD) +
-  labs(title = "Maurice Jones-Drew",
+  labs(title = "MJD",
        subtitle = "Logistic Regression") +
   theme(plot.title = element_text(hjust = 0.5, face = "bold", color = "darkolivegreen"),
         plot.subtitle = element_text(hjust = 0.5, color = "lightskyblue"),
         strip.text = element_blank())
 
 # Visual
-ggarrange(gg_shap_rf_WR_NC, gg_shap_rf_WR_MD, gg_shap_rf_WR_LB, gg_shap_rf_WR_NI, gg_shap_rf_WR_MB, gg_shap_rf_WR_MJD,
-          nrow = 2, ncol = 3)
-ggarrange(gg_shap_log_WR_NC, gg_shap_log_WR_MD, gg_shap_log_WR_LB, gg_shap_log_WR_NI, gg_shap_log_WR_MB, gg_shap_log_WR_MJD,
-          nrow = 2, ncol = 3)
+ggarrange(gg_shap_rf_WR_NC, gg_shap_rf_WR_LB, gg_shap_rf_WR_MB, gg_shap_rf_WR_MJD,
+          nrow = 1)
+ggarrange(gg_shap_log_WR_NC, gg_shap_log_WR_LB, gg_shap_log_WR_MB, gg_shap_log_WR_MJD,
+          nrow = 1)
 
 
 
@@ -2973,29 +2952,6 @@ gg_bd_log_WR_NC <- plot(bd_log_NC, max_features = 5) +
         plot.subtitle = element_text(hjust = 0.5, color = "lightskyblue"),
         strip.text = element_blank())
 
-# - Mike Davis
-bd_rf_MD <- predict_parts(explainer = EXP_rf_F,
-                          new_observation = nfl_test_MD,
-                          type = "break_down",
-                          keep_distributions = TRUE)
-bd_log_MD <- predict_parts(explainer = EXP_log_F,
-                           new_observation = nfl_test_MD,
-                           type = "break_down",
-                           keep_distributions = TRUE)
-
-gg_bd_rf_WR_MD <- plot(bd_rf_MD, max_features = 5) +
-  labs(title = "Mike Davis",
-       subtitle = "Random Forrest") +
-  theme(plot.title = element_text(hjust = 0.5, face = "bold", color = "darkolivegreen"),
-        plot.subtitle = element_text(hjust = 0.5, color = "seagreen1"),
-        strip.text = element_blank())
-gg_bd_log_WR_MD <- plot(bd_log_MD, max_features = 5) +
-  labs(title = "Mike Davis",
-       subtitle = "Logistic Regression") +
-  theme(plot.title = element_text(hjust = 0.5, face = "bold", color = "darkolivegreen"),
-        plot.subtitle = element_text(hjust = 0.5, color = "lightskyblue"),
-        strip.text = element_blank())
-
 # - LaGarrette Blount
 bd_rf_LB <- predict_parts(explainer = EXP_rf_F,
                           new_observation = nfl_test_LB,
@@ -3016,29 +2972,6 @@ gg_bd_log_WR_LB <- plot(bd_log_LB, max_features = 5) +
   labs(title = "LaGarrette Blount",
        subtitle = "Logistic Regression") +
   theme(plot.title = element_text(hjust = 0.5, face = "bold", color = "tomato"),
-        plot.subtitle = element_text(hjust = 0.5, color = "lightskyblue"),
-        strip.text = element_blank())
-
-# - Nate Ilaoa
-bd_rf_NI <- predict_parts(explainer = EXP_rf_F,
-                          new_observation = nfl_test_NI,
-                          type = "break_down",
-                          keep_distributions = TRUE)
-bd_log_NI <- predict_parts(explainer = EXP_log_F,
-                           new_observation = nfl_test_NI,
-                           type = "break_down",
-                           keep_distributions = TRUE)
-
-gg_bd_rf_WR_NI <- plot(bd_rf_NI, max_features = 5) +
-  labs(title = "Nate Ilaoa",
-       subtitle = "Random Forrest") +
-  theme(plot.title = element_text(hjust = 0.5, face = "bold", color = "darkolivegreen"),
-        plot.subtitle = element_text(hjust = 0.5, color = "seagreen1"),
-        strip.text = element_blank())
-gg_bd_log_WR_NI <- plot(bd_log_NI, max_features = 5) +
-  labs(title = "Nate Ilaoa",
-       subtitle = "Logistic Regression") +
-  theme(plot.title = element_text(hjust = 0.5, face = "bold", color = "darkolivegreen"),
         plot.subtitle = element_text(hjust = 0.5, color = "lightskyblue"),
         strip.text = element_blank())
 
@@ -3089,60 +3022,21 @@ gg_bd_log_WR_MJD <- plot(bd_log_MJD, max_features = 5) +
         strip.text = element_blank())
 
 # Visual
-ggarrange(gg_bd_rf_WR_NC, gg_bd_rf_WR_MD, gg_bd_rf_WR_LB, gg_bd_rf_WR_NI, gg_bd_rf_WR_MB, gg_bd_rf_WR_MJD,
-          nrow = 2, ncol = 3)
-ggarrange(gg_bd_log_WR_NC, gg_bd_log_WR_MD, gg_bd_log_WR_LB, gg_bd_log_WR_NI, gg_bd_log_WR_MB, gg_bd_log_WR_MJD,
-          nrow = 2, ncol = 3)
+ggarrange(gg_bd_rf_WR_NC, gg_bd_rf_WR_LB, gg_bd_rf_WR_MB, gg_bd_rf_WR_MJD,
+          nrow = 1)
+ggarrange(gg_bd_log_WR_NC, gg_bd_log_WR_LB, gg_bd_log_WR_MB, gg_bd_log_WR_MJD,
+          nrow = 1)
 #
 # Feature Selection: DALEX (OG) ----
 
-# Data
-nfl_test_pred_OG <- nfl_test_pred %>%
-  filter(player %in% c("Steve Schilling","Dion Dawkins","Leander Jordan","Mike Iupati","Ryan Groy","Tony Tella"))
-# - CM
-# - drafted
-nfl_test_pred %>% filter(position == "OG" & drafted == "Yes")
-nfl_test_SS <- nfl_test %>% filter(player == "Steve Schilling")
-nfl_test_DD <- nfl_test %>% filter(player == "Dion Dawkins")
-nfl_test_LJ <- nfl_test %>% filter(player == "Leander Jordan")
-nfl_test_MI <- nfl_test %>% filter(player == "Mike Iupati")
-# - not drafted
-nfl_test_pred %>% filter(position == "OG" & drafted == "No")
-nfl_test_RG <- nfl_test %>% filter(player == "Ryan Groy")
-nfl_test_TT <- nfl_test %>% filter(player == "Tony Tella")
-
-
 # SHAP
-# - Dion Dawkins
-shap_rf_DD <- predict_parts(explainer = EXP_rf_F,
-                            new_observation = nfl_test_DD,
-                            type = "shap",
-                            B = 20)
-shap_log_DD <- predict_parts(explainer = EXP_log_F,
-                             new_observation = nfl_test_DD,
-                             type = "shap",
-                             B = 20)
-
-gg_shap_rf_OG_DD <- plot(shap_rf_DD) +
-  labs(title = "Dion Dawkins",
-       subtitle = "Random Forrest") +
-  theme(plot.title = element_text(hjust = 0.5, face = "bold", color = "darkolivegreen"),
-        plot.subtitle = element_text(hjust = 0.5, color = "seagreen1"),
-        strip.text = element_blank())
-gg_shap_log_OG_DD <- plot(shap_log_DD) +
-  labs(title = "Dion Dawkins",
-       subtitle = "Logistic Regression") +
-  theme(plot.title = element_text(hjust = 0.5, face = "bold", color = "darkolivegreen"),
-        plot.subtitle = element_text(hjust = 0.5, color = "lightskyblue"),
-        strip.text = element_blank())
-
 # -	Ryan Groy
 shap_rf_RG <- predict_parts(explainer = EXP_rf_F,
-                            new_observation = nfl_test_RG,
+                            new_observation = nfl_test_OG_RG,
                             type = "shap",
                             B = 20)
 shap_log_RG <- predict_parts(explainer = EXP_log_F,
-                             new_observation = nfl_test_RG,
+                             new_observation = nfl_test_OG_RG,
                              type = "shap",
                              B = 20)
 
@@ -3161,11 +3055,11 @@ gg_shap_log_OG_RG <- plot(shap_log_RG) +
 
 # - Steve Schilling
 shap_rf_SS <- predict_parts(explainer = EXP_rf_F,
-                            new_observation = nfl_test_SS,
+                            new_observation = nfl_test_OG_SS,
                             type = "shap",
                             B = 20)
 shap_log_SS <- predict_parts(explainer = EXP_log_F,
-                             new_observation = nfl_test_SS,
+                             new_observation = nfl_test_OG_SS,
                              type = "shap",
                              B = 20)
 
@@ -3182,36 +3076,13 @@ gg_shap_log_OG_SS <- plot(shap_log_SS) +
         plot.subtitle = element_text(hjust = 0.5, color = "lightskyblue"),
         strip.text = element_blank())
 
-# - Mike Iupati
-shap_rf_MI <- predict_parts(explainer = EXP_rf_F,
-                            new_observation = nfl_test_MI,
-                            type = "shap",
-                            B = 20)
-shap_log_MI <- predict_parts(explainer = EXP_log_F,
-                             new_observation = nfl_test_MI,
-                             type = "shap",
-                             B = 20)
-
-gg_shap_rf_OG_MI <- plot(shap_rf_MI) +
-  labs(title = "Mike Iupati",
-       subtitle = "Random Forrest") +
-  theme(plot.title = element_text(hjust = 0.5, face = "bold", color = "darkolivegreen"),
-        plot.subtitle = element_text(hjust = 0.5, color = "seagreen1"),
-        strip.text = element_blank())
-gg_shap_log_OG_MI <- plot(shap_log_MI) +
-  labs(title = "Mike Iupati",
-       subtitle = "Logistic Regression") +
-  theme(plot.title = element_text(hjust = 0.5, face = "bold", color = "darkolivegreen"),
-        plot.subtitle = element_text(hjust = 0.5, color = "lightskyblue"),
-        strip.text = element_blank())
-
 # - Tony Tella
 shap_rf_TT <- predict_parts(explainer = EXP_rf_F,
-                            new_observation = nfl_test_TT,
+                            new_observation = nfl_test_OG_TT,
                             type = "shap",
                             B = 20)
 shap_log_TT <- predict_parts(explainer = EXP_log_F,
-                             new_observation = nfl_test_TT,
+                             new_observation = nfl_test_OG_TT,
                              type = "shap",
                              B = 20)
 
@@ -3230,11 +3101,11 @@ gg_shap_log_OG_TT <- plot(shap_log_TT) +
 
 # -	Leander Jordan
 shap_rf_LJ <- predict_parts(explainer = EXP_rf_F,
-                            new_observation = nfl_test_LJ,
+                            new_observation = nfl_test_OG_LJ,
                             type = "shap",
                             B = 20)
 shap_log_LJ <- predict_parts(explainer = EXP_log_F,
-                             new_observation = nfl_test_LJ,
+                             new_observation = nfl_test_OG_LJ,
                              type = "shap",
                              B = 20)
 
@@ -3252,43 +3123,20 @@ gg_shap_log_OG_LJ <- plot(shap_log_LJ) +
         strip.text = element_blank())
 
 # Visual
-ggarrange(gg_shap_rf_OG_DD, gg_shap_rf_OG_RG, gg_shap_rf_OG_SS, gg_shap_rf_OG_MI, gg_shap_rf_OG_TT, gg_shap_rf_OG_LJ,
-          nrow = 2, ncol = 3)
-ggarrange(gg_shap_log_OG_DD, gg_shap_log_OG_RG, gg_shap_log_OG_SS, gg_shap_log_OG_MI, gg_shap_log_OG_TT, gg_shap_log_OG_LJ,
-          nrow = 2, ncol = 3)
+ggarrange(gg_shap_rf_OG_RG, gg_shap_rf_OG_SS, gg_shap_rf_OG_TT, gg_shap_rf_OG_LJ,
+          nrow = 1)
+ggarrange(gg_shap_log_OG_RG, gg_shap_log_OG_SS, gg_shap_log_OG_TT, gg_shap_log_OG_LJ,
+          nrow = 1)
 
 
 # BREAKDOWN
-# - Dion Dawkins
-bd_rf_DD <- predict_parts(explainer = EXP_rf_F,
-                          new_observation = nfl_test_DD,
-                          type = "break_down",
-                          keep_distributions = TRUE)
-bd_log_DD <- predict_parts(explainer = EXP_log_F,
-                           new_observation = nfl_test_DD,
-                           type = "break_down",
-                           keep_distributions = TRUE)
-
-gg_bd_rf_OG_DD <- plot(bd_rf_DD, max_features = 5) +
-  labs(title = "Dion Dawkins",
-       subtitle = "Random Forrest") +
-  theme(plot.title = element_text(hjust = 0.5, face = "bold", color = "darkolivegreen"),
-        plot.subtitle = element_text(hjust = 0.5, color = "seagreen1"),
-        strip.text = element_blank())
-gg_bd_log_OG_DD <- plot(bd_log_DD, max_features = 5) +
-  labs(title = "Dion Dawkins",
-       subtitle = "Logistic Regression") +
-  theme(plot.title = element_text(hjust = 0.5, face = "bold", color = "darkolivegreen"),
-        plot.subtitle = element_text(hjust = 0.5, color = "lightskyblue"),
-        strip.text = element_blank())
-
 # -	Ryan Groy
 bd_rf_RG <- predict_parts(explainer = EXP_rf_F,
-                          new_observation = nfl_test_RG,
+                          new_observation = nfl_test_OG_RG,
                           type = "break_down",
                           keep_distributions = TRUE)
 bd_log_RG <- predict_parts(explainer = EXP_log_F,
-                           new_observation = nfl_test_RG,
+                           new_observation = nfl_test_OG_RG,
                            type = "break_down",
                            keep_distributions = TRUE)
 
@@ -3307,11 +3155,11 @@ gg_bd_log_OG_RG <- plot(bd_log_RG, max_features = 5) +
 
 # - Steve Schilling
 bd_rf_SS <- predict_parts(explainer = EXP_rf_F,
-                          new_observation = nfl_test_SS,
+                          new_observation = nfl_test_OG_SS,
                           type = "break_down",
                           keep_distributions = TRUE)
 bd_log_SS <- predict_parts(explainer = EXP_log_F,
-                           new_observation = nfl_test_SS,
+                           new_observation = nfl_test_OG_SS,
                            type = "break_down",
                            keep_distributions = TRUE)
 
@@ -3328,36 +3176,14 @@ gg_bd_log_OG_SS <- plot(bd_log_SS, max_features = 5) +
         plot.subtitle = element_text(hjust = 0.5, color = "lightskyblue"),
         strip.text = element_blank())
 
-# - Mike Iupati
-bd_rf_MI <- predict_parts(explainer = EXP_rf_F,
-                          new_observation = nfl_test_MI,
-                          type = "break_down",
-                          keep_distributions = TRUE)
-bd_log_MI <- predict_parts(explainer = EXP_log_F,
-                           new_observation = nfl_test_MI,
-                           type = "break_down",
-                           keep_distributions = TRUE)
-
-gg_bd_rf_OG_MI <- plot(bd_rf_MI, max_features = 5) +
-  labs(title = "Mike Iupati",
-       subtitle = "Random Forrest") +
-  theme(plot.title = element_text(hjust = 0.5, face = "bold", color = "darkolivegreen"),
-        plot.subtitle = element_text(hjust = 0.5, color = "seagreen1"),
-        strip.text = element_blank())
-gg_bd_log_OG_MI <- plot(bd_log_MI, max_features = 5) +
-  labs(title = "Mike Iupati",
-       subtitle = "Logistic Regression") +
-  theme(plot.title = element_text(hjust = 0.5, face = "bold", color = "darkolivegreen"),
-        plot.subtitle = element_text(hjust = 0.5, color = "lightskyblue"),
-        strip.text = element_blank())
 
 # - Tony Tella
 bd_rf_TT <- predict_parts(explainer = EXP_rf_F,
-                          new_observation = nfl_test_TT,
+                          new_observation = nfl_test_OG_TT,
                           type = "break_down",
                           keep_distributions = TRUE)
 bd_log_TT <- predict_parts(explainer = EXP_log_F,
-                           new_observation = nfl_test_TT,
+                           new_observation = nfl_test_OG_TT,
                            type = "break_down",
                            keep_distributions = TRUE)
 
@@ -3376,11 +3202,11 @@ gg_bd_log_OG_TT <- plot(bd_log_TT, max_features = 5) +
 
 # -	Leander Jordan
 bd_rf_LJ <- predict_parts(explainer = EXP_rf_F,
-                          new_observation = nfl_test_LJ,
+                          new_observation = nfl_test_OG_LJ,
                           type = "break_down",
                           keep_distributions = TRUE)
 bd_log_LJ <- predict_parts(explainer = EXP_log_F,
-                           new_observation = nfl_test_LJ,
+                           new_observation = nfl_test_OG_LJ,
                            type = "break_down",
                            keep_distributions = TRUE)
 
@@ -3398,36 +3224,21 @@ gg_bd_log_OG_LJ <- plot(bd_log_LJ, max_features = 5) +
         strip.text = element_blank())
 
 # Visual
-ggarrange(gg_bd_rf_OG_DD, gg_bd_rf_OG_RG, gg_bd_rf_OG_SS, gg_bd_rf_OG_MI, gg_bd_rf_OG_TT, gg_bd_rf_OG_LJ,
-          nrow = 2, ncol = 3)
-ggarrange(gg_bd_log_OG_DD, gg_bd_log_OG_RG, gg_bd_log_OG_SS, gg_bd_log_OG_MI, gg_bd_log_OG_TT, gg_bd_log_OG_LJ,
-          nrow = 2, ncol = 3)
+ggarrange(gg_bd_rf_OG_RG, gg_bd_rf_OG_SS, gg_bd_rf_OG_TT, gg_bd_rf_OG_LJ,
+          nrow = 1)
+ggarrange(gg_bd_log_OG_RG, gg_bd_log_OG_SS, gg_bd_log_OG_TT, gg_bd_log_OG_LJ,
+          nrow = 1)
 #
 # Feature Selection: DALEX (CB) ----
-
-# Data
-nfl_test_pred_CB <- nfl_test_pred %>%
-  filter(player %in% c("Eric Rowe","Prince Amukamara","Brandon Dixon","Quandre Diggs","Tony Brown","Channing Stribling"))
-# - drafted
-nfl_test_pred %>% filter(position == "CB" & drafted == "Yes")
-nfl_test_ER <- nfl_test %>% filter(player == "Eric Rowe")
-nfl_test_PA <- nfl_test %>% filter(player == "Prince Amukamara")
-nfl_test_BD <- nfl_test %>% filter(player == "Brandon Dixon")
-nfl_test_QD <- nfl_test %>% filter(player == "Quandre Diggs")
-# - not drafted
-nfl_test_pred %>% filter(position == "CB" & drafted == "No")
-nfl_test_TB <- nfl_test %>% filter(player == "Tony Brown")
-nfl_test_CS <- nfl_test %>% filter(player == "Channing Stribling")
-
 
 # SHAP
 # - Tony Brown
 shap_rf_TB <- predict_parts(explainer = EXP_rf_F,
-                            new_observation = nfl_test_TB,
+                            new_observation = nfl_test_CB_TB,
                             type = "shap",
                             B = 20)
 shap_log_TB <- predict_parts(explainer = EXP_log_F,
-                             new_observation = nfl_test_TB,
+                             new_observation = nfl_test_CB_TB,
                              type = "shap",
                              B = 20)
 
@@ -3446,11 +3257,11 @@ gg_shap_log_CB_TB <- plot(shap_log_TB) +
 
 # - Channing Stribling
 shap_rf_CS <- predict_parts(explainer = EXP_rf_F,
-                            new_observation = nfl_test_CS,
+                            new_observation = nfl_test_CB_CS,
                             type = "shap",
                             B = 20)
 shap_log_CS <- predict_parts(explainer = EXP_log_F,
-                             new_observation = nfl_test_CS,
+                             new_observation = nfl_test_CB_CS,
                              type = "shap",
                              B = 20)
 
@@ -3469,11 +3280,11 @@ gg_shap_log_CB_CS <- plot(shap_log_CS) +
 
 # - Quandre Diggs
 shap_rf_QD <- predict_parts(explainer = EXP_rf_F,
-                            new_observation = nfl_test_QD,
+                            new_observation = nfl_test_CB_QD,
                             type = "shap",
                             B = 20)
 shap_log_QD <- predict_parts(explainer = EXP_log_F,
-                             new_observation = nfl_test_QD,
+                             new_observation = nfl_test_CB_QD,
                              type = "shap",
                              B = 20)
 
@@ -3492,11 +3303,11 @@ gg_shap_log_CB_QD <- plot(shap_log_QD) +
 
 # - Eric Rowe
 shap_rf_ER <- predict_parts(explainer = EXP_rf_F,
-                            new_observation = nfl_test_ER,
+                            new_observation = nfl_test_CB_ER,
                             type = "shap",
                             B = 20)
 shap_log_ER <- predict_parts(explainer = EXP_log_F,
-                             new_observation = nfl_test_ER,
+                             new_observation = nfl_test_CB_ER,
                              type = "shap",
                              B = 20)
 
@@ -3513,68 +3324,23 @@ gg_shap_log_CB_ER <- plot(shap_log_ER) +
         plot.subtitle = element_text(hjust = 0.5, color = "lightskyblue"),
         strip.text = element_blank())
 
-# - Brandon Dixon
-shap_rf_BD <- predict_parts(explainer = EXP_rf_F,
-                            new_observation = nfl_test_BD,
-                            type = "shap",
-                            B = 20)
-shap_log_BD <- predict_parts(explainer = EXP_log_F,
-                             new_observation = nfl_test_BD,
-                             type = "shap",
-                             B = 20)
-
-gg_shap_rf_CB_BD <- plot(shap_rf_BD) +
-  labs(title = "Brandon Dixon",
-       subtitle = "Random Forrest") +
-  theme(plot.title = element_text(hjust = 0.5, face = "bold", color = "darkolivegreen"),
-        plot.subtitle = element_text(hjust = 0.5, color = "seagreen1"),
-        strip.text = element_blank())
-gg_shap_log_CB_BD <- plot(shap_log_BD) +
-  labs(title = "Brandon Dixon",
-       subtitle = "Logistic Regression") +
-  theme(plot.title = element_text(hjust = 0.5, face = "bold", color = "darkolivegreen"),
-        plot.subtitle = element_text(hjust = 0.5, color = "lightskyblue"),
-        strip.text = element_blank())
-
-# - Prince Amukamara
-shap_rf_PA <- predict_parts(explainer = EXP_rf_F,
-                            new_observation = nfl_test_PA,
-                            type = "shap",
-                            B = 20)
-shap_log_PA <- predict_parts(explainer = EXP_log_F,
-                             new_observation = nfl_test_PA,
-                             type = "shap",
-                             B = 20)
-
-gg_shap_rf_CB_PA <- plot(shap_rf_PA) +
-  labs(title = "Prince Amukamara",
-       subtitle = "Random Forrest") +
-  theme(plot.title = element_text(hjust = 0.5, face = "bold", color = "darkolivegreen"),
-        plot.subtitle = element_text(hjust = 0.5, color = "seagreen1"),
-        strip.text = element_blank())
-gg_shap_log_CB_PA <- plot(shap_log_PA) +
-  labs(title = "Prince Amukamara",
-       subtitle = "Logistic Regression") +
-  theme(plot.title = element_text(hjust = 0.5, face = "bold", color = "darkolivegreen"),
-        plot.subtitle = element_text(hjust = 0.5, color = "lightskyblue"),
-        strip.text = element_blank())
 
 # Visual
-ggarrange(gg_shap_rf_CB_TB, gg_shap_rf_CB_CS, gg_shap_rf_CB_QD, gg_shap_rf_CB_ER, gg_shap_rf_CB_BD, gg_shap_rf_CB_PA,
-          nrow = 2, ncol = 3)
-ggarrange(gg_shap_log_CB_TB, gg_shap_log_CB_CS, gg_shap_log_CB_QD, gg_shap_log_CB_ER, gg_shap_log_CB_BD, gg_shap_log_CB_PA,
-          nrow = 2, ncol = 3)
+ggarrange(gg_shap_rf_CB_TB, gg_shap_rf_CB_CS, gg_shap_rf_CB_QD, gg_shap_rf_CB_ER,
+          nrow = 1)
+ggarrange(gg_shap_log_CB_TB, gg_shap_log_CB_CS, gg_shap_log_CB_QD, gg_shap_log_CB_ER,
+          nrow = 1)
 
 
 
 # BREAKDOWN
 # - Tony Brown
 bd_rf_TB <- predict_parts(explainer = EXP_rf_F,
-                          new_observation = nfl_test_TB,
+                          new_observation = nfl_test_CB_TB,
                           type = "break_down",
                           keep_distributions = TRUE)
 bd_log_TB <- predict_parts(explainer = EXP_log_F,
-                           new_observation = nfl_test_TB,
+                           new_observation = nfl_test_CB_TB,
                            type = "break_down",
                            keep_distributions = TRUE)
 
@@ -3585,7 +3351,7 @@ gg_bd_rf_CB_TB <- plot(bd_rf_TB, max_features = 5) +
         plot.subtitle = element_text(hjust = 0.5, color = "seagreen1"),
         strip.text = element_blank())
 gg_bd_log_CB_TB <- plot(bd_log_TB, max_features = 5) +
-  labs(title = "Dion Dawkins",
+  labs(title = "Tony Brown",
        subtitle = "Logistic Regression") +
   theme(plot.title = element_text(hjust = 0.5, face = "bold", color = "tomato"),
         plot.subtitle = element_text(hjust = 0.5, color = "lightskyblue"),
@@ -3593,11 +3359,11 @@ gg_bd_log_CB_TB <- plot(bd_log_TB, max_features = 5) +
 
 # - Channing Stribling
 bd_rf_CS <- predict_parts(explainer = EXP_rf_F,
-                          new_observation = nfl_test_CS,
+                          new_observation = nfl_test_CB_CS,
                           type = "break_down",
                           keep_distributions = TRUE)
 bd_log_CS <- predict_parts(explainer = EXP_log_F,
-                           new_observation = nfl_test_CS,
+                           new_observation = nfl_test_CB_CS,
                            type = "break_down",
                            keep_distributions = TRUE)
 
@@ -3616,11 +3382,11 @@ gg_bd_log_CB_CS <- plot(bd_log_CS, max_features = 5) +
 
 # - Quandre Diggs
 bd_rf_QD <- predict_parts(explainer = EXP_rf_F,
-                          new_observation = nfl_test_QD,
+                          new_observation = nfl_test_CB_QD,
                           type = "break_down",
                           keep_distributions = TRUE)
 bd_log_QD <- predict_parts(explainer = EXP_log_F,
-                           new_observation = nfl_test_QD,
+                           new_observation = nfl_test_CB_QD,
                            type = "break_down",
                            keep_distributions = TRUE)
 
@@ -3639,11 +3405,11 @@ gg_bd_log_CB_QD <- plot(bd_log_QD, max_features = 5) +
 
 # - Eric Rowe
 bd_rf_ER <- predict_parts(explainer = EXP_rf_F,
-                          new_observation = nfl_test_ER,
+                          new_observation = nfl_test_CB_ER,
                           type = "break_down",
                           keep_distributions = TRUE)
 bd_log_ER <- predict_parts(explainer = EXP_log_F,
-                           new_observation = nfl_test_ER,
+                           new_observation = nfl_test_CB_ER,
                            type = "break_down",
                            keep_distributions = TRUE)
 
@@ -3660,82 +3426,22 @@ gg_bd_log_CB_ER <- plot(bd_log_ER, max_features = 5) +
         plot.subtitle = element_text(hjust = 0.5, color = "lightskyblue"),
         strip.text = element_blank())
 
-# - Brandon Dixon
-bd_rf_BD <- predict_parts(explainer = EXP_rf_F,
-                          new_observation = nfl_test_BD,
-                          type = "break_down",
-                          keep_distributions = TRUE)
-bd_log_BD <- predict_parts(explainer = EXP_log_F,
-                           new_observation = nfl_test_BD,
-                           type = "break_down",
-                           keep_distributions = TRUE)
-
-gg_bd_rf_CB_BD <- plot(bd_rf_BD, max_features = 5) +
-  labs(title = "Brandon Dixon",
-       subtitle = "Random Forrest") +
-  theme(plot.title = element_text(hjust = 0.5, face = "bold", color = "darkolivegreen"),
-        plot.subtitle = element_text(hjust = 0.5, color = "seagreen1"),
-        strip.text = element_blank())
-gg_bd_log_CB_BD <- plot(bd_log_BD, max_features = 5) +
-  labs(title = "Brandon Dixon",
-       subtitle = "Logistic Regression") +
-  theme(plot.title = element_text(hjust = 0.5, face = "bold", color = "darkolivegreen"),
-        plot.subtitle = element_text(hjust = 0.5, color = "lightskyblue"),
-        strip.text = element_blank())
-
-# - Prince Amukamara
-bd_rf_PA <- predict_parts(explainer = EXP_rf_F,
-                          new_observation = nfl_test_PA,
-                          type = "break_down",
-                          keep_distributions = TRUE)
-bd_log_PA <- predict_parts(explainer = EXP_log_F,
-                           new_observation = nfl_test_PA,
-                           type = "break_down",
-                           keep_distributions = TRUE)
-
-gg_bd_rf_CB_PA <- plot(bd_rf_PA, max_features = 5) +
-  labs(title = "Prince Amukamara",
-       subtitle = "Random Forrest") +
-  theme(plot.title = element_text(hjust = 0.5, face = "bold", color = "darkolivegreen"),
-        plot.subtitle = element_text(hjust = 0.5, color = "seagreen1"),
-        strip.text = element_blank())
-gg_bd_log_CB_PA <- plot(bd_log_PA, max_features = 5) +
-  labs(title = "Prince Amukamara",
-       subtitle = "Logistic Regression") +
-  theme(plot.title = element_text(hjust = 0.5, face = "bold", color = "darkolivegreen"),
-        plot.subtitle = element_text(hjust = 0.5, color = "lightskyblue"),
-        strip.text = element_blank())
-
 # Visual
-ggarrange(gg_bd_rf_CB_TB, gg_bd_rf_CB_CS, gg_bd_rf_CB_QD, gg_bd_rf_CB_ER, gg_bd_rf_CB_BD, gg_bd_rf_CB_PA,
-          nrow = 2, ncol = 3)
-ggarrange(gg_bd_log_CB_TB, gg_bd_log_CB_CS, gg_bd_log_CB_QD, gg_bd_log_CB_ER, gg_bd_log_CB_BD, gg_bd_log_CB_PA,
-          nrow = 2, ncol = 3)
+ggarrange(gg_bd_rf_CB_TB, gg_bd_rf_CB_CS, gg_bd_rf_CB_QD, gg_bd_rf_CB_ER,
+          nrow = 1)
+ggarrange(gg_bd_log_CB_TB, gg_bd_log_CB_CS, gg_bd_log_CB_QD, gg_bd_log_CB_ER,
+          nrow = 1)
 #
 # Feature Selection: DALEX (DE) ----
-
-# Data
-nfl_test_pred_DE <- nfl_test_pred %>%
-  filter(player %in% c("Ryan Kerrigan","Brett Keisel","Michael Sam","John Frank","Mike Kudla","James Cowser"))
-# - drafted
-nfl_test_pred %>% filter(position == "DE" & drafted == "Yes")
-nfl_test_RK <- nfl_test %>% filter(player == "Ryan Kerrigan")
-nfl_test_BK <- nfl_test %>% filter(player == "Brett Keisel")
-nfl_test_MS <- nfl_test %>% filter(player == "Michael Sam")
-# - not drafted
-nfl_test_pred %>% filter(position == "DE" & drafted == "No")
-nfl_test_JF <- nfl_test %>% filter(player == "John Frank")
-nfl_test_MK <- nfl_test %>% filter(player == "Mike Kudla")
-nfl_test_JC <- nfl_test %>% filter(player == "James Cowser")
 
 # SHAP
 # - James Cowser
 shap_rf_JC <- predict_parts(explainer = EXP_rf_F,
-                            new_observation = nfl_test_JC,
+                            new_observation = nfl_test_DE_JC,
                             type = "shap",
                             B = 20)
 shap_log_JC <- predict_parts(explainer = EXP_log_F,
-                             new_observation = nfl_test_JC,
+                             new_observation = nfl_test_DE_JC,
                              type = "shap",
                              B = 20)
 
@@ -3752,36 +3458,13 @@ gg_shap_log_DE_JC <- plot(shap_log_JC) +
         plot.subtitle = element_text(hjust = 0.5, color = "lightskyblue"),
         strip.text = element_blank())
 
-# - Michael Sam
-shap_rf_MS <- predict_parts(explainer = EXP_rf_F,
-                            new_observation = nfl_test_MS,
-                            type = "shap",
-                            B = 20)
-shap_log_MS <- predict_parts(explainer = EXP_log_F,
-                             new_observation = nfl_test_MS,
-                             type = "shap",
-                             B = 20)
-
-gg_shap_rf_DE_MS <- plot(shap_rf_MS) +
-  labs(title = "Michael Sam",
-       subtitle = "Random Forrest") +
-  theme(plot.title = element_text(hjust = 0.5, face = "bold", color = "darkolivegreen"),
-        plot.subtitle = element_text(hjust = 0.5, color = "seagreen1"),
-        strip.text = element_blank())
-gg_shap_log_DE_MS <- plot(shap_log_MS) +
-  labs(title = "Michael Sam",
-       subtitle = "Logistic Regression") +
-  theme(plot.title = element_text(hjust = 0.5, face = "bold", color = "darkolivegreen"),
-        plot.subtitle = element_text(hjust = 0.5, color = "lightskyblue"),
-        strip.text = element_blank())
-
 # - Ryan Kerrigan
 shap_rf_RK <- predict_parts(explainer = EXP_rf_F,
-                            new_observation = nfl_test_RK,
+                            new_observation = nfl_test_DE_RK,
                             type = "shap",
                             B = 20)
 shap_log_RK <- predict_parts(explainer = EXP_log_F,
-                             new_observation = nfl_test_RK,
+                             new_observation = nfl_test_DE_RK,
                              type = "shap",
                              B = 20)
 
@@ -3800,11 +3483,11 @@ gg_shap_log_DE_RK <- plot(shap_log_RK) +
 
 # - Mike Kudla
 shap_rf_MK <- predict_parts(explainer = EXP_rf_F,
-                            new_observation = nfl_test_MK,
+                            new_observation = nfl_test_DE_MK,
                             type = "shap",
                             B = 20)
 shap_log_MK <- predict_parts(explainer = EXP_log_F,
-                             new_observation = nfl_test_MK,
+                             new_observation = nfl_test_DE_MK,
                              type = "shap",
                              B = 20)
 
@@ -3823,11 +3506,11 @@ gg_shap_log_DE_MK <- plot(shap_log_MK) +
 
 # - Brett Keisel
 shap_rf_BK <- predict_parts(explainer = EXP_rf_F,
-                            new_observation = nfl_test_BK,
+                            new_observation = nfl_test_DE_BK,
                             type = "shap",
                             B = 20)
 shap_log_BK <- predict_parts(explainer = EXP_log_F,
-                             new_observation = nfl_test_BK,
+                             new_observation = nfl_test_DE_BK,
                              type = "shap",
                              B = 20)
 
@@ -3845,43 +3528,21 @@ gg_shap_log_DE_BK <- plot(shap_log_BK) +
         strip.text = element_blank())
 
 
-# - John Frank
-shap_rf_JF <- predict_parts(explainer = EXP_rf_F,
-                            new_observation = nfl_test_JF,
-                            type = "shap",
-                            B = 20)
-shap_log_JF <- predict_parts(explainer = EXP_log_F,
-                             new_observation = nfl_test_JF,
-                             type = "shap",
-                             B = 20)
-
-gg_shap_rf_DE_JF <- plot(shap_rf_JF) +
-  labs(title = "John Frank",
-       subtitle = "Random Forrest") +
-  theme(plot.title = element_text(hjust = 0.5, face = "bold", color = "tomato"),
-        plot.subtitle = element_text(hjust = 0.5, color = "seagreen1"),
-        strip.text = element_blank())
-gg_shap_log_DE_JF <- plot(shap_log_JF) +
-  labs(title = "John Frank",
-       subtitle = "Logistic Regression") +
-  theme(plot.title = element_text(hjust = 0.5, face = "bold", color = "tomato"),
-        plot.subtitle = element_text(hjust = 0.5, color = "lightskyblue"),
-        strip.text = element_blank())
 
 # Visual
-ggarrange(gg_shap_rf_DE_JC, gg_shap_rf_DE_MS, gg_shap_rf_DE_RK, gg_shap_rf_DE_MK, gg_shap_rf_DE_BK, gg_shap_rf_DE_JF,
-          nrow = 2, ncol = 3)
-ggarrange(gg_shap_log_DE_JC, gg_shap_log_DE_MS, gg_shap_log_DE_RK, gg_shap_log_DE_MK, gg_shap_log_DE_BK, gg_shap_log_DE_JF,
-          nrow = 2, ncol = 3)
+ggarrange(gg_shap_rf_DE_JC, gg_shap_rf_DE_RK, gg_shap_rf_DE_MK, gg_shap_rf_DE_BK,
+          nrow = 1)
+ggarrange(gg_shap_log_DE_JC, gg_shap_log_DE_RK, gg_shap_log_DE_MK, gg_shap_log_DE_BK,
+          nrow = 1)
 
 # BREAKDOWN
 # - James Cowser
 bd_rf_JC <- predict_parts(explainer = EXP_rf_F,
-                          new_observation = nfl_test_JC,
+                          new_observation = nfl_test_DE_JC,
                           type = "break_down",
                           keep_distributions = TRUE)
 bd_log_JC <- predict_parts(explainer = EXP_log_F,
-                           new_observation = nfl_test_JC,
+                           new_observation = nfl_test_DE_JC,
                            type = "break_down",
                            keep_distributions = TRUE)
 
@@ -3898,36 +3559,13 @@ gg_bd_log_DE_JC <- plot(bd_log_JC, max_features = 5) +
         plot.subtitle = element_text(hjust = 0.5, color = "lightskyblue"),
         strip.text = element_blank())
 
-# - Michael Sam
-bd_rf_MS <- predict_parts(explainer = EXP_rf_F,
-                          new_observation = nfl_test_MS,
-                          type = "break_down",
-                          keep_distributions = TRUE)
-bd_log_MS <- predict_parts(explainer = EXP_log_F,
-                           new_observation = nfl_test_MS,
-                           type = "break_down",
-                           keep_distributions = TRUE)
-
-gg_bd_rf_DE_MS <- plot(bd_rf_MS, max_features = 5) +
-  labs(title = "Michael Sam",
-       subtitle = "Random Forrest") +
-  theme(plot.title = element_text(hjust = 0.5, face = "bold", color = "darkolivegreen"),
-        plot.subtitle = element_text(hjust = 0.5, color = "seagreen1"),
-        strip.text = element_blank())
-gg_bd_log_DE_MS <- plot(bd_log_MS, max_features = 5) +
-  labs(title = "Michael Sam",
-       subtitle = "Logistic Regression") +
-  theme(plot.title = element_text(hjust = 0.5, face = "bold", color = "darkolivegreen"),
-        plot.subtitle = element_text(hjust = 0.5, color = "lightskyblue"),
-        strip.text = element_blank())
-
 # - Ryan Kerrigan
 bd_rf_RK <- predict_parts(explainer = EXP_rf_F,
-                          new_observation = nfl_test_RK,
+                          new_observation = nfl_test_DE_RK,
                           type = "break_down",
                           keep_distributions = TRUE)
 bd_log_RK <- predict_parts(explainer = EXP_log_F,
-                           new_observation = nfl_test_RK,
+                           new_observation = nfl_test_DE_RK,
                            type = "break_down",
                            keep_distributions = TRUE)
 
@@ -3946,11 +3584,11 @@ gg_bd_log_DE_RK <- plot(bd_log_RK, max_features = 5) +
 
 # - Mike Kudla
 bd_rf_MK <- predict_parts(explainer = EXP_rf_F,
-                          new_observation = nfl_test_MK,
+                          new_observation = nfl_test_DE_MK,
                           type = "break_down",
                           keep_distributions = TRUE)
 bd_log_MK <- predict_parts(explainer = EXP_log_F,
-                           new_observation = nfl_test_MK,
+                           new_observation = nfl_test_DE_MK,
                            type = "break_down",
                            keep_distributions = TRUE)
 
@@ -3969,11 +3607,11 @@ gg_bd_log_DE_MK <- plot(bd_log_MK, max_features = 5) +
 
 # - Brett Keisel
 bd_rf_BK <- predict_parts(explainer = EXP_rf_F,
-                          new_observation = nfl_test_BK,
+                          new_observation = nfl_test_DE_BK,
                           type = "break_down",
                           keep_distributions = TRUE)
 bd_log_BK <- predict_parts(explainer = EXP_log_F,
-                           new_observation = nfl_test_BK,
+                           new_observation = nfl_test_DE_BK,
                            type = "break_down",
                            keep_distributions = TRUE)
 
@@ -3990,30 +3628,8 @@ gg_bd_log_DE_BK <- plot(bd_log_BK, max_features = 5) +
         plot.subtitle = element_text(hjust = 0.5, color = "lightskyblue"),
         strip.text = element_blank())
 
-# - John Frank
-bd_rf_JF <- predict_parts(explainer = EXP_rf_F,
-                          new_observation = nfl_test_JF,
-                          type = "break_down",
-                          keep_distributions = TRUE)
-bd_log_JF <- predict_parts(explainer = EXP_log_F,
-                           new_observation = nfl_test_JF,
-                           type = "break_down",
-                           keep_distributions = TRUE)
 
-gg_bd_rf_DE_JF <- plot(bd_rf_JF, max_features = 5) +
-  labs(title = "John Frank",
-       subtitle = "Random Forrest") +
-  theme(plot.title = element_text(hjust = 0.5, face = "bold", color = "tomato"),
-        plot.subtitle = element_text(hjust = 0.5, color = "seagreen1"),
-        strip.text = element_blank())
-gg_bd_log_DE_JF <- plot(bd_log_JF, max_features = 5) +
-  labs(title = "John Frank",
-       subtitle = "Logistic Regression") +
-  theme(plot.title = element_text(hjust = 0.5, face = "bold", color = "tomato"),
-        plot.subtitle = element_text(hjust = 0.5, color = "lightskyblue"),
-        strip.text = element_blank())
-
-ggarrange(gg_bd_rf_DE_JC, gg_bd_rf_DE_MS, gg_bd_rf_DE_RK, gg_bd_rf_DE_MK, gg_bd_rf_DE_BK, gg_bd_rf_DE_JF,
-          nrow = 2, ncol = 3)
-ggarrange(gg_bd_log_DE_JC, gg_bd_log_DE_MS, gg_bd_log_DE_RK, gg_bd_log_DE_MK, gg_bd_log_DE_BK, gg_bd_log_DE_JF,
-          nrow = 2, ncol = 3)
+ggarrange(gg_bd_rf_DE_JC, gg_bd_rf_DE_RK, gg_bd_rf_DE_MK, gg_bd_rf_DE_BK,
+          nrow = 1)
+ggarrange(gg_bd_log_DE_JC, gg_bd_log_DE_RK, gg_bd_log_DE_MK, gg_bd_log_DE_BK,
+          nrow = 1)
