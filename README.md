@@ -74,7 +74,7 @@ conference | created a variable to view conference by conference instead of scho
 
 <img src="Images/EDA/drafted_conference.PNG" width="700" />
 
-> **Note (Conference)**: The majority of players Drafted came from the **_[ SEC | ACC | Big 10 ]_** Conferences
+> **Note (Conference)**: The majority of players Drafted came from the "ELITE" Conferences
 
 ## Correlation
 <img src="Images/EDA/corr.PNG" width="700">
@@ -410,8 +410,8 @@ RF-Acc SIMPLE (mtry = 6, min = 9) | 0.697 | 0.679 | 0.809 | 0.432 | 0.73 | 0.809
 
 > **BENCH:** From EDA average Bench Reps for the entire dataset was **_21 reps_**
 > - **Both Models** captures the general shape that as bench reps increase so those the probability of a certain player being drafted.   
-> - **Random Forrest** on average the players on this dataset _based on bench reps_ are predicted to be drafted. It also shows that the relationship between bench reps and the probability of being drafted is monotonic.
-> - **Logistic Regression** players that have a _bench rep below 10 reps_ are predicted on average to not be drafted. \
+> - **Random Forrest** on average all players in this dataset _based on bench reps_ are predicted to be drafted. It also shows that the relationship between bench reps and the probability of being drafted is monotonic.
+> - **Logistic Regression** players that have a _bench rep below 10 reps_ are predicted on average to not be drafted.
 
 > **FORTY**: From EDA average 40 time for the entire dataset was **_4.8 secs_**
 > - **Both Models** show that as 40 time increases the probability of a player being drafted decreases.
