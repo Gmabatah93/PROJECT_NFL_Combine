@@ -80,11 +80,11 @@ nfl <- nfl %>%
 nfl <- nfl %>% 
   mutate(conference = case_when(
     # Division I-A
-    school %in% c("Alabama","Texas A&M","Auburn","LSU","Mississippi","Arkansas","Mississippi State","Florida","Georgia","Missouri","Kentucky","Tennessee", "South Carolina","Vanderbilt") ~ "Division I-A (SEC)",
-    school %in% c("Notre Dame","Clemson","Miami (FL)","Miami","North Carolina", "North Carolina State", "Boston College","Pittsburgh","Virginia Tech","Virginia","Wake Forest","Georgia Tech","Louisville","Florida State","Duke","Syracuse") ~ "Division I-A (ACC)",
-    school %in% c("Northwestern", "Iowa", "Wisconsin", "Minnesota","Nebraska","Purdue","Illinois","Ohio State","Indiana","Penn State","Maryland","Rutgers","Michigan","Michigan State") ~ "Division I-A (Big 10)",
-    school %in% c("Iowa State", "Oklahoma","Oklahoma State","Texas","TCU","West Virginia", "Kansas State", "Texas Tech", "Baylor","Kansas") ~ "Division I-A (Big 12)",
-    school %in% c("USC","Colorado","Utah","Arizona State","UCLA","Arizona","Washington","Oregon","Stanford","Oregon State","Washington State","California") ~ "Division I-A (Pac-12)",
+    school %in% c("Alabama","Texas A&M","Auburn","LSU","Mississippi","Arkansas","Mississippi State","Florida","Georgia","Missouri","Kentucky","Tennessee", "South Carolina","Vanderbilt") ~ 'Division I-A (SEC) "ELITE"',
+    school %in% c("Notre Dame","Clemson","Miami (FL)","Miami","North Carolina", "North Carolina State", "Boston College","Pittsburgh","Virginia Tech","Virginia","Wake Forest","Georgia Tech","Louisville","Florida State","Duke","Syracuse") ~ 'Division I-A (ACC) "ELITE"',
+    school %in% c("Northwestern", "Iowa", "Wisconsin", "Minnesota","Nebraska","Purdue","Illinois","Ohio State","Indiana","Penn State","Maryland","Rutgers","Michigan","Michigan State") ~ 'Division I-A (Big 10) "ELITE"',
+    school %in% c("Iowa State", "Oklahoma","Oklahoma State","Texas","TCU","West Virginia", "Kansas State", "Texas Tech", "Baylor","Kansas") ~ 'Division I-A (Big 12) "ELITE"',
+    school %in% c("USC","Colorado","Utah","Arizona State","UCLA","Arizona","Washington","Oregon","Stanford","Oregon State","Washington State","California") ~ 'Division I-A (Pac-12) "ELITE"',
     school %in% c("Cincinnati", "Tulsa", "Memphis", "Central Florida", "SMU", "Houston", "Navy", "Tulane", "East Carolina", "Temple", "South Florida","Connecticut") ~ "Division I-A (American)",
     school %in% c("Appalachian State","Louisiana-Lafayette","Georgia State","South Alabama","Troy","Louisiana","Texas State", "Arkansas State","Coastal Carolina","Georgia Southern","Louisiana-Monroe") ~ "Division I-A (Sunbelt)",
     school %in% c("San Jose State", "Boise State","Nevada","San Diego State","Hawaii","Fresno State", "Air Force","Wyoming","New Mexico","Colorado State","Utah State","UNLV") ~ "Division I-A (Mountain West)",
@@ -472,7 +472,7 @@ ggarrange(gg_Combine_Weight_Offense_draft, gg_Combine_Weight_Defense_draft, nrow
 # - By Conference
 nfl_draft %>%
   mutate(cond = case_when(
-    conference %in% c("Division I-A (SEC)", "Division I-A (ACC)", "Division I-A (Big 10)", "Division I-A (Big 12)", "Division I-A (Pac-12)") ~ "Elite",
+    conference %in% c('Division I-A (SEC) "ELITE"', 'Division I-A (ACC) "ELITE"', 'Division I-A (Big 10) "ELITE"', 'Division I-A (Big 12) "ELITE"', 'Division I-A (Pac-12) "ELITE"') ~ "Elite",
     conference %in% c("Division I-A (American)", "Division I-A (Sunbelt)", "Division I-A (Mountain West)", "Division I-A (MAC)","Division I-A (Conference USA)") ~ "Division I-A",
     conference %in% c("Division I-AA") ~ "Division I-AA",
     conference %in% c("Division II & III") ~ "Division II & III"
@@ -486,7 +486,7 @@ nfl_draft %>%
         axis.title.y = element_text(colour = "red"),
         axis.title.x = element_blank(),
         plot.caption = element_text(color = "gray70", face = "italic")) +
-  scale_fill_brewer(palette = "YlGnBu")
+  scale_fill_manual(values = c("lightblue2","navyblue","grey90","cyan"))
 
 
 # Combine Data: Forty
@@ -541,7 +541,7 @@ ggarrange(gg_Combine_40_Offense_draft, gg_Combine_40_Defense_draft, nrow = 1)
 # - By Conference
 nfl_draft %>%
   mutate(cond = case_when(
-    conference %in% c("Division I-A (SEC)", "Division I-A (ACC)", "Division I-A (Big 10)", "Division I-A (Big 12)", "Division I-A (Pac-12)") ~ "Elite",
+    conference %in% c('Division I-A (SEC) "ELITE"', 'Division I-A (ACC) "ELITE"', 'Division I-A (Big 10) "ELITE"', 'Division I-A (Big 12) "ELITE"', 'Division I-A (Pac-12) "ELITE"') ~ "Elite",
     conference %in% c("Division I-A (American)", "Division I-A (Sunbelt)", "Division I-A (Mountain West)", "Division I-A (MAC)","Division I-A (Conference USA)") ~ "Division I-A",
     conference %in% c("Division I-AA") ~ "Division I-AA",
     conference %in% c("Division II & III") ~ "Division II & III"
@@ -555,7 +555,7 @@ nfl_draft %>%
         axis.title.y = element_text(colour = "red"),
         axis.title.x = element_blank(),
         plot.caption = element_text(color = "gray70", face = "italic")) +
-  scale_fill_brewer(palette = "YlGnBu")
+  scale_fill_manual(values = c("lightblue2","navyblue","grey90","cyan"))
 
 # Combine Data: Bench
 # - mean
@@ -606,7 +606,7 @@ ggarrange(gg_Combine_Bench_Offense_draft, gg_Combine_Bench_Defense_draft, nrow =
 # - By Conference
 nfl_draft %>%
   mutate(cond = case_when(
-    conference %in% c("Division I-A (SEC)", "Division I-A (ACC)", "Division I-A (Big 10)", "Division I-A (Big 12)", "Division I-A (Pac-12)") ~ "Elite",
+    conference %in% c('Division I-A (SEC) "ELITE"', 'Division I-A (ACC) "ELITE"', 'Division I-A (Big 10) "ELITE"', 'Division I-A (Big 12) "ELITE"', 'Division I-A (Pac-12) "ELITE"') ~ "Elite",
     conference %in% c("Division I-A (American)", "Division I-A (Sunbelt)", "Division I-A (Mountain West)", "Division I-A (MAC)","Division I-A (Conference USA)") ~ "Division I-A",
     conference %in% c("Division I-AA") ~ "Division I-AA",
     conference %in% c("Division II & III") ~ "Division II & III"
@@ -620,7 +620,7 @@ nfl_draft %>%
         axis.title.y = element_text(colour = "red"),
         axis.title.x = element_blank(),
         plot.caption = element_text(color = "gray70", face = "italic")) +
-  scale_fill_brewer(palette = "YlGnBu")
+  scale_fill_manual(values = c("lightblue2","navyblue","grey90","cyan"))
 
 # Combine Data: Broad Jump
 # - mean
@@ -673,7 +673,7 @@ ggarrange(gg_Combine_Jump_Offense_draft, gg_Combine_Jump_Defense_draft, nrow = 1
 # - By Conference
 nfl_draft %>%
   mutate(cond = case_when(
-    conference %in% c("Division I-A (SEC)", "Division I-A (ACC)", "Division I-A (Big 10)", "Division I-A (Big 12)", "Division I-A (Pac-12)") ~ "Elite",
+    conference %in% c('Division I-A (SEC) "ELITE"', 'Division I-A (ACC) "ELITE"', 'Division I-A (Big 10) "ELITE"', 'Division I-A (Big 12) "ELITE"', 'Division I-A (Pac-12) "ELITE"') ~ "Elite",
     conference %in% c("Division I-A (American)", "Division I-A (Sunbelt)", "Division I-A (Mountain West)", "Division I-A (MAC)","Division I-A (Conference USA)") ~ "Division I-A",
     conference %in% c("Division I-AA") ~ "Division I-AA",
     conference %in% c("Division II & III") ~ "Division II & III"
@@ -687,7 +687,7 @@ nfl_draft %>%
         axis.title.y = element_text(colour = "red"),
         axis.title.x = element_blank(),
         plot.caption = element_text(color = "gray70", face = "italic")) +
-  scale_fill_brewer(palette = "YlGnBu")
+  scale_fill_manual(values = c("lightblue2","navyblue","grey90","cyan"))
 
 
 # "DRAFT": Exploratory Data Analysis - Offense ----
