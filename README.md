@@ -5,6 +5,7 @@
 - [Validation Results](https://github.com/Gmabatah93/PROJECT_NFL_Combine#validation-diagnostic)
 - [Test Results](https://github.com/Gmabatah93/PROJECT_NFL_Combine#test-results)
 - [Prescriptive Analysis](https://github.com/Gmabatah93/PROJECT_NFL_Combine#prescriptive-analysis)
+- [Conclusion](https://github.com/Gmabatah93/PROJECT_NFL_Combine#conclusion)
 
 ---
 # Project Overview
