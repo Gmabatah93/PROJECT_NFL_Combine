@@ -1565,7 +1565,7 @@ log_Results <-
 # - Accuracy
 log_ROC_Acc <- log_Results %>%
   roc_curve(Drafted, LOG_Acc_Prob) %>% 
-  mutate(Model = "Normal_Acc_p0.001_m0.5")
+  mutate(Model = "Full_Acc_p0.001_m0.5")
 # - F Score
 log_ROC_F <- log_Results %>%
   roc_curve(Drafted, LOG_F_Prob) %>% 
@@ -1595,7 +1595,7 @@ log_ROC_Acc %>%
 log_CM_Acc <- log_Results %>% 
   conf_mat(truth = Drafted, estimate = LOG_Acc_Pred) %>% 
   autoplot(type = "heatmap") +
-  labs(title = "Accuracy", subtitle = "(Normal): penalty = 0.001 | mix = 0.5") +
+  labs(title = "Full", subtitle = "penalty = 0.001 | mix = 0.5") +
   theme_bw() +
   theme(plot.title = element_text(hjust = 0.5, color = "midnightblue", face = "bold"),
         plot.subtitle = element_text(hjust = 0.5, color = "orchid4"),
@@ -1607,7 +1607,7 @@ log_CM_Acc <- log_Results %>%
 log_CM_F <- log_Results %>% 
   conf_mat(truth = Drafted, estimate = LOG_F_Pred) %>% 
   autoplot(type = "heatmap") +
-  labs(title = "F Score", subtitle = "(Simple): penalty = 0.011 | mix = 0") +
+  labs(title = "Simple", subtitle = "penalty = 0.011 | mix = 0") +
   theme_bw() +
   theme(plot.title = element_text(hjust = 0.5, color = "lightskyblue", face = "bold"),
         plot.subtitle = element_text(hjust = 0.5, color = "orchid4"),
@@ -1665,7 +1665,7 @@ rf_ROC_Acc <- rf_Results %>%
 # - F Score
 rf_ROC_F <- rf_Results %>%
   roc_curve(Drafted, RF_F_Prob) %>% 
-  mutate(Model = "None_F_mtry1_min9")
+  mutate(Model = "Full_F_mtry1_min9")
 # - Visual
 rf_ROC_Acc %>% 
   bind_rows(rf_ROC_Acc, rf_ROC_F) %>% 
@@ -1689,7 +1689,7 @@ rf_ROC_Acc %>%
 rf_CM_Acc <- rf_Results %>% 
   conf_mat(truth = Drafted, estimate = RF_Acc_Pred) %>% 
   autoplot(type = "heatmap") +
-  labs(title = "Accuracy", subtitle = "(Simple): mtry = 6 | min_n = 9") +
+  labs(title = "Simple", subtitle = "mtry = 6 | min_n = 9") +
   theme_bw() +
   theme(plot.title = element_text(hjust = 0.5, color = "seagreen1", face = "bold"),
         plot.subtitle = element_text(hjust = 0.5, color = "orchid4"),
@@ -1700,7 +1700,7 @@ rf_CM_Acc <- rf_Results %>%
 rf_CM_F <- rf_Results %>% 
   conf_mat(truth = Drafted, estimate = RF_F_Pred) %>% 
   autoplot(type = "heatmap") +
-  labs(title = "F Score", subtitle = "(None): mtry = 1 | min_n = 9") +
+  labs(title = "Full", subtitle = "mtry = 1 | min_n = 9") +
   theme_bw() +
   theme(plot.title = element_text(hjust = 0.5, color = "seagreen", face = "bold"),
         plot.subtitle = element_text(hjust = 0.5, color = "orchid4"),
@@ -1942,8 +1942,8 @@ Log_ROC_Acc_FINAL %>%
 log_CM_FINAL_Acc <- Log_FINAL_Results %>% 
   conf_mat(truth = Drafted, estimate = LOG_Acc_Pred) %>% 
   autoplot(type = "heatmap") +
-  labs(title = "Accuracy 50%",
-       subtitle = "(Normal): penalty = 0.001 | mix = 0.5") +
+  labs(title = "Full",
+       subtitle = "penalty = 0.001 | mix = 0.5") +
   theme_bw() +
   theme(plot.title = element_text(hjust = 0.5, color = "midnightblue", face = "bold"),
         plot.subtitle = element_text(hjust = 0.5, color = "orchid4"),
@@ -1967,8 +1967,8 @@ log_CM_FINAL_Acc65 <- Log_FINAL_Results %>%
 log_CM_FINAL_F <- Log_FINAL_Results %>% 
   conf_mat(truth = Drafted, estimate = LOG_F_Pred) %>% 
   autoplot(type = "heatmap") +
-  labs(title = "F Score",
-       subtitle = "(Simple): penalty = 0.011 | mix = 0") +
+  labs(title = "Simple",
+       subtitle = "penalty = 0.011 | mix = 0") +
   theme_bw() +
   theme(plot.title = element_text(hjust = 0.5, color = "lightskyblue", face = "bold"),
         plot.subtitle = element_text(hjust = 0.5, color = "orchid4"),
@@ -1985,8 +1985,8 @@ ggarrange(log_CM_FINAL_Acc, log_CM_FINAL_Acc65, log_CM_FINAL_F, nrow = 1)
 rf_CM_FINAL_Acc <- rf_FINAL_Results %>% 
   conf_mat(truth = Drafted, estimate = RF_Acc_Pred) %>% 
   autoplot(type = "heatmap") +
-  labs(title = "Accuracy 50%",
-       subtitle = "(Simple): mtry = 6 | min = 9") +
+  labs(title = "Simple",
+       subtitle = "mtry = 6 | min = 9") +
   theme_bw() +
   theme(plot.title = element_text(hjust = 0.5, color = "seagreen", face = "bold"),
         plot.subtitle = element_text(hjust = 0.5, color = "orchid4"),
@@ -2010,8 +2010,8 @@ rf_CM_FINAL_Acc65 <- rf_FINAL_Results %>%
 rf_CM_FINAL_F <- rf_FINAL_Results %>% 
   conf_mat(truth = Drafted, estimate = RF_F_Pred) %>% 
   autoplot(type = "heatmap") +
-  labs(title = "F Score",
-       subtitle = "(Normal): mtry = 1 | min = 9") +
+  labs(title = "Full",
+       subtitle = "mtry = 1 | min = 9") +
   theme_bw() +
   theme(plot.title = element_text(hjust = 0.5, color = "seagreen1", face = "bold"),
         plot.subtitle = element_text(hjust = 0.5, color = "orchid4"),
@@ -2143,20 +2143,20 @@ EXP_log_Acc <- explain_tidymodels(model = log_fit_Acc,
                                   data = nfl_test,
                                   y = nfl_test$drafted == "Yes",
                                   predict_function = custom_func_Prob,
-                                  label = "LOG-Acc")
+                                  label = "LOG-Full")
 # Random Forrest SIMPLE (F): Mtry = 6, Min = 9
 EXP_rf_F <- explain_tidymodels(model = rf_fit_F,
                                data = nfl_test,
                                y = nfl_test$drafted == "Yes",
                                predict_function = custom_func_Prob,
-                               label = "RF-F")
+                               label = "RF-Full")
 
 # Logistic Regression (F Score): P = 1, P = 9
 EXP_log_F <- explain_tidymodels(model = log_fit_F,
                                 data = nfl_test,
                                 y = nfl_test$drafted == "Yes",
                                 predict_function = custom_func_Prob,
-                                label = "LOG-F")
+                                label = "LOG-Simple")
 
 # Explainer (WR | RB | OG | CB | DE)
 # - Data
@@ -2238,7 +2238,7 @@ plot(pdp_rf, pdp_log_F) +
 gg_pdp_rf <- plot(pdp_rf, geom = "profiles") +
   geom_hline(yintercept = 0.5, linetype = 2, color = "tomato", alpha = 0.7) +
   labs(title = "CP Profile: Random Forrest",
-       subtitle = "(NONE: mtry = 1, min = 9)") +
+       subtitle = "(FULL: mtry = 1, min = 9)") +
   theme(
     plot.title = element_text(hjust = 0.5, face = "bold", color = "seagreen1"),
     plot.subtitle = element_text(hjust = 0.5, face = "italic", color = "orchid4"),
@@ -2273,7 +2273,7 @@ pdp_log_F_Conference <- model_profile(explainer = EXP_log_F,
 gg_pdp_rf_Position <- plot(pdp_rf_Position) +
   geom_hline(yintercept = 0.5, linetype = 2, color = "tomato", alpha = 0.7) +
   labs(title = "Random Forrest",
-       subtitle = '(NONE: mtry = 1, min = 9)') +
+       subtitle = '(FULL: mtry = 1, min = 9)') +
   ylim(c(0,0.8)) +
   theme(
     plot.title = element_text(hjust = 0.5, face = "bold", color = "seagreen1"),
@@ -2298,12 +2298,12 @@ gg_pdp_rf_Conference <- plot(pdp_rf_Conference) +
   geom_hline(yintercept = 0.5, linetype = 2, color = "tomato", alpha = 0.7) +
   ylim(c(0,0.8)) +
   labs(title = "Random Forrest",
-       subtitle = '(NONE: mtry = 1, min = 9)') +
+       subtitle = '(FULL: mtry = 1, min = 9)') +
   theme(
     plot.title = element_text(hjust = 0.5, face = "bold", color = "seagreen1"),
     plot.subtitle = element_text(hjust = 0.5, face = "italic", color = "orchid4"),
     axis.title.y = element_text(color = "tomato"),
-    axis.text.x = element_text(angle = 45, hjust = 0.8),
+    axis.text.x = element_text(angle = 90, hjust = 1, vjust = 0.5),
     strip.text = element_blank())
 gg_pdp_log_Conference <- plot(pdp_log_F_Conference) +
   geom_hline(yintercept = 0.5, linetype = 2, color = "tomato", alpha = 0.7) +
@@ -2314,7 +2314,7 @@ gg_pdp_log_Conference <- plot(pdp_log_F_Conference) +
     plot.title = element_text(hjust = 0.5, face = "bold", color = "lightskyblue"),
     plot.subtitle = element_text(hjust = 0.5, face = "italic", color = "orchid4"),
     axis.title.y = element_blank(),
-    axis.text.x = element_text(angle = 45, hjust = 0.8),
+    axis.text.x = element_text(angle = 90, hjust = 1, vjust = 0.5),
     strip.text = element_blank())
 
 ggarrange(gg_pdp_rf_Position, gg_pdp_log_Position, nrow = 1)

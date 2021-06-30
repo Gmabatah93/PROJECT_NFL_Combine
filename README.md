@@ -78,6 +78,29 @@ The average _BENCH_ for everyone in the dataset was **_21reps_**. By _Position_:
 The average _BROAD JUMP_ for everyone in the dataset was **_113inches_**. By _Position_: CB = **_122inches_**, DE = **_115inches_**, OLB = **_118inches_**, OT = **_102inches_**, WR = **_121inches_**, RB = **_118inches_**. By _Conference_: Elite = **_113inches_**, Division I-A = **_114inches_**, Division I-AA = **_113inches_**, Divsion II & III = **_112inches_**.
 
 > **MODELING**: \
+Metrics: AUC, Accuracy, Sensitivity, Specificity, F1. \
+The 1st model **Random Forrest** was fit trying three different dataset. 1) As is, meaning no preprocess. 2) using PCA with the 2 principal components. 3) a simpler dataset removing the highly correlated features. \
+The 2nd model **Logistic Regression** was fit trying three different dataset. 1) With minimal preprocessing ("normalized", "dummy"). 2) Minimal preprocessing and PCA using the 2 principal components. 3) simpler dataset removing the highly correlated features and minimal preprocessing.
+
+> **VALIDATION METRICS**
+
+Model | AUC | Accuracy | Sensitivity | Specificity | Precision | Recall | F1
+--- | --- | --- | --- | --- | --- | --- | ---
+**_LOG (NORMAL: P = 0.001, M = 0.5)_** | **_0.737_** | **_0.72_** | **_0.907_** | **_0.365_** | **_0.73_** | **_0.907_** | **_0.809_**
+LOG (SIMPLE: P = 0.011, M = 0) | 0.725 | 0.696 | 0.914 | 0.283 | 0.707 | 0.914 | 0.797
+RF (SIMPLE: mtry = 6, min = 9) | 0.703 | 0.698 | 0.85 | 0.409 | 0.731 | 0.85 | 0.786
+RF (NONE: mtry = 1, min = 9) | 0.737 | 0.707 | 0.944 | 0.258 | 0.706 | 0.944 | 0.808
+
+> **TEST METRICS**
+
+Model | AUC | Accuracy | Sensitivity | Specificity | Precision | Recall | F1
+--- | --- | --- | --- | --- | --- | --- | ---
+**_LOG-Acc NORMAL (P = 0.001, M = 0.5)_** | 0.711 | 0.719 | 0.899 | 0.377 | 0.732 | 0.899 | **_0.807_**
+LOG-F SIMPLE (P = 0.011, M = 0) | 0.688 | 0.691 | 0.907 | 0.281 | 0.705 | 0.907 | 0.794
+RF-Acc SIMPLE (mtry = 6, min = 9) | 0.697 | 0.679 | 0.809 | 0.432 | 0.73 | 0.809 | 0.767
+**_RF-F NONE (mtry = 1, min = 9)_** | 0.7 | 0.693 | **_0.926_** | 0.251 | 0.701 | 0.926 | 0.798
+
+> **PRESCRIPTIVE ANALYSIS**
 
 
 ---
@@ -404,19 +427,19 @@ RF-Acc SIMPLE (mtry = 6, min = 9) | 0.697 | 0.679 | 0.809 | 0.432 | 0.73 | 0.809
 <img src="Images/PA/vip.PNG" width="  1000">
 
 > **Note: (Variable Importance)**
-> - **Logistic Regression (NORMAL)**
+> - **Logistic Regression (Full)**
 >   1. Forty = 0.14
 >   2. Weight = 0.135
 >   3. Position = 0.064
 >   4. Three Cone = 0.033
 >   5. Side = 0.026
-> - **Logistic Regression (SIMPLE)**
+> - **Logistic Regression (Simple)**
 >   1. Forty = 0.121
 >   2. Weight = 0.074
 >   3. Position = 0.044
 >   4. Bench = 0.039
 >   5. Broad Jump = 0.02
-> - **Random Forrest (NONE)**
+> - **Random Forrest (Full)**
 >   1. Weight = 0.061
 >   2. Forty = 0.051
 >   3. Bench = 0.027
