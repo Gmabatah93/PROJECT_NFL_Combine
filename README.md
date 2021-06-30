@@ -100,7 +100,8 @@ LOG-F SIMPLE (P = 0.011, M = 0) | 0.688 | 0.691 | 0.907 | 0.281 | 0.705 | 0.907 
 RF-Acc SIMPLE (mtry = 6, min = 9) | 0.697 | 0.679 | 0.809 | 0.432 | 0.73 | 0.809 | 0.767
 **_RF-F NONE (mtry = 1, min = 9)_** | 0.7 | 0.693 | **_0.926_** | 0.251 | 0.701 | 0.926 | 0.798
 
-> **PRESCRIPTIVE ANALYSIS**
+> **PRESCRIPTIVE ANALYSIS:** \
+Feature Importance: **_LOG-Full:_** 1) Forty, 2) Weight, 3) Position. **_LOG-Simple:_** 1) Forty, 2) Weight, 3) Position. **_RF-Full:_** 1) Weight, 2) Forty, 3) Bench. \
 
 
 ---
@@ -556,7 +557,12 @@ RF-Acc SIMPLE (mtry = 6, min = 9) | 0.697 | 0.679 | 0.809 | 0.432 | 0.73 | 0.809
 > - What stands out is OG must weigh at least 280 to have a chance of being drafted
 
 ## Instance-Level
-> After assessing the models at a dataset level we'll take some samples from each position and do further evaluation
+> After assessing the models at a dataset level we'll take some samples from each position and do further evaluation. \
+**Break-Down Plots:** Shows which variables contributes to the results the most. _(The underlying idea capture the contribution of a feature to the model’s prediction by computing the shift in the expected value of **Y** while fixing the values of other variables)_
+
+
+**Samples**
+<img src="Images/PA/data_Full.PNG" width="  1000">
 
 <img src="Images/PA/rf_cm.PNG" width="  1000">
 
@@ -580,24 +586,15 @@ Defensive Ends | 0.656 | 0.860 | 0.167 | 0.712 | 0.779
 
 > **Note (Metrics)**: In terms of **F1 Score** Random Forrest is out performing Logistic Regression, However by a small margin
 
-**Samples**
-<img src="Images/PA/data_Full.PNG" width="  1000">
-
 ### Wide Receivers
-
-**SHAP**
-<img src="Images/PA/shap_rf_WR.PNG" width="  1200">
-<img src="Images/PA/shap_log_WR.PNG" width="  1200">
 
 **Break-Down**
 <img src="Images/PA/bd_rf_WR.PNG" width="  1200">
 <img src="Images/PA/bd_log_WR.PNG" width="  1200">
 
-### Running Backs
+> **Note (WR)**
 
-**SHAP**
-<img src="Images/PA/shap_rf_RB.PNG" width="  1200">
-<img src="Images/PA/shap_log_RB.PNG" width="  1200">
+### Running Backs
 
 **Break-Down**
 <img src="Images/PA/bd_rf_RB.PNG" width="  1200">
@@ -605,29 +602,17 @@ Defensive Ends | 0.656 | 0.860 | 0.167 | 0.712 | 0.779
 
 ### Offensive Guards
 
-**SHAP**
-<img src="Images/PA/shap_rf_OG.PNG" width="  1200">
-<img src="Images/PA/shap_log_OG.PNG" width="  1200">
-
 **Break-Down**
 <img src="Images/PA/bd_rf_OG.PNG" width="  1200">
 <img src="Images/PA/bd_log_OG.PNG" width="  1200">
 
 ### Cornerbacks
 
-**SHAP**
-<img src="Images/PA/shap_rf_CB.PNG" width="  1200">
-<img src="Images/PA/shap_log_CB.PNG" width="  1200">
-
 **Break-Down**
 <img src="Images/PA/bd_rf_CB.PNG" width="  1200">
 <img src="Images/PA/bd_log_CB.PNG" width="  1200">
 
 ### Defensive Ends
-
-**SHAP**
-<img src="Images/PA/shap_rf_DE.PNG" width="  1200">
-<img src="Images/PA/shap_log_DE.PNG" width="  1200">
 
 **Break-Down**
 <img src="Images/PA/bd_rf_DE.PNG" width="  1200">
