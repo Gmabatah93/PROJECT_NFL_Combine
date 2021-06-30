@@ -72,10 +72,10 @@ After performing PCA, it was shown that the first 2 principal components account
 > 2. **_[ Bench ]_** represented the 2nd Component. And this simply is the overall **_strength_** of a player.
 
 > **Combine Data**: \
-The average **WEIGHT** for everyone in the dataset was **_252lbs_**. _Defense_ **_CB = 193lbs | DE = 268lbs | OLB = 240lbs_**. _Offense_ **_OT = 315lbs | WR = 204lbs | RB = 215lbs_** .\
-The average **FORTY** for everyone in the dataset was **_4.81secs_**. _Defense_ **_CB = 4.49secs | DE = 4.83secs | OLB = 4.68secs_**. _Offense_ **_OT = 5.25secs | WR = 4.51secs | RB = 4.56secs_**. \
-The average **BENCH** for everyone in the dataset was **_21reps_**. _Defense_ **_CB = 14reps | DE = 24reps | OLB = 23reps ]_**. _Offense_ **_[ OT = 24reps | WR = 14reps | RB = 20reps_**. \
-The average **BROAD JUMP** for everyone in the dataset was **_113inches_**. _Defense_ **_CB = 122inches | DE = 115inches | OLB = 118inches_**. _Offense_ **_OT = 102inches | WR = 121inches | RB = 118inches_**
+The average **WEIGHT** for everyone in the dataset was **_252lbs_**. _Defense_ CB = **_193lbs_**, DE = **_268lbs_**, OLB = **_240lbs_**. _Offense_ OT = **_315lbs_**, WR = **_204lbs_**, RB = **_215lbs_**. By _CONFERENCE_ Elite = **_253lbs_**, Division I-A = **_246lbs_**, Division I-AA = **_252lbs_**, Divsion II & III = **_266lbs_** .\
+The average **FORTY** for everyone in the dataset was **_4.81secs_**. _Defense_ CB = **_4.49secs, DE = **_4.83secs, OLB = **_4.68secs_**. _Offense_ OT = **_5.25secs_**, WR = **_4.51secs_**, RB = **_4.56secs_**. By _CONFERENCE_ Elite = **_4.81sec_**, Division I-A = **_4.78secs_**, Division I-AA = **_4.82secs_**, Divsion II & III = **_4.89secs_**. \
+The average **BENCH** for everyone in the dataset was **_21reps_**. _Defense_ CB = **_14reps_**, DE = **_24reps_**, OLB = **_23reps_**. _Offense_ OT = **_24reps_**, WR = **_14reps_**, RB = **_20reps_**. By _CONFERENCE_ Elite = **_21reps_**, Division I-A = **_21reps_**, Division I-AA = **_21reps_**, Divsion II & III = **_23reps_**. \
+The average **BROAD JUMP** for everyone in the dataset was **_113inches_**. _Defense_ CB = **_122inches_**, DE = **_115inches_**, OLB = **_118inches_**. _Offense_ OT = **_102inches_**, WR = **_121inches_**, RB = **_118inches_**. By _CONFERENCE_ Elite = **_113inches_**, Division I-A = **_114inches_**, Division I-AA = **_113inches_**, Divsion II & III = **_112inches_**.
 
 > **MODELING**: \
 
