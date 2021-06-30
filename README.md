@@ -72,10 +72,10 @@ After performing PCA, it was shown that the first 2 principal components account
 > 2. **_[ Bench ]_** represented the 2nd Component. And this simply is the overall **_strength_** of a player.
 
 > **Combine Data**: \
-The average **WEIGHT** for everyone in the dataset was **_252lbs_**. _Defense_ **_[ CB = 193lbs | DE = 268lbs | OLB = 240lbs ]_**. _Offense_ **_[ OT = 315lbs | WR = 204lbs | RB = 215lbs ]_** .\
-The average **FORTY** for everyone in the dataset was **_4.81secs_**. _Defense_ **_[ CB = 4.49secs | DE = 4.83secs | OLB = 4.68secs ]_**. _Offense_ **_[ OT = 5.25secs | WR = 4.51secs | RB = 4.56secs ]_**. \
-The average **BENCH** for everyone in the dataset was **_21reps_**. _Defense_ **_[ CB = 14reps | DE = 24reps | OLB = 23reps ]_**. _Offense_ **_[ OT = 24reps | WR = 14reps | RB = 20reps ]_**. \
-The average **BROAD JUMP** for everyone in the dataset was **_113inches_**. _Defense_ **_[ CB = 122inches | DE = 115inches | OLB = 118inches ]_**. _Offense_ **_[ OT = 102inches | WR = 121inches | RB = 118inches ]_**
+The average **WEIGHT** for everyone in the dataset was **_252lbs_**. _Defense_ **_CB = 193lbs | DE = 268lbs | OLB = 240lbs_**. _Offense_ **_OT = 315lbs | WR = 204lbs | RB = 215lbs_** .\
+The average **FORTY** for everyone in the dataset was **_4.81secs_**. _Defense_ **_CB = 4.49secs | DE = 4.83secs | OLB = 4.68secs_**. _Offense_ **_OT = 5.25secs | WR = 4.51secs | RB = 4.56secs_**. \
+The average **BENCH** for everyone in the dataset was **_21reps_**. _Defense_ **_CB = 14reps | DE = 24reps | OLB = 23reps ]_**. _Offense_ **_[ OT = 24reps | WR = 14reps | RB = 20reps_**. \
+The average **BROAD JUMP** for everyone in the dataset was **_113inches_**. _Defense_ **_CB = 122inches | DE = 115inches | OLB = 118inches_**. _Offense_ **_OT = 102inches | WR = 121inches | RB = 118inches_**
 
 > **MODELING**: \
 
