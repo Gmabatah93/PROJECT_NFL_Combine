@@ -1,3 +1,5 @@
+# Project Overview
+
 ### Table of Contents
 - [Summary](https://github.com/Gmabatah93/PROJECT_NFL_Combine#summary)
 - [Exploratory Data Analysis](https://github.com/Gmabatah93/PROJECT_NFL_Combine#exploratory-data-analysis)
@@ -8,7 +10,6 @@
 - [Conclusion](https://github.com/Gmabatah93/PROJECT_NFL_Combine#conclusion)
 
 ---
-# Project Overview
 
 ### Code Used
 
