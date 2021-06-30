@@ -1,9 +1,13 @@
 ### Table of Contents
+- [Summary](https://github.com/Gmabatah93/PROJECT_NFL_Combine#summary)
+- [Exploratory Data Analysis](https://github.com/Gmabatah93/PROJECT_NFL_Combine#exploratory-data-analysis)
+- [Modeling](https://github.com/Gmabatah93/PROJECT_NFL_Combine#modeling)
+- [Validation Results](https://github.com/Gmabatah93/PROJECT_NFL_Combine#validation-diagnostic)
+- [Test Results](https://github.com/Gmabatah93/PROJECT_NFL_Combine#test-results)
+- [Prescriptive Analysis](https://github.com/Gmabatah93/PROJECT_NFL_Combine#prescriptive-analysis)
 
 ---
 # Project Overview
-
-## Summary
 
 ### Code Used
 
@@ -54,11 +58,33 @@ drafted | split the drafted variable to represent one feature for [Round / Pick 
 side | created a new variable for High Level analysis of just offensive players and defensive players.
 conference | created a variable to view conference by conference instead of school by school
 
+## Summary
+> **EDA Target (Drafted):** \
+Of the 2,885 players in this dataset from 2000-2018 **_65%_** was drafted. \
+The **_65%_** of players were drafted mostly came from the **_"ELITE"_** conferences, the top 3 positions were:
+> - Defense: **_[ CB | DE | OLB]_**
+> - Offense: **_[ OT | WR | RB ]_**
+
+> **PCA:** \
+The combine statistics were HIGHLY correlated with each other. \
+After performing PCA, it was shown that the first 2 principal components accounted for 80% of the variance in the data. Therefore there were two themes that summarized the data.
+> 1. **_[ Weight | Forty | Three_cone | shuttle | broad_jump | vertical ]_** represented the 1st principal component. In my opinion, this can best be summarized as a players overall athleticism in regards to **_Agility and Explosiveness_**. Also after looking a the biplot, Forty, Three_cone, and shuttle pretty much represented the same thing so Forty time can essentially represent the 3. Broad_jump & vertical, can just be represented by broad_jump
+> 2. **_[ Bench ]_** represented the 2nd Component. And this simply is the overall **_strength_** of a player.
+
+> **Combine Data**: \
+The average **Weight** for everyone in the dataset was **_252lbs_**. By the top Position
+- Defense: **_[ CB = 193lbs | DE = 268lbs | OLB = 240lbs ]_**
+- Offense: **_[ OT = 315lbs | WR = 204lbs | RB = 215lbs ]_** .\
+The average **Weight** for everyone in the dataset was **_252lbs_**. By the top Position
+- Defense: **_[ CB = 193lbs | DE = 268lbs | OLB = 240lbs ]_**
+- Offense: **_[ OT = 315lbs | WR = 204lbs | RB = 215lbs ]_**
+
+
 ---
 
 # Exploratory Data Analysis
 
-## Summary
+## Target (Drafted ?)
 <img src="Images/EDA/drafted.PNG" width="700">
 
 >**Note (Target)**: Of all the players in this dataset **_65%_** of players in this dataset was Drafted
