@@ -165,15 +165,18 @@ If you look at the **Eigenvalue Plot** you can see that you can represent about 
 
 **Note (Weight)**: Average weight for players in this dataset is **_252lbs_**
 - Offense: **_262lbs_**
-  + Average weight for **OT** is **_315lbs_** for both drafted and non drafted players
-  + Average weight for **WR** is **_204lbs_** for both drafted and non drafted players
-  + Average weight for **RB** is **_215lbs_** for both drafted and non drafted players
+  + Average weight _OT_ = **_315lbs_**
+  + Average weight _WR_ = **_203lbs_**
+  + Average weight _RB_ = **_216lbs_**
 - Defense: **_242lbs_**
-  + Average weight for **CB** is **_193lbs_** for both drafted and non drafted players
-  + Average weight for **DE** is **_268lbs_** for both drafted and non drafted players
-  + Average weight for **OLB** is around **_240lbs_** for both drafted and non drafted players
-- Conference: Averages
-  + Elite = **_253lbs_** | Division I-A = **_246lbs_** | Division I-AA = **_252_** | Division II & II = **_266lbs_**
+  + Average weight _CB_ = **_193lbs_**
+  + Average weight _DE_ = **_268lbs_**
+  + Average weight _OLB_ = **_241lbs_**
+- CONFERENCE:
+  + _"ELITE"_ = **_253lbs_**
+  + _Division I-A_ = **_246lbs_**
+  + _Division I-AA_ = **_252_**
+  + _Division II & III_ = **_266lbs_**
 
 ### Forty
 <img src="Images/EDA/combine_40.PNG" width="  700">
@@ -182,15 +185,18 @@ If you look at the **Eigenvalue Plot** you can see that you can represent about 
 
 **Note (Forty):** Average forty for players in this dataset is **_4.81secs_**
 - Offense: **_4.72secs_**
-  + Average forty for **OT**: Drafted = **_5.21_** | Not Drafted = **_5.34_**
-  + Average forty for **WR**: Drafted = **_4.47_** | Not Drafted = **_4.55_**
-  + Average forty for **RB**: Drafted = **_4.52_** | Not Drafted = **_4.61_**
+  + Average forty _OT_ = **_5.25secs_**
+  + Average forty _WR_ = **_4.51secs_**
+  + Average forty _RB_ = **_4.56secs_**
 - Defense: **_4.90secs_**
-  + Average forty for **CB**: Drafted = **_4.47_** | Not Drafted = **_4.54_**
-  + Average forty for **DE**: Drafted = **_4.80_** | Not Drafted = **_4.89_**
-  + Average forty for **OLB**: Drafted = **_4.65_** | Not Drafted = **_4.74_**
-- Conference: Averages
-  + Elite = **_4.81secs_** | Division I-A = **_4.78secs_** | Division I-AA = **_4.82secs_** | Division II & II = **_4.89secs_**
+  + Average forty _CB_ = **_4.49secs_**
+  + Average forty _DE_ = **_4.83secs_**
+  + Average forty _OLB_ = **_4.68secs_**
+- CONFERENCE:
+  + _"ELITE"_ = **_4.81secs_**
+  + _Division I-A_ = **_4.78secs_**
+  + _Division I-AA_ = **_4.82secs_**
+  + _Division II & III_ = **_4.89secs_**
 
 ### Bench
 <img src="Images/EDA/combine_bench.PNG" width="  700">
@@ -199,15 +205,18 @@ If you look at the **Eigenvalue Plot** you can see that you can represent about 
 
 **Note (Bench):** Average bench for players in this dataset is **_21reps_**
 - Offense: **_21reps_**
-  + Average bench for **OT**: Drafted = **_25reps_** | Not Drafted = **_23reps_**
-  + Average bench for **WR** was **_14reps_** for both drafted and non drafted players
-  + Average bench for **RB**: Drafted = **_20reps_** | Not Drafted = **_19reps_**
+  + Average bench _OT_ = **_24reps_**
+  + Average bench _WR_ = **_14reps_**
+  + Average bench _RB_ = **_20reps_**
 - Defense: **_21reps_**
-  + Average bench for **CB**: Drafted = **_15reps_** | Not Drafted = **_13reps_**
-  + Average bench for **DE**: Drafted = **_24reps_** | Not Drafted = **_23reps_**
-  + Average bench for **OLB**: Drafted = **_23reps_** | Not Drafted = **_21reps_**
-- Conference: Averages
-  + Elite = **_21reps_** | Division I-A = **_21reps_** | Division I-AA = **_21reps_** | Division II & II = **_23reps_**
+  + Average bench _CB_ = **_14reps_**
+  + Average bench _DE_ = **_24reps_**
+  + Average bench _OLB_ = **_23reps_**
+- CONFERENCE:
+  + _"ELITE"_ = **_21reps_**
+  + _Division I-A_ = **_21reps_**
+  + _Division I-AA_ = **_21reps_**
+  + _Division II & III_ = **_23reps_**
 
 ### Broad Jump
 <img src="Images/EDA/combine_jump.PNG" width="  700">
@@ -216,15 +225,18 @@ If you look at the **Eigenvalue Plot** you can see that you can represent about 
 
 **Note (Jump):** Average broad jump for players in this dataset is **_113inches**
 - Offense: **_110inches_**
-  + Average broad jump for **OT**: Drafted = **_103inches_** | Not Drafted = **_100inches_**
-  + Average broad jump for **WR**: Drafted = **_121inches_** | Not Drafted = **_119inches_**
-  + Average broad jump for **RB**: Drafted = **_119inches_** | Not Drafted = **_117inches_**
+  + Average broad jump  _OT_ = **_102inches_**
+  + Average broad jump _WR_ = **_121inches_**
+  + Average broad jump _RB_ = **_118inches_**
 - Defense: **_116inches_**
-  + Average broad jump for **CB**: Drafted = **_122inches_** | Not Drafted = **_120inches_**
-  + Average broad jump for **DE**: Drafted = **_115inches_** | Not Drafted = **_113inches_**
-  + Average broad jump for **OLB**: Drafted = **_118inches_** | Not Drafted = **_115inches_**
-- Conference: Averages
-  + Elite = **_113inches_** | Division I-A = **_114inches_** | Division I-AA = **_113inches_** | Division II & II = **_112inches_**
+  + Average broad jump _CB_ = **_122inches_**
+  + Average broad jump _DE_ = **_115inches_**
+  + Average broad jump _OLB_ = **_118inches_**
+- CONFERENCE:
+  + _"ELITE"_ = **_113inches_**
+  + _Division I-A_ = **_114inches_**
+  + _Division I-AA_ = **_113inches_**
+  + _Division II & III_ = **_112inches_**
 
 ---
 
