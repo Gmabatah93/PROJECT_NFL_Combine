@@ -242,7 +242,7 @@ If you look at the **Eigenvalue Plot** you can see that you can represent about 
 
 # Modeling
 > The Models I'm going to use for this dataset is
-> - **Random Forrest**: because of its versatility _(as you see alot of features in this dataset is correlated, so we'd have to deal with that issue)_ with **RF** you don't even have to preprocess correlated features, it knows how to handle it.
+> - **Random Forrest**: because of its versatility _(as you see alot of features in this dataset is correlated, so we'd have to deal with that issue)_ using **RF** I don't have to worry too much about preprocessing.
 > - **Logistic Regression**: because it is a more interpretable model and if we can get close to the same metrics as **RF** I'd rather use **LR**, however we would have to do alot of preprocessing.
 
 ## Data Spending
@@ -316,7 +316,7 @@ If you look at the **Eigenvalue Plot** you can see that you can represent about 
  - **Specificity:** Out of all the players that got did not get drafted what percentage did the model predict correctly
  - **Precision:** Out of all the players the Model predicted got Drafted what percentage actually got Drafted ?
  - **F1:** Balance between Precision and Recall "Sensitivity"
-  + ultimately I will be using *F score* to select the best model
+    + ultimately I will be using *F score* to select the best model
 
 ## Fit
 
