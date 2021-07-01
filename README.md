@@ -146,13 +146,13 @@ Feature Importance: **_LOG-Full:_** 1) Forty, 2) Weight, 3) Position. **_LOG-Sim
 <img src="Images/EDA/pca_eig.PNG" width="700">
 <img src="Images/EDA/pca_pc.PNG" width="700">
 
-> **Note (PCA)**:
-> - **PC1 - Theme:**  _Represents Agility/Explosiveness_
->   + **_Agility_**: forty | three_cone | shuttle
->     + generally if your fast in one your fast in the others
->   + **_Explosiveness_**: vertical | broad_jump
->     + generally if you can jump well vertically you can jump well horizontally
-> - **PC2 - Theme**: _Represents overall strength_
+> **Note (PCA)**: \
+If you look at the **Eigenvalue Plot** you can see that you can represent about 80% of the data by just using the 1st 2 principal components.  
+> - **PC1 - (Theme: Agility/Explosiveness)**
+>   + **_Agility_** _(forty | three_cone | shuttle)_: generally if your fast in one your fast in the others
+>   + **_Explosiveness_** _(vertical | broad_jump)_: generally if you can jump well vertically you can jump well horizontally
+> - **PC2 - (Theme: Overall strength)**
+>   + **Bench** dominates this entire principal component
 
 
 ## Combine Summary
