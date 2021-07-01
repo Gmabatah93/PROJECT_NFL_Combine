@@ -56,7 +56,7 @@ drafted | chr | What NFL team drafted player / Round / Pick / Year
 
 Feature | Description
 --- | ---
-drafted | split the drafted variable to represent one feature for [Round / Pick / Year] & changed the drafted variable to a factor ["Yes","No"] to represent weather a player was drafted or not.
+drafted | split the drafted variable to represent one feature for [Team / Round / Pick / Year] & changed the drafted variable to a factor ["Yes","No"] to represent weather a player was drafted or not.
 side | created a new variable for High Level analysis of just offensive players and defensive players.
 conference | created a variable to view conference by conference instead of school by school
 
@@ -121,8 +121,8 @@ Feature Importance: **_LOG-Full:_** 1) Forty, 2) Weight, 3) Position. **_LOG-Sim
 
 > **Note (Position)**: There are **1426** Offensive &  **1459** Defensive players in this dataset
 > - Of the **1459** Defensive players **70%** was Drafted. Of the **1426** Offensive players **61%** was Drafted.
-> - Top 3 Offensive Positions Drafted: **_OT | WR | RB_**
-> - Top 3 Defensive Positions Drafted: **_CB | DE | OLB_**
+> - Top 3 Offensive Positions Drafted: OT = **_194_** | WR = **_157_** | RB = **_145_**
+> - Top 3 Defensive Positions Drafted: CB = **_229_** | DE = **_192_** | OLB = **_182_**
 
 <img src="Images/EDA/drafted_conference.PNG" width="700" />
 
