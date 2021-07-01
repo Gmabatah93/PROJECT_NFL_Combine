@@ -460,7 +460,7 @@ RF-PCA | 0.676 | 0.684 | 0.944 | 0.191 | 0.689 | 0.944 | 0.796
 # Prescriptive Analysis
 > After fitting a model an importance aspect of model assessment is to evaluate which features are important and how they effect the target variable, which in this case is the probability of a player being drafted. For this dataset I will be utilizing the DALEX package which uses a model-agnostic approach to asses feature importance
 
-> Based on the Test Results the models I choose to evaluate further is **[ 1) Logistic Regression - PCA 2) Logistic Regression - Full 3) Random Forrest - Full ]** because they perform the best. I will also evaluate **_Logistic Regression - Simple_** because it was performed nearly as well as those models. Also ideally this is the simplest most interpretable model in my opinion. 
+> Based on the Test Results the models I choose to evaluate further is **[ 1) Logistic Regression - PCA 2) Logistic Regression - Full 3) Random Forrest - Full ]** because they perform the best. I will also evaluate **_Logistic Regression - Simple_** because it was performed nearly as well as those models. Also ideally this is the simplest most interpretable model in my opinion.
 
 ## Feature Importance
 > To calculate feature importance the DALEX package first calculates the Loss of the normal model then permutes the variable of the feature in question. And finally takes the difference between the two. _(In this case I used AUC as the Loss Metric)_  
@@ -474,12 +474,18 @@ RF-PCA | 0.676 | 0.684 | 0.944 | 0.191 | 0.689 | 0.944 | 0.796
 >   3. Position = 0.064
 >   4. Three Cone = 0.033
 >   5. Side = 0.026
+> - **Logistic Regression (PCA)**
+>   1. Bench = 0.068
+>   2. Vertical = 0.031
+>   3. Height = 0.044
+>   4. Weight = 0.017
+>   5. Broad Jump = 0.016
 > - **Logistic Regression (Simple)**
->   1. Forty = 0.121
->   2. Weight = 0.074
->   3. Position = 0.044
->   4. Bench = 0.039
->   5. Broad Jump = 0.02
+>   1. Forty = 0.12
+>   2. Weight = 0.064
+>   3. Position = 0.039
+>   4. Bench = 0.035
+>   5. Conference = 0.019
 > - **Random Forrest (Full)**
 >   1. Weight = 0.061
 >   2. Forty = 0.051
@@ -487,9 +493,9 @@ RF-PCA | 0.676 | 0.684 | 0.944 | 0.191 | 0.689 | 0.944 | 0.796
 >   4. Three Cone = 0.016
 >   5. Vertical 0.016
 
-> _For all models assessed **Forty & Weight** were the most important features effecting the probability of a player being drafted_
+> **Note (Feature Importance):** _Apart from _Logistic Regression (PCA)_ all models calculated **Forty & Weight** to be the most important features effecting the probability of a player being drafted_
+>  - _With that conclusion I will no longer be evaluating Logistic Regression (PCA), because model interpretability is very important for this use-case_
 
-> **Note (Final Model Evaluation):** Although Logistic Regresison using NORMAL preprocessing was the best model overall, LR using **SIMPLE** preprocessing was really close and the benefit it is a much simpler model so moving forward I will be evaluating **Logistic Regression SIMPLE and Random Forrest NONE**.
 
 ## Partial Dependency
 > Shows how the expected value of model prediction behave as a function of a selected feature.
