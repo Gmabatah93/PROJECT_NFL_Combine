@@ -63,15 +63,15 @@ conference | created a variable to view conference by conference instead of scho
 ## Summary
 > **EDA Target (Drafted):** \
 Of the 2,885 players in this dataset from 2000-2018 **_65%_** was drafted. \
-The **_65%_** of players were drafted mostly came from the **_"ELITE"_** conferences, the top 3 positions were:
+Of the **_65%_** of players that were drafted, most of them came from the **_ELITE ("SEC", "ACC", "Big 10","Big 12", "Pac-12")_** conferences, the top 3 positions were:
 > - Defense: **_[ CB | DE | OLB]_**
 > - Offense: **_[ OT | WR | RB ]_**
 
 > **PCA:** \
 The combine statistics were HIGHLY correlated with each other. \
 After performing PCA, it was shown that the first 2 principal components accounted for 80% of the variance in the data. Therefore there were two themes that summarized the data.
-> 1. **_[ Weight | Forty | Three_cone | shuttle | broad_jump | vertical ]_** represented the 1st principal component. In my opinion, this can best be summarized as a players overall athleticism in regards to **_Agility and Explosiveness_**. Also after looking a the biplot, Forty, Three_cone, and shuttle pretty much represented the same thing so Forty time can essentially represent the 3. Broad_jump & vertical, can just be represented by broad_jump
-> 2. **_[ Bench ]_** represented the 2nd Component. And this simply is the overall **_strength_** of a player.
+> 1. The 1st principal component was represented by **_[ Weight | Forty | Three_cone | shuttle | broad_jump | vertical ]_**. In my opinion, this can best be summarized as a players overall athleticism in regards to **_Agility and Explosiveness_**. Also after looking a the biplot, Forty, Three_cone, and shuttle pretty much represented the same thing so Forty time can essentially represent the 3. Broad_jump & vertical, can just be represented by broad_jump
+> 2. The 2nd principal component was represented by **_Bench_**. This simply is the overall **_strength_** of a player.
 
 > **Combine Data**: \
 The average _WEIGHT_ for everyone in the dataset was **_252lbs_**. By _Position_: CB = **_193lbs_**, DE = **_268lbs_**, OLB = **_240lbs_**, OT = **_315lbs_**, WR = **_204lbs_**, RB = **_215lbs_**. By _Conference_: Elite = **_253lbs_**, Division I-A = **_246lbs_**, Division I-AA = **_252lbs_**, Divsion II & III = **_266lbs_** .\
@@ -80,9 +80,9 @@ The average _BENCH_ for everyone in the dataset was **_21reps_**. By _Position_:
 The average _BROAD JUMP_ for everyone in the dataset was **_113inches_**. By _Position_: CB = **_122inches_**, DE = **_115inches_**, OLB = **_118inches_**, OT = **_102inches_**, WR = **_121inches_**, RB = **_118inches_**. By _Conference_: Elite = **_113inches_**, Division I-A = **_114inches_**, Division I-AA = **_113inches_**, Divsion II & III = **_112inches_**.
 
 > **MODELING**: \
-Metrics: AUC, Accuracy, Sensitivity, Specificity, F1. \
-The 1st model **Random Forrest** was fit trying three different dataset. 1) As is, meaning no preprocess. 2) using PCA with the 2 principal components. 3) a simpler dataset removing the highly correlated features. \
-The 2nd model **Logistic Regression** was fit trying three different dataset. 1) With minimal preprocessing ("normalized", "dummy"). 2) Minimal preprocessing and PCA using the 2 principal components. 3) simpler dataset removing the highly correlated features and minimal preprocessing.
+Metrics: AUC, Accuracy, Sensitivity, Specificity, **F1** ("Used to ultimately to select the best model"). \
+The 1st model **Random Forrest** was fit trying three different dataset. 1) As is, meaning no preprocess. 2) using PCA with the first 2 principal components. 3) a simpler dataset removing the highly correlated features. \
+The 2nd model **Logistic Regression** was fit trying three different dataset. 1) With minimal preprocessing ("normalized", "dummy"). 2) Minimal preprocessing and PCA using the first 2 principal components. 3) simpler dataset removing the highly correlated features and minimal preprocessing.
 
 > **VALIDATION METRICS**
 
@@ -97,10 +97,10 @@ RF (NONE: mtry = 1, min = 9) | 0.737 | 0.707 | 0.944 | 0.258 | 0.706 | 0.944 | 0
 
 Model | AUC | Accuracy | Sensitivity | Specificity | Precision | Recall | F1
 --- | --- | --- | --- | --- | --- | --- | ---
-**_LOG-Acc NORMAL (P = 0.001, M = 0.5)_** | 0.711 | 0.719 | 0.899 | 0.377 | 0.732 | 0.899 | **_0.807_**
-LOG-F SIMPLE (P = 0.011, M = 0) | 0.688 | 0.691 | 0.907 | 0.281 | 0.705 | 0.907 | 0.794
-RF-Acc SIMPLE (mtry = 6, min = 9) | 0.697 | 0.679 | 0.809 | 0.432 | 0.73 | 0.809 | 0.767
-**_RF-F NONE (mtry = 1, min = 9)_** | 0.7 | 0.693 | **_0.926_** | 0.251 | 0.701 | 0.926 | 0.798
+**_LOG-Full (P = 0.001, M = 0.5)_** | 0.711 | 0.719 | 0.899 | 0.377 | 0.732 | 0.899 | **_0.807_**
+LOG-Simple (P = 0.011, M = 0) | 0.688 | 0.691 | 0.907 | 0.281 | 0.705 | 0.907 | 0.794
+RF-Simple (mtry = 6, min = 9) | 0.697 | 0.679 | 0.809 | 0.432 | 0.73 | 0.809 | 0.767
+**_RF-Full (mtry = 1, min = 9)_** | 0.7 | 0.693 | **_0.926_** | 0.251 | 0.701 | 0.926 | 0.798
 
 > **PRESCRIPTIVE ANALYSIS:** \
 Feature Importance: **_LOG-Full:_** 1) Forty, 2) Weight, 3) Position. **_LOG-Simple:_** 1) Forty, 2) Weight, 3) Position. **_RF-Full:_** 1) Weight, 2) Forty, 3) Bench. \
@@ -271,7 +271,7 @@ Feature Importance: **_LOG-Full:_** 1) Forty, 2) Weight, 3) Position. **_LOG-Sim
 
 > **Note (RF - Preprocess):** I will be fitting three different datasets to see how they perform.
 > - One using the raw NFL Train dataset, One using the dataset preprocessed by PCA, and Another simplified dataset taking out the correlated features
-> - _(player, school, team will not be used in the model)_
+> - _(player, school, team will not be used in the model) it is used as an ID_
 
 ## Preprocess - Logistic Regression
 
@@ -295,7 +295,7 @@ Feature Importance: **_LOG-Full:_** 1) Forty, 2) Weight, 3) Position. **_LOG-Sim
 > **Note (LR - Preprocess)**
 > - LR will need a little bit more preprocessing. 1st I normalized all the numeric features. Then I "dummified" the categorical features (side, position, conference)
 > - I also took the same approach I used for **RF** by fitting one dataset with Minimal "NORMAL" preprocessing, another using PCA, and another taking out the correlated features.  
-> - _(player, school, team will not be used in the model)_
+> - _(player, school, team will not be used in the model) it is used as an ID_
 
 ### Metrics
  - **AUC:** Measure of performance across all possible class
@@ -304,6 +304,7 @@ Feature Importance: **_LOG-Full:_** 1) Forty, 2) Weight, 3) Position. **_LOG-Sim
  - **Specificity:** Out of all the players that got did not get drafted what percentage did the model predict correctly
  - **Precision:** Out of all the players the Model predicted got Drafted what percentage actually got Drafted ?
  - **F1:** Balance between Precision and Recall "Sensitivity"
+  + ultimately I will be using *F score* to select the best model
 
 ## Fit
 
@@ -319,7 +320,7 @@ Feature Importance: **_LOG-Full:_** 1) Forty, 2) Weight, 3) Position. **_LOG-Sim
 <img src="Images/MODEL/fit_rf_f.PNG" width="  600">
 
 
-#### **Best Metrics**
+#### **10-Fold CV Metrics**
 
 Preprocess | Metric | mtry | min_n | Stat
 --- | --- | --- | --- | ---
@@ -341,7 +342,7 @@ Simple | F Score | 1 | 3 | 79.6%
 <img src="Images/MODEL/fit_log_acc.PNG" width="  600">
 <img src="Images/MODEL/fit_log_f.PNG" width="  600">
 
-### **Best Metrics**
+### **10-Fold CV Metrics**
 
 Preprocess | Metric | Penalty | Mixture | Stat
 --- | --- | --- | --- | ---
@@ -358,14 +359,6 @@ PCA  |  F Score | 0.051 | 0.5 | 80.1%
 
 # Validation Diagnostic
 
-## Logistic Regression
-
-### ROC Curve
-<img src="Images/MODEL/roc_log.PNG" width="  700">
-
-### Confusion Matrix
-<img src="Images/MODEL/cm_log.PNG" width="  700">
-
 ## Random Forrest
 
 ### ROC Curve
@@ -374,14 +367,24 @@ PCA  |  F Score | 0.051 | 0.5 | 80.1%
 ### Confusion Matrix
 <img src="Images/MODEL/cm_rf.PNG" width="  700">
 
+## Logistic Regression
+
+### ROC Curve
+<img src="Images/MODEL/roc_log.PNG" width="  700">
+
+### Confusion Matrix
+<img src="Images/MODEL/cm_log.PNG" width="  700">
+
 
 ## Validation Metrics
 Model | AUC | Accuracy | Sensitivity | Specificity | Precision | Recall | F1
 --- | --- | --- | --- | --- | --- | --- | ---
-**_LOG (NORMAL: P = 0.001, M = 0.5)_** | **_0.737_** | **_0.72_** | **_0.907_** | **_0.365_** | **_0.73_** | **_0.907_** | **_0.809_**
-LOG (SIMPLE: P = 0.011, M = 0) | 0.725 | 0.696 | 0.914 | 0.283 | 0.707 | 0.914 | 0.797
-RF (SIMPLE: mtry = 6, min = 9) | 0.703 | 0.698 | 0.85 | 0.409 | 0.731 | 0.85 | 0.786
-RF (NONE: mtry = 1, min = 9) | 0.737 | 0.707 | 0.944 | 0.258 | 0.706 | 0.944 | 0.808
+RF-Full | 0.737 | 0.707 | 0.944 | 0.258 | 0.706 | 0.944 | 0.808
+RF-Simple | 0.703 | 0.698 | 0.85 | 0.409 | 0.731 | 0.85 | 0.786
+RF-PCA | 0.701 | 0.667 | 0.937 | 0.157 | 0.678 | 0.937 | 0.787
+**_LOG-Full_** | **_0.737_** | **_0.72_** | **_0.907_** | **_0.365_** | **_0.73_** | **_0.907_** | **_0.809_**
+LOG-Simple | 0.725 | 0.696 | 0.914 | 0.283 | 0.707 | 0.914 | 0.797
+LOG-PCA | 0.657 | 0.678 | 0.963 | 0.138 | 0.679 | 0.963 | 0.797
 
 > **Note (Validation Results):** After comparing the models using the validation set. The best model was **Logistic Regression using NORMAL preprocess (penalty = 0.001, mixture = 0.5)**
 
@@ -406,23 +409,46 @@ RF (NONE: mtry = 1, min = 9) | 0.737 | 0.707 | 0.944 | 0.258 | 0.706 | 0.944 | 0
 
 Model | AUC | Accuracy | Sensitivity | Specificity | Precision | Recall | F1
 --- | --- | --- | --- | --- | --- | --- | ---
-**_LOG-Acc NORMAL (P = 0.001, M = 0.5)_** | 0.711 | 0.719 | 0.899 | 0.377 | 0.732 | 0.899 | **_0.807_**
-LOG-F SIMPLE (P = 0.011, M = 0) | 0.688 | 0.691 | 0.907 | 0.281 | 0.705 | 0.907 | 0.794
-RF-Acc SIMPLE (mtry = 6, min = 9) | 0.697 | 0.679 | 0.809 | 0.432 | 0.73 | 0.809 | 0.767
-**_RF-F NONE (mtry = 1, min = 9)_** | 0.7 | 0.693 | **_0.926_** | 0.251 | 0.701 | 0.926 | 0.798
-
+**LOG-Full** | **_0.711_** | **_0.719_** | 0.899 | 0.377 | **_0.732_** | 0.899 | 0.807
+LOG-Simple | 0.688 | 0.691 | 0.907 | 0.281 | 0.705 | 0.907 | 0.794
+LOG-PCA | 0.633 | 0.696 | **_0.981_** | 0.156 | 0.688 | 0.981 | **_0.809_**
+RF-Full | 0.7 | 0.693 | 0.926 | 0.251 | 0.701 | 0.926 | 0.798
+RF-Simple (mtry = 6, min = 9) | 0.697 | 0.679 | 0.809 | 0.432 | 0.73 | 0.809 | 0.767
+RF-PCA | 0.676 | 0.684 | 0.944 | 0.191 | 0.689 | 0.944 | 0.796
 
 > **Note (Test Results):** After comparing the models using the Test set. Below is the best model for each metric.
-> - **AUC:** Logistic Regression _(NORMAL: P = 0.001, M = 0.5)_ - **71.1%**
-> - **Accuracy:** Logistic Regression _(NORMAL: P = 0.001, M = 0.5)_ - **71.9%**
-> - **Sensitivity:** Random Forrest _(NONE: mtry = 1, min = 9)_ - **92.6%**
-> - **Precision:** Logistic Regression _(NORMAL: P = 0.001, M = 0.5)_ - **78.6%**
-> - **F Score:** Logistic Regression _(NORMAL: P = 0.001, M = 0.5)_ - **80.7%**
+
+> **AUC:**
+1. **80.9%** Logistic Regression - PCA
+2. **80.7%** Logistic Regression - Full
+3. **79.8%** Random Forrest - Full
+
+> **Accuracy:**
+1. **71.9%** Logistic Regression - Full
+2. **69.6%** Logistic Regression - PCA
+3. **69.3%** Random Forrest - Full
+
+> **Sensitivity:**
+1. **98.1%** Logistic Regression - PCA
+2. **94.4%** Random Forrest - PCA
+3. **92.6%** Random Forrest - Full
+
+> **Precision:**
+1. **73.2%** Logistic Regression - Full
+2. **73%** Random Forrest - Simple
+3. **70.5%** Logistic Regression - Simple
+
+> **F Score:**
+1. **80.9%** Logistic Regression - PCA
+2. **80.7%** Logistic Regression - Full
+3. **79.8%** Random Forrest - Full
 
 ---
 
 # Prescriptive Analysis
 > After fitting a model an importance aspect of model assessment is to evaluate which features are important and how they effect the target variable, which in this case is the probability of a player being drafted. For this dataset I will be utilizing the DALEX package which uses a model-agnostic approach to asses feature importance
+
+> Based on the Test Results the models I choose to evaluate further is 1) Logistic Regression - PCA 2) Logistic Regression - Full 3) Random Forrest - Full
 
 ## Feature Importance
 > To calculate feature importance the DALEX package first calculates the Loss of the normal model then permutes the variable of the feature in question. And finally takes the difference between the two. _(In this case I used AUC as the Loss Metric)_  
