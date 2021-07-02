@@ -537,7 +537,7 @@ RF-PCA | 0.676 | 0.684 | 0.944 | 0.191 | 0.689 | 0.944 | 0.796
 
 ### Partial Dependency: (Conference)
 
-<img src="Images/PA/pdp_Cont_Conference_RF.PNG" width="  1000">
+<img src="Images/PA/pdp_Conference_RF_Full.PNG" width="  1000">
 
 > **Note (Random Forrest- Conference)**
 
@@ -552,7 +552,7 @@ RF-PCA | 0.676 | 0.684 | 0.944 | 0.191 | 0.689 | 0.944 | 0.796
 > **WEIGHT:** From EDA average Weight time by Division **_[ Elite = 253lbs | Division I-A = 246lbs | Division I-AA = 252 | Division II & II = 266lbs ]_**
 > - At a High-Level no matter which conference a player plays for as there weight increases so does the probability of them being drafted.
 
-<img src="Images/PA/pdp_Cont_Conference_LOG.PNG" width="  1000">
+<img src="Images/PA/pdp_Conference_Log_Full.PNG" width="  1000">
 
 > **Note (Logistic Regression - Conference)**
 
@@ -568,10 +568,12 @@ RF-PCA | 0.676 | 0.684 | 0.944 | 0.191 | 0.689 | 0.944 | 0.796
 
 > **GENERAL:** Players that played in the **Division II or III conferences** would need to perform significantly better than average in the combine to have an equal probability of being drafted for players that played in the more "ELITE" conferences
 
+<img src="Images/PA/pdp_Conference_Log_Simple.PNG" width="  1000">
+
 ### Partial Dependency: (Position)
 > After some research I determined that (WR, RB, OG) were the most important/ popular offensive players that teams look for in the draft and (CB, DE) were the most important defensive players.
 
-<img src="Images/PA/pdp_Cont_Position_RF_Filtered.PNG" width="  1000">
+<img src="Images/PA/pdp_Position_RF_Full.PNG" width="  1000">
 
 > **Note (Random Forrest - Position)**
 
@@ -586,7 +588,7 @@ RF-PCA | 0.676 | 0.684 | 0.944 | 0.191 | 0.689 | 0.944 | 0.796
 > - At A High- Level it still sticks with the same general relationship, As you weight increase so those the probability of a player being drafted.
 > - What stands out is OG that weight below 300, the model predicts them as probably not being drafted.
 
-<img src="Images/PA/pdp_Cont_Position_LOG_Filtered.PNG" width="  1000">
+<img src="Images/PA/pdp_Position_Log_Full.PNG" width="  1000">
 
 > **Note (Logistic Regression - Position)**
 
@@ -601,6 +603,8 @@ RF-PCA | 0.676 | 0.684 | 0.944 | 0.191 | 0.689 | 0.944 | 0.796
 > **WEIGHT:** From EDA average Weight by Position **_[ CB = 193lbs | DE = 268lbs | OG = 314lbs | RB = 216lbs | WR = 203lbs ]_**
 > - At A High- Level it still sticks with the same general relationship, As you weight increase so those the probability of a player being drafted.
 > - What stands out is OG must weigh at least 280 to have a chance of being drafted
+
+<img src="Images/PA/pdp_Position_Log_Simple.PNG" width="  1000">
 
 ## Instance-Level
 > After assessing the models at a dataset level we'll take some samples from each position and do further evaluation. \

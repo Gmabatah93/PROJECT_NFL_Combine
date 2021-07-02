@@ -380,7 +380,9 @@ nfl_draft_PCA %>%
 # Eigen: 70.1% Explained by PC1
 nfl_draft_PCA %>% fviz_eig(addlabels = TRUE, 
                            barfill = "azure4", barcolor = "black") +
-  theme(axis.title = element_blank(),
+  labs(title = "Eigenvalues") +
+  theme(plot.title = element_text(hjust = 0.4, face = "bold"),
+        axis.title = element_blank(),
         axis.text.y = element_blank())
 # - variables:
 nfl_draft_PCA$var$coord[,c(1,2)]
@@ -2200,17 +2202,12 @@ metrics_FINAL <- log_Metrics_FINAL %>%
 #
 # Feature Selection: VIP ----
 
-log_fit_Acc %>% 
+log_fit_Simple %>% 
   pull_workflow_fit() %>% 
   vip(num_features = 20) +
   theme_bw()
 
-rf_fit_F %>% 
-  pull_workflow_fit() %>% 
-  vip(num_features = 20) + 
-  theme_bw()
-
-log_fit_F %>% 
+log_fit_PCA %>% 
   pull_workflow_fit() %>% 
   vip(num_features = 20) + 
   theme_bw()
@@ -2249,10 +2246,17 @@ EXP_rf_Full <- explain_tidymodels(model = rf_fit_Full,
                                   predict_function = custom_func_Prob,
                                   label = "RF-Full")
 
+# - Logistic Regression - Simple
+EXP_log_Simple <- explain_tidymodels(model = log_fit_Simple,
+                                     data = nfl_test,
+                                     y = nfl_test$drafted == "Yes",
+                                     predict_function = custom_func_Prob,
+                                     label = "LOG-Simple")
+
 # Explainer (WR | RB | OG | CB | DE)
 # - Data
 nfl_test_Positions <- nfl_test %>% 
-  filter(position %in% c("WR","RB","OG","CB","DE"))
+  filter(position %in% c("WR","RB","OG","OT","CB","DE"))
 # - Logistic Regression - PCA
 EXP_log_PCA_Positions <- explain_tidymodels(model = log_fit_PCA,
                                             data = nfl_test_Positions,
@@ -2273,29 +2277,43 @@ EXP_rf_Full_Positions <- explain_tidymodels(model = rf_fit_Full,
                                             predict_function = custom_func_Prob,
                                             label = "RF-Full")
 
+# - Logistic Regression - Simple
+EXP_log_Simple_Positions <- explain_tidymodels(model = log_fit_Simple,
+                                               data = nfl_test_Positions,
+                                               y = nfl_test_Positions$drafted == "Yes",
+                                               predict_function = custom_func_Prob,
+                                               label = "LOG-Simple")
+
+
 # Model-Performance
 md_log_PCA <- model_diagnostics(explainer = EXP_log_PCA)
 md_log_Full <- model_diagnostics(explainer = EXP_log_Full)
 md_rf_Full <- model_diagnostics(explainer = EXP_rf_Full)
+md_log_Simple <- model_diagnostics(explainer = EXP_log_Simple)
 
 nfl_test_pred <- nfl_test %>% 
   mutate(
     log_PCA_Prob = md_log_PCA$y_hat %>% round(3),
     log_Full_Prob = md_log_Full$y_hat %>% round(3),
-    rf_Full_Prob = md_rf_Full$y_hat %>% round(3)
+    rf_Full_Prob = md_rf_Full$y_hat %>% round(3),
+    log_Simple_Prob = md_log_Simple$y_hat %>% round(3)
   ) %>% 
   mutate(
     log_PCA_Pred = ifelse(log_PCA_Prob > 0.5, "Yes","No"),
     log_Full_Pred = ifelse(log_Full_Prob > 0.5, "Yes","No"),
-    rf_Full_Pred = ifelse(rf_Full_Prob > 0.5, "Yes","No")
+    rf_Full_Pred = ifelse(rf_Full_Prob > 0.5, "Yes","No"),
+    log_Simple_Pred = ifelse(log_Simple_Prob > 0.5, "Yes","No")
   ) %>% 
-  select(player, drafted, log_PCA_Prob, log_PCA_Pred, log_Full_Prob,log_Full_Pred,rf_Full_Prob,rf_Full_Pred,  side:team)
+  select(player, drafted, 
+         log_PCA_Prob, log_PCA_Pred, 
+         log_Full_Prob, log_Full_Pred,
+         rf_Full_Prob, rf_Full_Pred, 
+         log_Simple_Prob,log_Simple_Pred,  
+         side:team)
   
 
 #
-# Feature Selection: DALEX (Dataset) ----
-
-# Feature Importance
+# Feature Selection: DALEX (Feature Importance) ----
 set.seed(101)
 vip_log_PCA <- model_parts(explainer = EXP_log_PCA,
                            type = "difference",
@@ -2308,8 +2326,12 @@ set.seed(101)
 vip_rf_Full <- model_parts(explainer = EXP_rf_Full,
                            type = "difference",
                            B = 20)
+set.seed(101)
+vip_log_Simple <- model_parts(explainer = EXP_log_Simple,
+                              type = "difference",
+                              B = 20)
 
-plot(vip_log_PCA, vip_log_Full, vip_rf_Full,
+plot(vip_log_PCA, vip_log_Full, vip_rf_Full, vip_log_Simple,
      max_vars = 10) +
   labs(y = "Loss in AUC after permutations") +
   theme(
@@ -2322,12 +2344,14 @@ plot(vip_log_PCA, vip_log_Full, vip_rf_Full,
 vip_variables <- c("forty","weight","bench")
 
 set.seed(101)
-pdp_rf <- model_profile(explainer = EXP_rf_F,
-                        variables = vip_variables)
-pdp_log_F <- model_profile(explainer = EXP_log_F,
-                           variables = vip_variables)
+pdp_log_Full <- model_profile(explainer = EXP_log_Full,
+                              variables = vip_variables)
+pdp_log_Simple <- model_profile(explainer = EXP_log_Simple,
+                               variables = vip_variables)
+pdp_rf_Full <- model_profile(explainer = EXP_rf_Full,
+                             variables = vip_variables)
 
-plot(pdp_rf, pdp_log_F) +
+plot(pdp_log_Full, pdp_log_Simple, pdp_rf_Full) +
   geom_hline(yintercept = 0.5, linetype = 2, color = "tomato", alpha = 0.7) +
   theme(
     plot.title = element_text(hjust = 0.5, face = "bold", color = "darkolivegreen"),
@@ -2336,117 +2360,131 @@ plot(pdp_rf, pdp_log_F) +
   )
 
 
-gg_pdp_rf <- plot(pdp_rf, geom = "profiles") +
-  geom_hline(yintercept = 0.5, linetype = 2, color = "tomato", alpha = 0.7) +
-  labs(title = "CP Profile: Random Forrest",
-       subtitle = "(FULL: mtry = 1, min = 9)") +
-  theme(
-    plot.title = element_text(hjust = 0.5, face = "bold", color = "seagreen1"),
-    plot.subtitle = element_text(hjust = 0.5, face = "italic", color = "orchid4"),
-    axis.title.y = element_text(color = "tomato")
-  )
-gg_pdp_log <- plot(pdp_log_F, geom = "profiles") +
-  geom_hline(yintercept = 0.5, linetype = 2, color = "tomato", alpha = 0.7) +
-  labs(title = "CP Profile: Logistic Regression",
-       subtitle = '(SIMPLE: penalty = 0.011, mix = 0 "LASSO"') +
-  theme(
-    plot.title = element_text(hjust = 0.5, face = "bold", color = "lightskyblue"),
-    plot.subtitle = element_text(hjust = 0.5, face = "italic", color = "orchid4"),
-    axis.title.y = element_text(color = "tomato")
-  ) 
+# - Categorical: Position
+pdp_log_Full_Position <- model_profile(explainer = EXP_log_Full_Positions,
+                                       variables = "position",
+                                       variable_type = "categorical")
+pdp_log_Simple_Position <- model_profile(explainer = EXP_log_Simple_Positions,
+                                         variables = "position",
+                                         variable_type = "categorical")
+pdp_rf_Full_Position <- model_profile(explainer = EXP_rf_Full_Positions,
+                                      variables = "position",
+                                      variable_type = "categorical")
 
-ggarrange(gg_pdp_log, gg_pdp_rf, ncol = 1)
-
-# - Categorical
-pdp_rf_Position <- model_profile(explainer = EXP_rf_F,
-                                 variables = "position",
-                                 variable_type = "categorical")
-pdp_log_F_Poistion <- model_profile(explainer = EXP_log_F,
-                                    variables = "position",
-                                    variable_type = "categorical")
-pdp_rf_Conference <- model_profile(explainer = EXP_rf_F,
-                                   variables = "conference",
-                                   variable_type = "categorical")
-pdp_log_F_Conference <- model_profile(explainer = EXP_log_F,
-                                     variables = "conference",
-                                     variable_type = "categorical")
-
-gg_pdp_rf_Position <- plot(pdp_rf_Position) +
+gg_pdp_log_Full_Position <- plot(pdp_log_Full_Position) +
   geom_hline(yintercept = 0.5, linetype = 2, color = "tomato", alpha = 0.7) +
-  labs(title = "Random Forrest",
-       subtitle = '(FULL: mtry = 1, min = 9)') +
+  labs(title = "Logistic Regression",
+       subtitle = 'FULL') +
   ylim(c(0,0.8)) +
   theme(
-    plot.title = element_text(hjust = 0.5, face = "bold", color = "seagreen1"),
+    plot.title = element_text(hjust = 0.5, face = "bold", color = "midnightblue"),
     plot.subtitle = element_text(hjust = 0.5, face = "italic", color = "orchid4"),
     axis.title.y = element_text(color = "tomato"),
-    axis.text.x = element_text(angle = 45, hjust = 0.8),
+    axis.text.x = element_text(angle = 90, hjust = 0.5, vjust = 0.5),
     strip.text = element_blank())
 
-gg_pdp_log_Position <- plot(pdp_log_F_Poistion) +
+gg_pdp_log_Simple_Position <- plot(pdp_log_Simple_Position) +
   geom_hline(yintercept = 0.5, linetype = 2, color = "tomato", alpha = 0.7) +
   ylim(c(0,0.8)) +
   labs(title = "Logistic Regression",
-       subtitle = '(SIMPLE: penalty = 0.011, mix = 0 "LASSO"') +
+       subtitle = 'SIMPLE') +
   theme(
     plot.title = element_text(hjust = 0.5, face = "bold", color = "lightskyblue"),
     plot.subtitle = element_text(hjust = 0.5, face = "italic", color = "orchid4"),
     axis.title.y = element_blank(),
-    axis.text.x = element_text(angle = 45),
+    axis.text.x = element_text(angle = 90, hjust = 0.5, vjust = 0.5),
     strip.text = element_blank())
 
-gg_pdp_rf_Conference <- plot(pdp_rf_Conference) +
+gg_pdp_rf_Full_Position <- plot(pdp_rf_Full_Position) +
+  geom_hline(yintercept = 0.5, linetype = 2, color = "tomato", alpha = 0.7) +
+  labs(title = "Random Forrest",
+       subtitle = 'FULL') +
+  ylim(c(0,0.8)) +
+  theme(
+    plot.title = element_text(hjust = 0.5, face = "bold", color = "seagreen"),
+    plot.subtitle = element_text(hjust = 0.5, face = "italic", color = "orchid4"),
+    axis.title.y = element_text(color = "tomato"),
+    axis.text.x = element_text(angle = 90, hjust = 0.5, vjust = 0.5),
+    strip.text = element_blank())
+ggarrange(gg_pdp_log_Full_Position, gg_pdp_log_Simple_Position, gg_pdp_rf_Full_Position,
+          nrow = 1)
+
+# - Categorical: Conference
+pdp_log_Full_Conference <- model_profile(explainer = EXP_log_Full,
+                                         variables = "conference",
+                                         variable_type = "categorical")
+pdp_log_Simple_Conference <- model_profile(explainer = EXP_log_Simple,
+                                           variables = "conference",
+                                           variable_type = "categorical")
+pdp_rf_Full_Conference <- model_profile(explainer = EXP_rf_Full,
+                                        variables = "conference",
+                                        variable_type = "categorical")
+
+gg_pdp_log_Full_Conference <- plot(pdp_log_Full_Conference) +
   geom_hline(yintercept = 0.5, linetype = 2, color = "tomato", alpha = 0.7) +
   ylim(c(0,0.8)) +
-  labs(title = "Random Forrest",
-       subtitle = '(FULL: mtry = 1, min = 9)') +
+  labs(title = "Logistic Regression",
+       subtitle = 'FULL') +
   theme(
-    plot.title = element_text(hjust = 0.5, face = "bold", color = "seagreen1"),
+    plot.title = element_text(hjust = 0.5, face = "bold", color = "midnightblue"),
     plot.subtitle = element_text(hjust = 0.5, face = "italic", color = "orchid4"),
     axis.title.y = element_text(color = "tomato"),
     axis.text.x = element_text(angle = 90, hjust = 1, vjust = 0.5),
     strip.text = element_blank())
-gg_pdp_log_Conference <- plot(pdp_log_F_Conference) +
+gg_pdp_log_Simple_Conference <- plot(pdp_log_Simple_Conference) +
   geom_hline(yintercept = 0.5, linetype = 2, color = "tomato", alpha = 0.7) +
   ylim(c(0,0.8)) +
   labs(title = "Logistic Regression",
-       subtitle = '(SIMPLE: penalty = 0.011, mix = 0 "LASSO"') +
+       subtitle = 'SIMPLE') +
   theme(
     plot.title = element_text(hjust = 0.5, face = "bold", color = "lightskyblue"),
     plot.subtitle = element_text(hjust = 0.5, face = "italic", color = "orchid4"),
     axis.title.y = element_blank(),
     axis.text.x = element_text(angle = 90, hjust = 1, vjust = 0.5),
     strip.text = element_blank())
+gg_pdp_rf_Full_Conference <- plot(pdp_rf_Full_Conference) +
+  geom_hline(yintercept = 0.5, linetype = 2, color = "tomato", alpha = 0.7) +
+  ylim(c(0,0.8)) +
+  labs(title = "Random Forrest",
+       subtitle = 'FULL') +
+  theme(
+    plot.title = element_text(hjust = 0.5, face = "bold", color = "seagreen"),
+    plot.subtitle = element_text(hjust = 0.5, face = "italic", color = "orchid4"),
+    axis.title.y = element_text(color = "tomato"),
+    axis.text.x = element_text(angle = 90, hjust = 1, vjust = 0.5),
+    strip.text = element_blank())
 
-ggarrange(gg_pdp_rf_Position, gg_pdp_log_Position, nrow = 1)
-ggarrange(gg_pdp_rf_Conference, gg_pdp_log_Conference, nrow = 1)
+ggarrange(gg_pdp_log_Full_Conference, gg_pdp_log_Simple_Conference, gg_pdp_rf_Full_Conference,
+          nrow = 1)
 
 
-# Partial Dependency (Grouped)
+# Feature Selection: DALEX (Partial Dependency) ----
 # - Conference
 set.seed(101)
-pdp_conf_rf <- model_profile(explainer = EXP_rf_F,
-                             variables = vip_variables,
-                             groups = "conference")
-pdp_conf_log_F <- model_profile(explainer = EXP_log_F,
-                                variables = vip_variables,
-                                groups = "conference")
+pdp_conf_log_Full <- model_profile(explainer = EXP_log_Full,
+                                   variables = vip_variables,
+                                   groups = "conference")
+pdp_conf_log_Simple <- model_profile(explainer = EXP_log_Simple,
+                                     variables = vip_variables,
+                                     groups = "conference")
+pdp_conf_rf_Full <- model_profile(explainer = EXP_rf_Full,
+                                  variables = vip_variables,
+                                  groups = "conference")
 
-plot(pdp_conf_rf) +
+plot(pdp_conf_log_Full) +
   geom_hline(yintercept = 0.5, linetype = 2, color = "tomato", alpha = 0.7) +
-  labs(title = "Random Forrest",
-       subtitle = "(NONE: mtry = 1, min = 9)") +
+  labs(title = "Logistic Regression",
+       subtitle = "Full") +
   theme(
-    plot.title = element_text(hjust = 0.5, face = "bold", color = "seagreen1"),
+    plot.title = element_text(hjust = 0.5, face = "bold", color = "midnightblue"),
     plot.subtitle = element_text(hjust = 0.5, face = "italic", color = "orchid4"),
     axis.title.y = element_text(color = "tomato"),
     legend.position = "bottom"
   )
-
-plot(pdp_conf_log_F) +
+plot(pdp_conf_log_Simple) +
   geom_hline(yintercept = 0.5, linetype = 2, color = "tomato", alpha = 0.7) +
   labs(title = "Logistic Regression",
-       subtitle = '(SIMPLE: penalty = 0.011, mix = 0 "LASSO")') +
+       subtitle = "Simple") +
   theme(
     plot.title = element_text(hjust = 0.5, face = "bold", color = "lightskyblue"),
     plot.subtitle = element_text(hjust = 0.5, face = "italic", color = "orchid4"),
@@ -2454,64 +2492,55 @@ plot(pdp_conf_log_F) +
     legend.position = "bottom"
   )
 
+plot(pdp_conf_rf_Full) +
+  geom_hline(yintercept = 0.5, linetype = 2, color = "tomato", alpha = 0.7) +
+  labs(title = "Random Forrest",
+       subtitle = 'Full') +
+  theme(
+    plot.title = element_text(hjust = 0.5, face = "bold", color = "seagreen"),
+    plot.subtitle = element_text(hjust = 0.5, face = "italic", color = "orchid4"),
+    axis.title.y = element_text(color = "tomato"),
+    legend.position = "bottom"
+  )
 
-# - Position
+# - Positions
 set.seed(101)
-pdp_pos_rf_F <- model_profile(explainer = EXP_rf_F,
-                              variables = vip_variables,
-                              groups = "position")
-pdp_pos_log_F <- model_profile(explainer = EXP_log_F,
-                               variables = vip_variables,
-                               groups = "position")
+pdp_pos_log_Full_Filtered <- model_profile(explainer = EXP_log_Full_Positions,
+                                           variables = vip_variables,
+                                           groups = "position")
+pdp_pos_log_Simple_Filtered <- model_profile(explainer = EXP_log_Simple_Positions,
+                                             variables = vip_variables,
+                                             groups = "position")
+pdp_pos_rf_Full_Filtered <- model_profile(explainer = EXP_rf_Full_Positions,
+                                          variables = vip_variables,
+                                          groups = "position")
 
-plot(pdp_pos_rf_F) +
+plot(pdp_pos_log_Full_Filtered) +
   geom_hline(yintercept = 0.5, linetype = 2, color = "tomato", alpha = 0.7) +
-  labs(title = "Random Forrest",
-       subtitle = "(NONE: mtry = 1, min = 9)") +
+  labs(title = "Logistic Regression",
+       subtitle = 'Full') +
   theme(
-    plot.title = element_text(hjust = 0.5, face = "bold", color = "seagreen1"),
+    plot.title = element_text(hjust = 0.5, face = "bold", color = "midnightblue"),
     plot.subtitle = element_text(hjust = 0.5, face = "italic", color = "orchid4"),
     axis.title.y = element_text(color = "tomato"),
     legend.position = "bottom"
   )
-
-plot(pdp_pos_log_F) +
+plot(pdp_pos_log_Simple_Filtered) +
   geom_hline(yintercept = 0.5, linetype = 2, color = "tomato", alpha = 0.7) +
   labs(title = "Logistic Regression",
-       subtitle = '(SIMPLE: penalty = 0.011, mix = 0 "LASSO")') +
+       subtitle = 'Simple') +
   theme(
     plot.title = element_text(hjust = 0.5, face = "bold", color = "lightskyblue"),
     plot.subtitle = element_text(hjust = 0.5, face = "italic", color = "orchid4"),
     axis.title.y = element_text(color = "tomato"),
     legend.position = "bottom"
   )
-
-# - Positions (Filtered)
-set.seed(101)
-pdp_pos_rf_F_Filtered <- model_profile(explainer = EXP_rf_F_Positions,
-                                       variables = vip_variables,
-                                       groups = "position")
-pdp_pos_log_F_Filtered <- model_profile(explainer = EXP_log_F_Positions,
-                                        variables = vip_variables,
-                                        groups = "position")
-
-plot(pdp_pos_rf_F_Filtered) +
+plot(pdp_pos_rf_Full_Filtered) +
   geom_hline(yintercept = 0.5, linetype = 2, color = "tomato", alpha = 0.7) +
   labs(title = "Random Forrest",
-       subtitle = "(NONE: mtry = 1, min = 9)") +
+       subtitle = "Full") +
   theme(
-    plot.title = element_text(hjust = 0.5, face = "bold", color = "seagreen1"),
-    plot.subtitle = element_text(hjust = 0.5, face = "italic", color = "orchid4"),
-    axis.title.y = element_text(color = "tomato"),
-    legend.position = "bottom"
-  )
-
-plot(pdp_pos_log_F_Filtered) +
-  geom_hline(yintercept = 0.5, linetype = 2, color = "tomato", alpha = 0.7) +
-  labs(title = "Logistic Regression",
-       subtitle = '(SIMPLE: penalty = 0.011, mix = 0 "LASSO")') +
-  theme(
-    plot.title = element_text(hjust = 0.5, face = "bold", color = "lightskyblue"),
+    plot.title = element_text(hjust = 0.5, face = "bold", color = "seagreen"),
     plot.subtitle = element_text(hjust = 0.5, face = "italic", color = "orchid4"),
     axis.title.y = element_text(color = "tomato"),
     legend.position = "bottom"
