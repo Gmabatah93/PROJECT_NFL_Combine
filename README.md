@@ -163,80 +163,80 @@ If you look at the **Eigenvalue Plot** you can see that you can represent about 
 <img src="Images/EDA/combine_weight_side.PNG" width="  700">
 <img src="Images/EDA/combine_weight_conference.PNG" width="  700">
 
-**Note (Weight)**: Average weight for players in this dataset is **_252lbs_**
-- Offense: **_262lbs_**
-  + Average weight _OT_ = **_315lbs_**
-  + Average weight _WR_ = **_203lbs_**
-  + Average weight _RB_ = **_216lbs_**
-- Defense: **_242lbs_**
-  + Average weight _CB_ = **_193lbs_**
-  + Average weight _DE_ = **_268lbs_**
-  + Average weight _OLB_ = **_241lbs_**
-- CONFERENCE:
-  + _"ELITE"_ = **_253lbs_**
-  + _Division I-A_ = **_246lbs_**
-  + _Division I-AA_ = **_252_**
-  + _Division II & III_ = **_266lbs_**
+> **Note (Weight)**:  The density plot shows that there is a multimodal distribution indicating the different positions "groups" in the dataset. Average weight for players in this dataset is **_252lbs_**.
+> - Offense: **_262lbs_**
+>   + Average weight _OT_ = **_315lbs_**
+>   + Average weight _WR_ = **_203lbs_**
+>   + Average weight _RB_ = **_216lbs_**
+> - Defense: **_242lbs_**
+>   + Average weight _CB_ = **_193lbs_**
+>   + Average weight _DE_ = **_268lbs_**
+>   + Average weight _OLB_ = **_241lbs_**
+> - CONFERENCE:
+>   + _"ELITE"_ = **_253lbs_**
+>   + _Division I-A_ = **_246lbs_**
+>   + _Division I-AA_ = **_252_**
+>   + _Division II & III_ = **_266lbs_**
 
 ### Forty
 <img src="Images/EDA/combine_40.PNG" width="  700">
 <img src="Images/EDA/combine_40_side.PNG" width="  700">
 <img src="Images/EDA/combine_40_conference.PNG" width="  700">
 
-**Note (Forty):** Average forty for players in this dataset is **_4.81secs_**
-- Offense: **_4.72secs_**
-  + Average forty _OT_ = **_5.25secs_**
-  + Average forty _WR_ = **_4.51secs_**
-  + Average forty _RB_ = **_4.56secs_**
-- Defense: **_4.90secs_**
-  + Average forty _CB_ = **_4.49secs_**
-  + Average forty _DE_ = **_4.83secs_**
-  + Average forty _OLB_ = **_4.68secs_**
-- CONFERENCE:
-  + _"ELITE"_ = **_4.81secs_**
-  + _Division I-A_ = **_4.78secs_**
-  + _Division I-AA_ = **_4.82secs_**
-  + _Division II & III_ = **_4.89secs_**
+> **Note (Forty):** The density plot is skewed a bit to the right indicating that alot of the players in this dataset are faster then average. Average forty for players in this dataset is **_4.81secs_**
+> - Offense: **_4.72secs_**
+>   + Average forty _OT_ = **_5.25secs_**
+>   + Average forty _WR_ = **_4.51secs_**
+>   + Average forty _RB_ = **_4.56secs_**
+> - Defense: **_4.90secs_**
+>   + Average forty _CB_ = **_4.49secs_**
+>   + Average forty _DE_ = **_4.83secs_**
+>   + Average forty _OLB_ = **_4.68secs_**
+> - CONFERENCE:
+>   + _"ELITE"_ = **_4.81secs_**
+>   + _Division I-A_ = **_4.78secs_**
+>   + _Division I-AA_ = **_4.82secs_**
+>   + _Division II & III_ = **_4.89secs_**
 
 ### Bench
 <img src="Images/EDA/combine_bench.PNG" width="  700">
 <img src="Images/EDA/combine_bench_side.PNG" width="  700">
 <img src="Images/EDA/combine_bench_conference.PNG" width="  700">
 
-**Note (Bench):** Average bench for players in this dataset is **_21reps_**
-- Offense: **_21reps_**
-  + Average bench _OT_ = **_24reps_**
-  + Average bench _WR_ = **_14reps_**
-  + Average bench _RB_ = **_20reps_**
-- Defense: **_21reps_**
-  + Average bench _CB_ = **_14reps_**
-  + Average bench _DE_ = **_24reps_**
-  + Average bench _OLB_ = **_23reps_**
-- CONFERENCE:
-  + _"ELITE"_ = **_21reps_**
-  + _Division I-A_ = **_21reps_**
-  + _Division I-AA_ = **_21reps_**
-  + _Division II & III_ = **_23reps_**
+> **Note (Bench):** The density plot shows that bench is a normal distribution, indicating that the players in this dataset are benches closes to the Average. Average bench for players in this dataset is **_21reps_**
+> - Offense: **_21reps_**
+>   + Average bench _OT_ = **_24reps_**
+>   + Average bench _WR_ = **_14reps_**
+>   + Average bench _RB_ = **_20reps_**
+> - Defense: **_21reps_**
+>   + Average bench _CB_ = **_14reps_**
+>   + Average bench _DE_ = **_24reps_**
+>   + Average bench _OLB_ = **_23reps_**
+> - CONFERENCE:
+>   + _"ELITE"_ = **_21reps_**
+>   + _Division I-A_ = **_21reps_**
+>   + _Division I-AA_ = **_21reps_**
+>   + _Division II & III_ = **_23reps_**
 
 ### Broad Jump
 <img src="Images/EDA/combine_jump.PNG" width="  700">
 <img src="Images/EDA/combine_jump_side.PNG" width="  700">
 <img src="Images/EDA/combine_jump_conference.PNG" width="  700">
 
-**Note (Jump):** Average broad jump for players in this dataset is **_113inches**
-- Offense: **_110inches_**
-  + Average broad jump  _OT_ = **_102inches_**
-  + Average broad jump _WR_ = **_121inches_**
-  + Average broad jump _RB_ = **_118inches_**
-- Defense: **_116inches_**
-  + Average broad jump _CB_ = **_122inches_**
-  + Average broad jump _DE_ = **_115inches_**
-  + Average broad jump _OLB_ = **_118inches_**
-- CONFERENCE:
-  + _"ELITE"_ = **_113inches_**
-  + _Division I-A_ = **_114inches_**
-  + _Division I-AA_ = **_113inches_**
-  + _Division II & III_ = **_112inches_**
+> **Note (Jump):** The density plot is skewed a bit to the left indicating that alot of the players in this dataset jump farther then average. Average broad jump for players in this dataset is **_113inches**
+> - Offense: **_110inches_**
+>   + Average broad jump  _OT_ = **_102inches_**
+>   + Average broad jump _WR_ = **_121inches_**
+>   + Average broad jump _RB_ = **_118inches_**
+> - Defense: **_116inches_**
+>   + Average broad jump _CB_ = **_122inches_**
+>   + Average broad jump _DE_ = **_115inches_**
+>   + Average broad jump _OLB_ = **_118inches_**
+> - CONFERENCE:
+>   + _"ELITE"_ = **_113inches_**
+>   + _Division I-A_ = **_114inches_**
+>   + _Division I-AA_ = **_113inches_**
+>   + _Division II & III_ = **_112inches_**
 
 ---
 
@@ -391,14 +391,38 @@ PCA  |  F Score | 0.051 | 0.5 | 80.1%
 ## Validation Metrics
 Model | AUC | Accuracy | Sensitivity | Specificity | Precision | Recall | F1
 --- | --- | --- | --- | --- | --- | --- | ---
-RF-Full | 0.737 | 0.707 | 0.944 | 0.258 | 0.706 | 0.944 | 0.808
-RF-Simple | 0.703 | 0.698 | 0.85 | 0.409 | 0.731 | 0.85 | 0.786
+RF-Full | **_0.737_** | 0.707 | 0.944 | 0.258 | 0.706 | 0.944 | 0.808
+RF-Simple | 0.703 | 0.698 | 0.85 | **_0.409_** | 0.731 | 0.85 | 0.786
 RF-PCA | 0.701 | 0.667 | 0.937 | 0.157 | 0.678 | 0.937 | 0.787
-**_LOG-Full_** | **_0.737_** | **_0.72_** | **_0.907_** | **_0.365_** | **_0.73_** | **_0.907_** | **_0.809_**
+LOG-Full | **_0.737_** | **_0.72_** | 0.907 | 0.365 | 0.73 | 0.907 | **_0.809_**
 LOG-Simple | 0.725 | 0.696 | 0.914 | 0.283 | 0.707 | 0.914 | 0.797
-LOG-PCA | 0.657 | 0.678 | 0.963 | 0.138 | 0.679 | 0.963 | 0.797
+LOG-PCA | 0.657 | 0.678 | **_0.963_** | 0.138 | 0.679 | 0.963 | 0.797
 
-> **Note (Validation Results):** After comparing the models using the validation set. The best model was **Logistic Regression Full Model (penalty = 0.001, mix = 0.5)**
+> **Note (Validation Results):** After comparing the models using the Validation set. Below is the best model for each metric.
+
+> **AUC:**
+1. **73.7%** Logistic Regression - Full & Random Forrest - Full
+2. **72.5%** Logistic Regression - Simple
+
+> **Accuracy:**
+1. **72%** Logistic Regression - Full
+2. **70.7%** Random Forrest - Full
+3. **69.8%** Random Forrest - Simple
+
+> **Sensitivity:**
+1. **96.3%** Logistic Regression - PCA
+2. **94.4%** Random Forrest - Full
+3. **93.7%** Random Forrest - PCA
+
+> **Precision:**
+1. **73.1%** Random Forrest - Simple
+2. **73%** Logistic Regression - Full
+3. **70.7%** Logistic Regression - Simple
+
+> **F Score:**
+1. **80.9%** Logistic Regression - Full
+2. **80.8%** Random Forrest - Full
+3. **79.7%** Logistic Regression - Simple 
 
 ---
 # Test Results
