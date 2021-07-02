@@ -422,7 +422,7 @@ LOG-PCA | 0.657 | 0.678 | **_0.963_** | 0.138 | 0.679 | 0.963 | 0.797
 > **F Score:**
 1. **80.9%** Logistic Regression - Full
 2. **80.8%** Random Forrest - Full
-3. **79.7%** Logistic Regression - Simple 
+3. **79.7%** Logistic Regression - Simple
 
 ---
 # Test Results
@@ -638,23 +638,33 @@ RF-PCA | 0.676 | 0.684 | 0.944 | 0.191 | 0.689 | 0.944 | 0.796
 **Samples**
 <img src="Images/PA/data_Full.PNG" width="  1000">
 
-<img src="Images/PA/rf_cm.PNG" width="  1000">
+<img src="Images/PA/cm_rf_full.PNG" width="  1000">
 
 Position | Accuracy | Sensitivity | Specificity | Precision | F1
 --- | --- | --- | --- | --- | ---
 Wide Receivers | 0.774 | 0.97 | 0.45 | 0.744 | 0.842
 Running Backs | 0.75 | 0.9 | 0.5 | 0.75 | 0.818
-Offensive Guards | 0.646 | 0.92 | 0.348 | 0.605 | 0.730
+Offensive Line | 0.646 | 0.92 | 0.348 | 0.605 | 0.730
 Corner Backs | 0.696 | 0.974 | 0.059 | 0.704 | 0.817
 Defensive Ends | 0.656 | 0.884 | 0.111 | 0.704 | 0.784
 
-<img src="Images/PA/log_cm.PNG" width="  1000">
+<img src="Images/PA/cm_log_full.PNG" width="  1000">
 
 Position | Accuracy | Sensitivity | Specificity | Precision | F1
 --- | --- | --- | --- | --- | ---
 Wide Receivers | 0.736 | 0.879 | 0.5 | 0.744 | 0.806
 Running Backs | 0.75 | 0.9 | 0.5 | 0.75 | 0.818
-Offensive Guards | 0.583 | 0.8 | 0.348 | 0.571 | 0.667
+Offensive Line | 0.583 | 0.8 | 0.348 | 0.571 | 0.667
+Corner Backs | 0.679 | 0.974 | 0 | 0.691 | 0.809
+Defensive Ends | 0.656 | 0.860 | 0.167 | 0.712 | 0.779
+
+<img src="Images/PA/cm_log_simple.PNG" width="  1000">
+
+Position | Accuracy | Sensitivity | Specificity | Precision | F1
+--- | --- | --- | --- | --- | ---
+Wide Receivers | 0.736 | 0.879 | 0.5 | 0.744 | 0.806
+Running Backs | 0.75 | 0.9 | 0.5 | 0.75 | 0.818
+Offensive Line | 0.583 | 0.8 | 0.348 | 0.571 | 0.667
 Corner Backs | 0.679 | 0.974 | 0 | 0.691 | 0.809
 Defensive Ends | 0.656 | 0.860 | 0.167 | 0.712 | 0.779
 
@@ -664,7 +674,8 @@ Defensive Ends | 0.656 | 0.860 | 0.167 | 0.712 | 0.779
 
 **Break-Down**
 <img src="Images/PA/bd_rf_WR.PNG" width="  1200">
-<img src="Images/PA/bd_log_WR.PNG" width="  1200">
+<img src="Images/PA/bd_log_Full_WR.PNG" width="  1200">
+<img src="Images/PA/bd_log_Simple_WR.PNG" width="  1200">
 
 > **Note (WR)**
 
@@ -672,24 +683,28 @@ Defensive Ends | 0.656 | 0.860 | 0.167 | 0.712 | 0.779
 
 **Break-Down**
 <img src="Images/PA/bd_rf_RB.PNG" width="  1200">
-<img src="Images/PA/bd_log_RB.PNG" width="  1200">
+<img src="Images/PA/bd_log_Full_RB.PNG" width="  1200">
+<img src="Images/PA/bd_log_Simple_RB.PNG" width="  1200">
 
-### Offensive Guards
+### Offensive Line
 
 **Break-Down**
-<img src="Images/PA/bd_rf_OG.PNG" width="  1200">
-<img src="Images/PA/bd_log_OG.PNG" width="  1200">
+<img src="Images/PA/bd_rf_OL.PNG" width="  1200">
+<img src="Images/PA/bd_log_Full_OL.PNG" width="  1200">
+<img src="Images/PA/bd_log_Simple_OL.PNG" width="  1200">
 
 ### Cornerbacks
 
 **Break-Down**
 <img src="Images/PA/bd_rf_CB.PNG" width="  1200">
-<img src="Images/PA/bd_log_CB.PNG" width="  1200">
+<img src="Images/PA/bd_log_Full_CB.PNG" width="  1200">
+<img src="Images/PA/bd_log_Simple_CB.PNG" width="  1200">
 
 ### Defensive Ends
 
 **Break-Down**
 <img src="Images/PA/bd_rf_DE.PNG" width="  1200">
-<img src="Images/PA/bd_log_DE.PNG" width="  1200">
+<img src="Images/PA/bd_log_Full_DE.PNG" width="  1200">
+<img src="Images/PA/bd_log_Simple_DE.PNG" width="  1200">
 
 # Conclusion
