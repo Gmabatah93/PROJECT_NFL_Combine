@@ -468,12 +468,12 @@ RF-PCA | 0.676 | 0.684 | 0.944 | 0.191 | 0.689 | 0.944 | 0.796
 2. **80.7%** Logistic Regression - Full
 3. **79.8%** Random Forrest - Full
 
+> Based on the Test Results the models I choose to evaluate further is **[ 1) Logistic Regression - PCA 2) Logistic Regression - Full 3) Random Forrest - Full ]** because they perform the best. I will also evaluate **_Logistic Regression - Simple_** because it was performed nearly as well as those models. Also ideally this is the simplest most interpretable model in my opinion.
+
 ---
 
 # Prescriptive Analysis
 > After fitting a model an importance aspect of model assessment is to evaluate which features are important and how they effect the target variable, which in this case is the probability of a player being drafted. For this dataset I will be utilizing the DALEX package which uses a model-agnostic approach to asses feature importance
-
-> Based on the Test Results the models I choose to evaluate further is **[ 1) Logistic Regression - PCA 2) Logistic Regression - Full 3) Random Forrest - Full ]** because they perform the best. I will also evaluate **_Logistic Regression - Simple_** because it was performed nearly as well as those models. Also ideally this is the simplest most interpretable model in my opinion.
 
 ## Feature Importance
 > To calculate feature importance the DALEX package first calculates the Loss of the normal model then permutes the variable of the feature in question. And finally takes the difference between the two. _(In this case I used AUC as the Loss Metric)_  
