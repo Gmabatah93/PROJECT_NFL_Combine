@@ -156,7 +156,7 @@ If you look at the **Eigenvalue Plot** you can see that you can represent about 
 
 
 ## Combine Summary
-> With the help of PCA I can say that the combine features **(Weight, Forty, Bench, and Broad Jump)** best summaries the athletics ability of players entering the draft. So we'll view these features by Position & Conference.
+> With the help of PCA I can say that the combine features **(Weight, Forty, Bench, and Broad Jump)** best summaries the athletic ability of players entering the draft. So we'll view these features by Position & Conference.
 
 ### Weight
 <img src="Images/EDA/combine_weight.PNG" width=" 700">
@@ -223,7 +223,7 @@ If you look at the **Eigenvalue Plot** you can see that you can represent about 
 <img src="Images/EDA/combine_jump_side.PNG" width="  700">
 <img src="Images/EDA/combine_jump_conference.PNG" width="  700">
 
-> **Note (Jump):** The density plot is skewed a bit to the left indicating that alot of the players in this dataset jump farther then average. Average broad jump for players in this dataset is **_113inches**
+> **Note (Jump):** The density plot is skewed a bit to the left indicating that alot of the players in this dataset jump farther then average. Average broad jump for players in this dataset is **113inches**
 > - Offense: **_110inches_**
 >   + Average broad jump  _OT_ = **_102inches_**
 >   + Average broad jump _WR_ = **_121inches_**
@@ -429,17 +429,6 @@ LOG-PCA | 0.657 | 0.678 | **_0.963_** | 0.138 | 0.679 | 0.963 | 0.797
 
 ## ROC Curve
 <img src="Images/MODEL/roc_final.PNG" width="  700">
-
-## Confusion Matrix
-**Logistic Regression**
-
-<img src="Images/MODEL/cm_log_final.PNG" width="  700">
-
-
-**Random Forrest**
-
-<img src="Images/MODEL/cm_rf_final.PNG" width="  700">
-
 
 ## Metrics  
 
