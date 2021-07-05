@@ -518,16 +518,16 @@ RF-PCA | 0.676 | 0.684 | 0.944 | 0.191 | 0.689 | 0.944 | 0.796
 > **Note (pdp Continuous)**
 
 > **BENCH:** From EDA we saw that the average Bench Reps for the entire dataset was **_21 reps_**. All models capture the general relationship that as bench reps increase so those the probability of a certain player being drafted.  
-> - **Random Forrest** on average all players in this dataset _based on bench reps_ are predicted to be drafted. It also shows that the relationship between bench reps and the probability of being drafted is monotonic. When Bench Reps are below 15 it has the highest predicted probability on average compared to the other models. After 15 approaching 30 reps and more is has the lowest and starts to remain stagnant.
+> - **Random Forrest** on average all players in this dataset _based on bench reps_ are predicted to be drafted. It also shows that the relationship between bench reps and the probability of being drafted is monotonic. When Bench Reps are below 15 _Random Forrest_ has the highest predicted probability on average compared to the other models. After 15 approaching 30 reps and more is has the lowest and starts to remain stagnant.
 > - **Logistic Regression (Full)** like random forest Logistic Regression predicted on average all players to be drafted just based on Bench Reps. However when Bench Reps are below 15 the predicted probability is lower then Random Forrest. The probability when Bench Reps between 15 and 30 is similar to Random Forrest. When Bench Reps are above 30 the predicted probability is greater than Random Forrest.
 > - **Logistic Regression (Simple)** When Bench Reps are below 5 the model predicts players not to be drafted. When bench reps are 15 reps and above this model has the highest predicted probability compared to the other two models
 
-> **FORTY**: From EDA average 40 time for the entire dataset was **_4.8 secs_**. All models capture the genral relationship that as 40 time increases the probability of a player being drafted decreases.
+> **FORTY**: From EDA average 40 time for the entire dataset was **_4.8 secs_**. All models capture the general relationship that as 40 time increases the probability of a player being drafted decreases.
 > - **Random Forrest** shows that relationship is monotonic. However this model still predicts on average all players to be drafted just based on 40 time. Also the predicted probability drops steadily compared to the linear models. When 40 time is below 4.8 secs random forest has the lowest probability compared to the other models. When 40 time is above 5.0 secs it has the highest probability.  
-> - **Logistic Regression (Full)** As 40 time approaches 5.0 seconds Logistic Regression (Full) starts to predict players not being drafted. It also has a more steep decrease compared to Random Forrest. Compared to the more simpler model, after 4.5 secs the Full Model as a lower predicted probability.
+> - **Logistic Regression (Full)** As 40 time approaches 5.0 seconds Logistic Regression (Full) starts to predict players not being drafted. It also has a more steep decrease compared to Random Forrest. Compared to the more simpler model, after 4.5 secs the Full Model has a lower predicted probability.
 > - **Logistic Regression (Simple)** This model has the highest predicted probability when 40 time is below 5.0 secs compared to other models. However the model does not predict players to not be drafted until 40 time approaches about 5.2 secs
 
-> **WEIGHT:** From EDA average Weight for the entire dataset was **_251lbs_**. All show the general relationship that as weight increases so those the probability of a player being drafted.
+> **WEIGHT:** From EDA average Weight for the entire dataset was **_251lbs_**. All models show the general relationship that as weight increases so those the probability of a player being drafted.
 > - **Random Forrest** shows that the relationship between weight and the probability of being drafted is monotonic. As far as the amount of increase its very steady compared to the linear models. This model also predicts, on average just accounting for Weight all players to be drafted. When Weight is below 200 RF has the highest predicted probability. When Weight is above 250 it has the lowest predicted probability.
 > - **Logistic Regression (Full)** The slope for is much steeper than Random Forrest. When Weight is below 230 this model predicts on average players no to be drafted. When Weight is below around 230 this model has the lowest predicted probability. When weight is above around 250 is has the highest predicted probability  
 > - **Logistic Regression (Simple)** The slope is again much steeper than Random Forrest but not as steep as the Full model. The Simple model only predicts on average players not to be drafted when weight is below about 180. When weight is above 250 the predicted probability of the Simple model is higher than Random Forrest but lower then the Full model.
@@ -555,13 +555,12 @@ RF-PCA | 0.676 | 0.684 | 0.944 | 0.191 | 0.689 | 0.944 | 0.796
 
 > **Note (Random Forrest- Conference)**
 
-> **BENCH:** From EDA average Bench by Division **_[Elite = 21reps | Division I-A = 21reps | Division I-AA = 21reps | Division II & II = 23reps ]_**. No matter which conference a player plays for as there bench reps increases so does the probability of them being drafted. Also the relationship for each conference is monotonic.
+> **BENCH:** From EDA average Bench by Division **_[Elite = 21reps | Division I-A = 21reps | Division I-AA = 21reps | Division II & II = 23reps ]_**. No matter which conference a player plays for, as bench reps increases so does the probability of them being drafted. Also the relationship for each conference is monotonic.
 > - What stands out is, for players that played for a school in the Division I-AA or Division II or III, if they bench below 20 reps Random Forrest predicts those players on average as not being drafted.
 
 
-> **FORTY:** From EDA average 40 time by Division **_[ Elite = 4.81secs | Division I-A = 4.78secs | Division I-AA = 4.82secs | Division II & II = 4.89secs ]_**. No matter which conference a player plays for as there 40 time increases the probability of them being drafted decreases. Also the relationship for each conference is monotonic.
+> **FORTY:** From EDA average 40 time by Division **_[ Elite = 4.81secs | Division I-A = 4.78secs | Division I-AA = 4.82secs | Division II & II = 4.89secs ]_**. No matter which conference a player plays for, as 40 time increases the probability of them being drafted decreases. Also the relationship for each conference is monotonic.
 > - What stands out is, for a players that played for a school in Division I-A (MAC), Division I-AA, Division II or III, if they run a 40 time above 5.5 RF predicts those players on average as not being drafted.
-> -
 
 > **WEIGHT:** From EDA average Weight time by Division **_[ Elite = 253lbs | Division I-A = 246lbs | Division I-AA = 252 | Division II & II = 266lbs ]_**. No matter which conference a player plays for as there weight increases so does the probability of them being drafted. Also the relationship for each conference is monotonic.
 > - What stands out is, for players that played for a school in Division I-A (MAC), Division I-AA, if Weigh below 250lbs RF predicts on average those players as not being drafted. For players that played for a school in Division II or III, if they Weigh below 300 RF predicts on average those players as not being drafted.   
@@ -570,56 +569,73 @@ RF-PCA | 0.676 | 0.684 | 0.944 | 0.191 | 0.689 | 0.944 | 0.796
 
 <img src="Images/PA/pdp_Conference_Log_Full.PNG" width="  1000">
 
-> **Note (Logistic Regression - Conference)**
+> **Note (Logistic Regression "Full"- Conference)**
 
-> **BENCH:** From EDA average Bench by Division **_[Elite = 21reps | Division I-A = 21reps | Division I-AA = 21reps | Division II & II = 23reps ]_**. No matter which conference a player plays for as there bench reps increases so does the probability of them being drafted.
+> **BENCH:** From EDA average Bench by Division **_[Elite = 21reps | Division I-A = 21reps | Division I-AA = 21reps | Division II & II = 23reps ]_**. No matter which conference a player plays for, as bench reps increases so does the probability of them being drafted.
 > - What stands out is, if a player came from the MAC or Mountain West Conference & they Bench below 20 reps, the Full Regression model predicts those players as not being drafted on average. If a player came from Division II & III Conference, no matter the Bench Reps the Full Regression model those players on average as not being drafted.
 
-> **FORTY:** From EDA average 40 time by Division **_[ Elite = 4.81secs | Division I-A = 4.78secs | Division I-AA = 4.82secs | Division II & II = 4.89secs ]_**. No matter which conference a player plays for as there 40 time increases the probability of them being drafted decreases.
+> **FORTY:** From EDA average 40 time by Division **_[ Elite = 4.81secs | Division I-A = 4.78secs | Division I-AA = 4.82secs | Division II & II = 4.89secs ]_**. No matter which conference a player plays for, as 40 time increases the probability of them being drafted decreases.
 > - What stands out is, for a players that played for a school in  Conference USA, Mountain West, Division II or III & they run a 40 time above 4.8 secs, the model predicts those players on average as not being drafted. If a player played for the MAC Conference the Full Regression model will only predict those players as not being drafted unless they run a 40 time above 5.3.
 
-> **WEIGHT:** From EDA average Weight time by Division **_[ Elite = 253lbs | Division I-A = 246lbs | Division I-AA = 252 | Division II & II = 266lbs ]_**. No matter which conference a player plays for as there weight increases so does the probability of them being drafted.
+> **WEIGHT:** From EDA average Weight time by Division **_[ Elite = 253lbs | Division I-A = 246lbs | Division I-AA = 252 | Division II & II = 266lbs ]_**. No matter which conference a player plays for, as Weight increases so does the probability of them being drafted.
 > - What stands out is, for players that played for a school in the MAC Conference & the Full Regression Model will only predict those players as being drafted if they weigh above 270lbs. If a player played for a school in Division II or III the Full Regression Model will only predict those players as being drafted if they Weigh above around 350lbs
 
 > **GENERAL:** The Full Regression predicted the highest probability across Weight for players that played BIG 10 Conference, lowest in the Division II & III Conference. The Full Regression predicted the highest probability across Forty for players that played MAC Conference, lowest in the Division II & III Conference. The Full Regression predicted the highest probability across Weight for players that played in the Conference USA Conference, lowest in the Division II & III Conference.
 
 <img src="Images/PA/pdp_Conference_Log_Simple.PNG" width="  1000">
 
+> **Note (Logistic Regression "Simple"- Conference)**
+
+> **BENCH:** From EDA average Bench by Division **_[Elite = 21reps | Division I-A = 21reps | Division I-AA = 21reps | Division II & II = 23reps ]_**. No matter which conference a player plays for, as bench reps increases so does the probability of them being drafted.
+> - What stands out is, the results are very similar to the Full Regression Model however the variance is not a large between conferences
+
+> **FORTY:** From EDA average 40 time by Division **_[ Elite = 4.81secs | Division I-A = 4.78secs | Division I-AA = 4.82secs | Division II & II = 4.89secs ]_**. No matter which conference a player plays for, as 40 time increases the probability of them being drafted decreases.
+> - What stands out is, again the results are very similar to the Full Regression Model. However instead of the highest probability across forty time being the MAC Division, the simple model has the Big 10 Division as the highest.
+
+> **WEIGHT:** From EDA average Weight time by Division **_[ Elite = 253lbs | Division I-A = 246lbs | Division I-AA = 252 | Division II & II = 266lbs ]_**. No matter which conference a player plays for, as Weight increases so does the probability of them being drafted.
+> - What stands out is, There is less variance between conferences in the Simple Model compared to the Full Model  
+
 ### Partial Dependency: (Position)
-> After some research I determined that (WR, RB, OG) were the most important/ popular offensive players that teams look for in the draft and (CB, DE) were the most important defensive players.
+> After some research I determined that (WR, RB, Offensive Lineman) were the most important/ popular offensive players that teams look for in the draft and (CB, DE) were the most important defensive players.
 
 <img src="Images/PA/pdp_Position_RF_Full.PNG" width="  1000">
 
 > **Note (Random Forrest - Position)**
 
-> **BENCH:** From EDA average Bench by Position **_[ CB = 14reps | DE = 24reps | OG = 26reps | RB = 20reps | WR = 14reps ]_**
-> - At A High- Level it still sticks with the same general relationship, As you bench reps increase so those the probability of a player being drafted.
+> **BENCH:** From EDA average Bench by Position **_[ CB = 14reps | DE = 24reps | OG = 26reps | RB = 20reps | WR = 14reps ]_**. At A High- Level it still sticks with the same general relationship, As you bench reps increase so those the probability of a player being drafted.
 > - It looks like no matter the position if your able to bench over 20 reps the probability of you being drafted increase to above 50%
 
-> **FORTY:** From EDA average 40 time by Position **_[ CB = 4.49secs | DE = 4.83secs | OG = 5.31secs | RB = 4.56secs | WR = 4.51secs ]_**
-> - At A High- Level it still sticks with the same general relationship, As you 40 times increase the probability of a player being drafted decreases.
+> **FORTY:** From EDA average 40 time by Position **_[ CB = 4.49secs | DE = 4.83secs | OG = 5.31secs | RB = 4.56secs | WR = 4.51secs ]_**. At A High- Level it still sticks with the same general relationship, As you 40 times increase the probability of a player being drafted decreases.
+> - _CB, RB, WR_ probability of being drafted drop significantly once their 40 time approaches 4.7 secs
 
-> **WEIGHT:** From EDA average Weight by Position **_[ CB = 193lbs | DE = 268lbs | OG = 314lbs | RB = 216lbs | WR = 203lbs ]_**
-> - At A High- Level it still sticks with the same general relationship, As you weight increase so those the probability of a player being drafted.
-> - What stands out is OG that weight below 300, the model predicts them as probably not being drafted.
+> **WEIGHT:** From EDA average Weight by Position **_[ CB = 193lbs | DE = 268lbs | OG = 314lbs | RB = 216lbs | WR = 203lbs ]_**. At A High- Level it still sticks with the same general relationship, As you weight increase so those the probability of a player being drafted.
+> - _OG_ that weigh below 300lbs RF predicts on average those players not being drafted. _OT_ that weigh below _240lbs_ RF predicts on average those players not being drafted.
 
 <img src="Images/PA/pdp_Position_Log_Full.PNG" width="  1000">
 
-> **Note (Logistic Regression - Position)**
+> **Note (Logistic Regression "Full" - Position)**
 
-> **BENCH:** From EDA average Bench by Position **_[ CB = 14reps | DE = 24reps | OG = 26reps | RB = 20reps | WR = 14reps ]_**
-> - At A High- Level it still sticks with the same general relationship, As you bench reps increase so those the probability of a player being drafted.
-> - What stands out is what a CB benches does not matter to much in terms of getting drafted
+> **BENCH:** From EDA average Bench by Position **_[ CB = 14reps | DE = 24reps | OG = 26reps | RB = 20reps | WR = 14reps ]_**. At A High- Level it still sticks with the same general relationship, As you bench reps increase so those the probability of a player being drafted.
+> - _RB & OG_ that benches below 20 the Full Regression Model predicts them on average as not being drafted.
 
-> **FORTY:** From EDA average 40 time by Position **_[ CB = 4.49secs | DE = 4.83secs | OG = 5.31secs | RB = 4.56secs | WR = 4.51secs ]_**
-> - At A High- Level it still sticks with the same general relationship, As you 40 times increase the probability of a player being drafted decreases.
-> - What stands out is if a (WR CB) does not run at least around  4.6 secs he will probably not get drafted
+> **FORTY:** From EDA average 40 time by Position **_[ CB = 4.49secs | DE = 4.83secs | OG = 5.31secs | RB = 4.56secs | WR = 4.51secs ]_**. At A High- Level it still sticks with the same general relationship, As you 40 times increase the probability of a player being drafted decreases.
+> - _RB, WR, & CB_ must run a 40 time of at least 4.7 or the Full Regression Model will predict on average those players as not being drafted. _DE_ at least 5.1secs. _OG & OT_ at least 5.5.
 
-> **WEIGHT:** From EDA average Weight by Position **_[ CB = 193lbs | DE = 268lbs | OG = 314lbs | RB = 216lbs | WR = 203lbs ]_**
-> - At A High- Level it still sticks with the same general relationship, As you weight increase so those the probability of a player being drafted.
-> - What stands out is OG must weigh at least 280 to have a chance of being drafted
+> **WEIGHT:** From EDA average Weight by Position **_[ CB = 193lbs | DE = 268lbs | OG = 314lbs | RB = 216lbs | WR = 203lbs ]_**. At A High-Level it still sticks with the same general relationship, As you weight increase so those the probability of a player being drafted.
+> - _WR_ must weigh at 180lbs or the Full Regression Model will predict on average those players as not being drafted. _RB_ at least 200lbs. _DE_ at least 240lbs. _OT_ at least 270lbs. _OG_ at least 300lbs.
 
 <img src="Images/PA/pdp_Position_Log_Simple.PNG" width="  1000">
+
+> **Note (Logistic Regression "Simple" - Position)**
+
+> **BENCH:** From EDA average Bench by Position **_[ CB = 14reps | DE = 24reps | OG = 26reps | RB = 20reps | WR = 14reps ]_**. At A High- Level it still sticks with the same general relationship, As you bench reps increase so those the probability of a player being drafted.
+> - Very similar to the Full Regression Model except _RB_ only need to bench at least about 12 reps for the Full Regression Model to not predict them on average as not being drafted.
+
+> **FORTY:** From EDA average 40 time by Position **_[ CB = 4.49secs | DE = 4.83secs | OG = 5.31secs | RB = 4.56secs | WR = 4.51secs ]_**. At A High- Level it still sticks with the same general relationship, As you 40 times increase the probability of a player being drafted decreases.
+> - Almost an exact replica of the Full Model
+
+> **WEIGHT:** From EDA average Weight by Position **_[ CB = 193lbs | DE = 268lbs | OG = 314lbs | RB = 216lbs | WR = 203lbs ]_**. At A High-Level it still sticks with the same general relationship, As you weight increase so those the probability of a player being drafted.
+> - _RB & WR_ must weigh at least 180lbs for the Full Regression Model will predict on average those players as being drafted. _DE_ at least around 200lbs. _OT_ at least 240lbs. _OG_ at least 280lbs.
 
 ## Instance-Level
 > After assessing the models at a dataset level we'll take some samples from each position and do further evaluation. \
