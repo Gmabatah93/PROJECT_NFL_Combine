@@ -648,38 +648,38 @@ RF-PCA | 0.676 | 0.684 | 0.944 | 0.191 | 0.689 | 0.944 | 0.796
 ### Wide Receivers
 
 **Break-Down**
-<img src="Images/PA/bd_rf_WR.PNG" width="  1200">
-<img src="Images/PA/bd_log_Full_WR.PNG" width="  1200">
-<img src="Images/PA/bd_log_Simple_WR.PNG" width="  1200">
+<img src="Images/PA/bd_rf_WR.PNG" width="  900">
+<img src="Images/PA/bd_log_Full_WR.PNG" width="  900">
+<img src="Images/PA/bd_log_Simple_WR.PNG" width="  900">
 
 > **Note (WR)**
 
 ### Running Backs
 
 **Break-Down**
-<img src="Images/PA/bd_rf_RB.PNG" width="  1200">
-<img src="Images/PA/bd_log_Full_RB.PNG" width="  1200">
-<img src="Images/PA/bd_log_Simple_RB.PNG" width="  1200">
+<img src="Images/PA/bd_rf_RB.PNG" width="  900">
+<img src="Images/PA/bd_log_Full_RB.PNG" width="  900">
+<img src="Images/PA/bd_log_Simple_RB.PNG" width="  900">
 
 ### Offensive Line
 
 **Break-Down**
-<img src="Images/PA/bd_rf_OL.PNG" width="  1200">
-<img src="Images/PA/bd_log_Full_OL.PNG" width="  1200">
-<img src="Images/PA/bd_log_Simple_OL.PNG" width="  1200">
+<img src="Images/PA/bd_rf_OL.PNG" width="  900">
+<img src="Images/PA/bd_log_Full_OL.PNG" width="  900">
+<img src="Images/PA/bd_log_Simple_OL.PNG" width="  900">
 
 ### Cornerbacks
 
 **Break-Down**
-<img src="Images/PA/bd_rf_CB.PNG" width="  1200">
-<img src="Images/PA/bd_log_Full_CB.PNG" width="  1200">
-<img src="Images/PA/bd_log_Simple_CB.PNG" width="  1200">
+<img src="Images/PA/bd_rf_CB.PNG" width="  900">
+<img src="Images/PA/bd_log_Full_CB.PNG" width="  900">
+<img src="Images/PA/bd_log_Simple_CB.PNG" width="  900">
 
 ### Defensive Ends
 
 **Break-Down**
-<img src="Images/PA/bd_rf_DE.PNG" width="  1200">
-<img src="Images/PA/bd_log_Full_DE.PNG" width="  1200">
-<img src="Images/PA/bd_log_Simple_DE.PNG" width="  1200">
+<img src="Images/PA/bd_rf_DE.PNG" width="  900">
+<img src="Images/PA/bd_log_Full_DE.PNG" width="  900">
+<img src="Images/PA/bd_log_Simple_DE.PNG" width="  900">
 
 # Conclusion
