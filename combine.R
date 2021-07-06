@@ -3162,151 +3162,103 @@ ggarrange(gg_bd_log_Simple_OL_TL, gg_bd_log_Simple_OL_JM, gg_bd_log_Simple_OL_TT
 #
 # Feature Selection: DALEX (CB) ----
 
-# SHAP
-# - Channing Stribling
-shap_rf_CS <- predict_parts(explainer = EXP_rf_F,
-                            new_observation = nfl_test_CB_CS,
-                            type = "shap",
-                            B = 20)
-shap_log_CS <- predict_parts(explainer = EXP_log_F,
-                             new_observation = nfl_test_CB_CS,
-                             type = "shap",
-                             B = 20)
-
-gg_shap_rf_CB_CS <- plot(shap_rf_CS) +
-  labs(title = "Channing Stribling",
-       subtitle = "Random Forrest") +
-  theme(plot.title = element_text(hjust = 0.5, face = "bold", color = "tomato"),
-        plot.subtitle = element_text(hjust = 0.5, color = "seagreen1"),
-        strip.text = element_blank())
-gg_shap_log_CB_CS <- plot(shap_log_CS) +
-  labs(title = "Channing Stribling",
-       subtitle = "Logistic Regression") +
-  theme(plot.title = element_text(hjust = 0.5, face = "bold", color = "tomato"),
-        plot.subtitle = element_text(hjust = 0.5, color = "lightskyblue"),
-        strip.text = element_blank())
-
-# - Quandre Diggs
-shap_rf_QD <- predict_parts(explainer = EXP_rf_F,
-                            new_observation = nfl_test_CB_QD,
-                            type = "shap",
-                            B = 20)
-shap_log_QD <- predict_parts(explainer = EXP_log_F,
-                             new_observation = nfl_test_CB_QD,
-                             type = "shap",
-                             B = 20)
-
-gg_shap_rf_CB_QD <- plot(shap_rf_QD) +
-  labs(title = "Quandre Diggs",
-       subtitle = "Random Forrest") +
-  theme(plot.title = element_text(hjust = 0.5, face = "bold", color = "darkolivegreen"),
-        plot.subtitle = element_text(hjust = 0.5, color = "seagreen1"),
-        strip.text = element_blank())
-gg_shap_log_CB_QD <- plot(shap_log_QD) +
-  labs(title = "Quandre Diggs",
-       subtitle = "Logistic Regression") +
-  theme(plot.title = element_text(hjust = 0.5, face = "bold", color = "darkolivegreen"),
-        plot.subtitle = element_text(hjust = 0.5, color = "lightskyblue"),
-        strip.text = element_blank())
-
-# - Eric Rowe
-shap_rf_ER <- predict_parts(explainer = EXP_rf_F,
-                            new_observation = nfl_test_CB_ER,
-                            type = "shap",
-                            B = 20)
-shap_log_ER <- predict_parts(explainer = EXP_log_F,
-                             new_observation = nfl_test_CB_ER,
-                             type = "shap",
-                             B = 20)
-
-gg_shap_rf_CB_ER <- plot(shap_rf_ER) +
-  labs(title = "Eric Rowe",
-       subtitle = "Random Forrest") +
-  theme(plot.title = element_text(hjust = 0.5, face = "bold", color = "darkolivegreen"),
-        plot.subtitle = element_text(hjust = 0.5, color = "seagreen1"),
-        strip.text = element_blank())
-gg_shap_log_CB_ER <- plot(shap_log_ER) +
-  labs(title = "Eric Rowe",
-       subtitle = "Logistic Regression") +
-  theme(plot.title = element_text(hjust = 0.5, face = "bold", color = "darkolivegreen"),
-        plot.subtitle = element_text(hjust = 0.5, color = "lightskyblue"),
-        strip.text = element_blank())
-
-
-# Visual
-ggarrange(gg_shap_rf_CB_TB, gg_shap_rf_CB_CS, gg_shap_rf_CB_QD, gg_shap_rf_CB_ER,
-          nrow = 1)
-ggarrange(gg_shap_log_CB_TB, gg_shap_log_CB_CS, gg_shap_log_CB_QD, gg_shap_log_CB_ER,
-          nrow = 1)
-
-
-
 # BREAKDOWN
 # - Channing Stribling
-bd_rf_CS <- predict_parts(explainer = EXP_rf_F,
+bd_rf_CS <- predict_parts(explainer = EXP_rf_Full,
                           new_observation = nfl_test_CB_CS,
                           type = "break_down",
                           keep_distributions = TRUE)
-bd_log_CS <- predict_parts(explainer = EXP_log_F,
-                           new_observation = nfl_test_CB_CS,
-                           type = "break_down",
-                           keep_distributions = TRUE)
+bd_log_Full_CS <- predict_parts(explainer = EXP_log_Full,
+                                new_observation = nfl_test_CB_CS,
+                                type = "break_down",
+                                keep_distributions = TRUE)
+bd_log_Simple_CS <- predict_parts(explainer = EXP_log_Simple,
+                                  new_observation = nfl_test_CB_CS,
+                                  type = "break_down",
+                                  keep_distributions = TRUE)
 
 gg_bd_rf_CB_CS <- plot(bd_rf_CS, max_features = 5) +
   labs(title = "Channing Stribling",
-       subtitle = "Random Forrest") +
+       subtitle = "Random Forrest (Full)") +
   theme(plot.title = element_text(hjust = 0.5, face = "bold", color = "tomato"),
-        plot.subtitle = element_text(hjust = 0.5, color = "seagreen1"),
+        plot.subtitle = element_text(hjust = 0.5, color = "seagreen"),
         strip.text = element_blank())
-gg_bd_log_CB_CS <- plot(bd_log_CS, max_features = 5) +
+gg_bd_log_Full_CB_CS <- plot(bd_log_Full_CS, max_features = 5) +
   labs(title = "Channing Stribling",
-       subtitle = "Logistic Regression") +
+       subtitle = "Logistic Regression (Full)") +
+  theme(plot.title = element_text(hjust = 0.5, face = "bold", color = "tomato"),
+        plot.subtitle = element_text(hjust = 0.5, color = "midnightblue"),
+        strip.text = element_blank())
+gg_bd_log_Simple_CB_CS <- plot(bd_log_Simple_CS, max_features = 5) +
+  labs(title = "Channing Stribling",
+       subtitle = "Logistic Regression (Simple)") +
   theme(plot.title = element_text(hjust = 0.5, face = "bold", color = "tomato"),
         plot.subtitle = element_text(hjust = 0.5, color = "lightskyblue"),
         strip.text = element_blank())
 
+
 # - Quandre Diggs
-bd_rf_QD <- predict_parts(explainer = EXP_rf_F,
+bd_rf_QD <- predict_parts(explainer = EXP_rf_Full,
                           new_observation = nfl_test_CB_QD,
                           type = "break_down",
                           keep_distributions = TRUE)
-bd_log_QD <- predict_parts(explainer = EXP_log_F,
-                           new_observation = nfl_test_CB_QD,
-                           type = "break_down",
-                           keep_distributions = TRUE)
+bd_log_Full_QD <- predict_parts(explainer = EXP_log_Full,
+                                new_observation = nfl_test_CB_QD,
+                                type = "break_down",
+                                keep_distributions = TRUE)
+bd_log_Simple_QD <- predict_parts(explainer = EXP_log_Simple,
+                                  new_observation = nfl_test_CB_QD,
+                                  type = "break_down",
+                                  keep_distributions = TRUE)
 
 gg_bd_rf_CB_QD <- plot(bd_rf_QD, max_features = 5) +
   labs(title = "Quandre Diggs",
-       subtitle = "Random Forrest") +
+       subtitle = "Random Forrest (Full)") +
   theme(plot.title = element_text(hjust = 0.5, face = "bold", color = "darkolivegreen"),
-        plot.subtitle = element_text(hjust = 0.5, color = "seagreen1"),
+        plot.subtitle = element_text(hjust = 0.5, color = "seagreen"),
         strip.text = element_blank())
-gg_bd_log_CB_QD <- plot(bd_log_QD, max_features = 5) +
+gg_bd_log_Full_CB_QD <- plot(bd_log_Full_QD, max_features = 5) +
   labs(title = "Quandre Diggs",
-       subtitle = "Logistic Regression") +
+       subtitle = "Logistic Regression (Full)") +
+  theme(plot.title = element_text(hjust = 0.5, face = "bold", color = "darkolivegreen"),
+        plot.subtitle = element_text(hjust = 0.5, color = "midnightblue"),
+        strip.text = element_blank())
+gg_bd_log_Simple_CB_QD <- plot(bd_log_Simple_QD, max_features = 5) +
+  labs(title = "Quandre Diggs",
+       subtitle = "Logistic Regression (Simple)") +
   theme(plot.title = element_text(hjust = 0.5, face = "bold", color = "darkolivegreen"),
         plot.subtitle = element_text(hjust = 0.5, color = "lightskyblue"),
         strip.text = element_blank())
 
 # - Eric Rowe
-bd_rf_ER <- predict_parts(explainer = EXP_rf_F,
+bd_rf_ER <- predict_parts(explainer = EXP_rf_Full,
                           new_observation = nfl_test_CB_ER,
                           type = "break_down",
                           keep_distributions = TRUE)
-bd_log_ER <- predict_parts(explainer = EXP_log_F,
-                           new_observation = nfl_test_CB_ER,
-                           type = "break_down",
-                           keep_distributions = TRUE)
+bd_log_Full_ER <- predict_parts(explainer = EXP_log_Full,
+                                new_observation = nfl_test_CB_ER,
+                                type = "break_down",
+                                keep_distributions = TRUE)
+bd_log_Simple_ER <- predict_parts(explainer = EXP_log_Simple,
+                                  new_observation = nfl_test_CB_ER,
+                                  type = "break_down",
+                                  keep_distributions = TRUE)
 
 gg_bd_rf_CB_ER <- plot(bd_rf_ER, max_features = 5) +
   labs(title = "Eric Rowe",
-       subtitle = "Random Forrest") +
+       subtitle = "Random Forrest (Full)") +
   theme(plot.title = element_text(hjust = 0.5, face = "bold", color = "darkolivegreen"),
-        plot.subtitle = element_text(hjust = 0.5, color = "seagreen1"),
+        plot.subtitle = element_text(hjust = 0.5, color = "seagreen"),
         strip.text = element_blank())
-gg_bd_log_CB_ER <- plot(bd_log_ER, max_features = 5) +
+gg_bd_log_Full_CB_ER <- plot(bd_log_Full_ER, max_features = 5) +
   labs(title = "Eric Rowe",
-       subtitle = "Logistic Regression") +
+       subtitle = "Logistic Regression (Full)") +
+  theme(plot.title = element_text(hjust = 0.5, face = "bold", color = "darkolivegreen"),
+        plot.subtitle = element_text(hjust = 0.5, color = "midnightblue"),
+        strip.text = element_blank())
+gg_bd_log_Simple_CB_ER <- plot(bd_log_Simple_ER, max_features = 5) +
+  labs(title = "Eric Rowe",
+       subtitle = "Logistic Regression (Simple)") +
   theme(plot.title = element_text(hjust = 0.5, face = "bold", color = "darkolivegreen"),
         plot.subtitle = element_text(hjust = 0.5, color = "lightskyblue"),
         strip.text = element_blank())
@@ -3314,155 +3266,109 @@ gg_bd_log_CB_ER <- plot(bd_log_ER, max_features = 5) +
 # Visual
 ggarrange(gg_bd_rf_CB_CS, gg_bd_rf_CB_QD, gg_bd_rf_CB_ER,
           nrow = 1)
-ggarrange(gg_bd_log_CB_CS, gg_bd_log_CB_QD, gg_bd_log_CB_ER,
+ggarrange(gg_bd_log_Full_CB_CS, gg_bd_log_Full_CB_QD, gg_bd_log_Full_CB_ER,
+          nrow = 1)
+ggarrange(gg_bd_log_Simple_CB_CS, gg_bd_log_Simple_CB_QD, gg_bd_log_Simple_CB_ER,
           nrow = 1)
 #
 # Feature Selection: DALEX (DE) ----
 
-# SHAP
-# - James Cowser
-shap_rf_JC <- predict_parts(explainer = EXP_rf_F,
-                            new_observation = nfl_test_DE_JC,
-                            type = "shap",
-                            B = 20)
-shap_log_JC <- predict_parts(explainer = EXP_log_F,
-                             new_observation = nfl_test_DE_JC,
-                             type = "shap",
-                             B = 20)
-
-gg_shap_rf_DE_JC <- plot(shap_rf_JC) +
-  labs(title = "James Cowser",
-       subtitle = "Random Forrest") +
-  theme(plot.title = element_text(hjust = 0.5, face = "bold", color = "tomato"),
-        plot.subtitle = element_text(hjust = 0.5, color = "seagreen1"),
-        strip.text = element_blank())
-gg_shap_log_DE_JC <- plot(shap_log_JC) +
-  labs(title = "James Cowser",
-       subtitle = "Logistic Regression") +
-  theme(plot.title = element_text(hjust = 0.5, face = "bold", color = "tomato"),
-        plot.subtitle = element_text(hjust = 0.5, color = "lightskyblue"),
-        strip.text = element_blank())
-
-# - Ryan Kerrigan
-shap_rf_RK <- predict_parts(explainer = EXP_rf_F,
-                            new_observation = nfl_test_DE_RK,
-                            type = "shap",
-                            B = 20)
-shap_log_RK <- predict_parts(explainer = EXP_log_F,
-                             new_observation = nfl_test_DE_RK,
-                             type = "shap",
-                             B = 20)
-
-gg_shap_rf_DE_RK <- plot(shap_rf_RK) +
-  labs(title = "Ryan Kerrigan",
-       subtitle = "Random Forrest") +
-  theme(plot.title = element_text(hjust = 0.5, face = "bold", color = "darkolivegreen"),
-        plot.subtitle = element_text(hjust = 0.5, color = "seagreen1"),
-        strip.text = element_blank())
-gg_shap_log_DE_RK <- plot(shap_log_RK) +
-  labs(title = "Ryan Kerrigan",
-       subtitle = "Logistic Regression") +
-  theme(plot.title = element_text(hjust = 0.5, face = "bold", color = "darkolivegreen"),
-        plot.subtitle = element_text(hjust = 0.5, color = "lightskyblue"),
-        strip.text = element_blank())
-
-# - Brett Keisel
-shap_rf_BK <- predict_parts(explainer = EXP_rf_F,
-                            new_observation = nfl_test_DE_BK,
-                            type = "shap",
-                            B = 20)
-shap_log_BK <- predict_parts(explainer = EXP_log_F,
-                             new_observation = nfl_test_DE_BK,
-                             type = "shap",
-                             B = 20)
-
-gg_shap_rf_DE_BK <- plot(shap_rf_BK) +
-  labs(title = "Brett Keisel",
-       subtitle = "Random Forrest") +
-  theme(plot.title = element_text(hjust = 0.5, face = "bold", color = "darkolivegreen"),
-        plot.subtitle = element_text(hjust = 0.5, color = "seagreen1"),
-        strip.text = element_blank())
-gg_shap_log_DE_BK <- plot(shap_log_BK) +
-  labs(title = "Brett Keisel",
-       subtitle = "Logistic Regression") +
-  theme(plot.title = element_text(hjust = 0.5, face = "bold", color = "darkolivegreen"),
-        plot.subtitle = element_text(hjust = 0.5, color = "lightskyblue"),
-        strip.text = element_blank())
-
-
-
-# Visual
-ggarrange(gg_shap_rf_DE_JC, gg_shap_rf_DE_RK, gg_shap_rf_DE_MK, gg_shap_rf_DE_BK,
-          nrow = 1)
-ggarrange(gg_shap_log_DE_JC, gg_shap_log_DE_RK, gg_shap_log_DE_MK, gg_shap_log_DE_BK,
-          nrow = 1)
-
 # BREAKDOWN
 # - James Cowser
-bd_rf_JC <- predict_parts(explainer = EXP_rf_F,
+bd_rf_JC <- predict_parts(explainer = EXP_rf_Full,
                           new_observation = nfl_test_DE_JC,
                           type = "break_down",
                           keep_distributions = TRUE)
-bd_log_JC <- predict_parts(explainer = EXP_log_F,
-                           new_observation = nfl_test_DE_JC,
-                           type = "break_down",
-                           keep_distributions = TRUE)
+bd_log_Full_JC <- predict_parts(explainer = EXP_log_Full,
+                                new_observation = nfl_test_DE_JC,
+                                type = "break_down",
+                                keep_distributions = TRUE)
+bd_log_Simple_JC <- predict_parts(explainer = EXP_log_Simple,
+                                  new_observation = nfl_test_DE_JC,
+                                  type = "break_down",
+                                  keep_distributions = TRUE)
 
 gg_bd_rf_DE_JC <- plot(bd_rf_JC, max_features = 5) +
   labs(title = "James Cowser",
-       subtitle = "Random Forrest") +
+       subtitle = "Random Forrest (Full)") +
   theme(plot.title = element_text(hjust = 0.5, face = "bold", color = "tomato"),
-        plot.subtitle = element_text(hjust = 0.5, color = "seagreen1"),
+        plot.subtitle = element_text(hjust = 0.5, color = "seagreen"),
         strip.text = element_blank())
-gg_bd_log_DE_JC <- plot(bd_log_JC, max_features = 5) +
+gg_bd_log_Full_DE_JC <- plot(bd_log_Full_JC, max_features = 5) +
   labs(title = "James Cowser",
-       subtitle = "Logistic Regression") +
+       subtitle = "Logistic Regression (Full)") +
+  theme(plot.title = element_text(hjust = 0.5, face = "bold", color = "tomato"),
+        plot.subtitle = element_text(hjust = 0.5, color = "midnightblue"),
+        strip.text = element_blank())
+gg_bd_log_Simple_DE_JC <- plot(bd_log_Simple_JC, max_features = 5) +
+  labs(title = "James Cowser",
+       subtitle = "Logistic Regression (Simple)") +
   theme(plot.title = element_text(hjust = 0.5, face = "bold", color = "tomato"),
         plot.subtitle = element_text(hjust = 0.5, color = "lightskyblue"),
         strip.text = element_blank())
 
 # - Ryan Kerrigan
-bd_rf_RK <- predict_parts(explainer = EXP_rf_F,
+bd_rf_RK <- predict_parts(explainer = EXP_rf_Full,
                           new_observation = nfl_test_DE_RK,
                           type = "break_down",
                           keep_distributions = TRUE)
-bd_log_RK <- predict_parts(explainer = EXP_log_F,
-                           new_observation = nfl_test_DE_RK,
-                           type = "break_down",
-                           keep_distributions = TRUE)
+bd_log_Full_RK <- predict_parts(explainer = EXP_log_Full,
+                                new_observation = nfl_test_DE_RK,
+                                type = "break_down",
+                                keep_distributions = TRUE)
+bd_log_Simple_RK <- predict_parts(explainer = EXP_log_Simple,
+                                  new_observation = nfl_test_DE_RK,
+                                  type = "break_down",
+                                  keep_distributions = TRUE)
 
 gg_bd_rf_DE_RK <- plot(bd_rf_RK, max_features = 5) +
   labs(title = "Ryan Kerrigan",
-       subtitle = "Random Forrest") +
+       subtitle = "Random Forrest (Full)") +
   theme(plot.title = element_text(hjust = 0.5, face = "bold", color = "darkolivegreen"),
-        plot.subtitle = element_text(hjust = 0.5, color = "seagreen1"),
+        plot.subtitle = element_text(hjust = 0.5, color = "seagreen"),
         strip.text = element_blank())
-gg_bd_log_DE_RK <- plot(bd_log_RK, max_features = 5) +
+gg_bd_log_Full_DE_RK <- plot(bd_log_Full_RK, max_features = 5) +
   labs(title = "Ryan Kerrigan",
-       subtitle = "Logistic Regression") +
+       subtitle = "Logistic Regression (Full)") +
+  theme(plot.title = element_text(hjust = 0.5, face = "bold", color = "darkolivegreen"),
+        plot.subtitle = element_text(hjust = 0.5, color = "midnightblue"),
+        strip.text = element_blank())
+gg_bd_log_Simple_DE_RK <- plot(bd_log_Simple_RK, max_features = 5) +
+  labs(title = "Ryan Kerrigan",
+       subtitle = "Logistic Regression (Simple)") +
   theme(plot.title = element_text(hjust = 0.5, face = "bold", color = "darkolivegreen"),
         plot.subtitle = element_text(hjust = 0.5, color = "lightskyblue"),
         strip.text = element_blank())
 
 # - Brett Keisel
-bd_rf_BK <- predict_parts(explainer = EXP_rf_F,
+bd_rf_BK <- predict_parts(explainer = EXP_rf_Full,
                           new_observation = nfl_test_DE_BK,
                           type = "break_down",
                           keep_distributions = TRUE)
-bd_log_BK <- predict_parts(explainer = EXP_log_F,
-                           new_observation = nfl_test_DE_BK,
-                           type = "break_down",
-                           keep_distributions = TRUE)
+bd_log_Full_BK <- predict_parts(explainer = EXP_log_Full,
+                                new_observation = nfl_test_DE_BK,
+                                type = "break_down",
+                                keep_distributions = TRUE)
+bd_log_Simple_BK <- predict_parts(explainer = EXP_log_Simple,
+                                  new_observation = nfl_test_DE_BK,
+                                  type = "break_down",
+                                  keep_distributions = TRUE)
 
 gg_bd_rf_DE_BK <- plot(bd_rf_BK, max_features = 5) +
   labs(title = "Brett Keisel",
-       subtitle = "Random Forrest") +
+       subtitle = "Random Forrest (Full)") +
   theme(plot.title = element_text(hjust = 0.5, face = "bold", color = "darkolivegreen"),
-        plot.subtitle = element_text(hjust = 0.5, color = "seagreen1"),
+        plot.subtitle = element_text(hjust = 0.5, color = "seagreen"),
         strip.text = element_blank())
-gg_bd_log_DE_BK <- plot(bd_log_BK, max_features = 5) +
+gg_bd_log_Full_DE_BK <- plot(bd_log_Full_BK, max_features = 5) +
   labs(title = "Brett Keisel",
-       subtitle = "Logistic Regression") +
+       subtitle = "Logistic Regression (Full)") +
+  theme(plot.title = element_text(hjust = 0.5, face = "bold", color = "darkolivegreen"),
+        plot.subtitle = element_text(hjust = 0.5, color = "midnightblue"),
+        strip.text = element_blank())
+gg_bd_log_Simple_DE_BK <- plot(bd_log_Simple_BK, max_features = 5) +
+  labs(title = "Brett Keisel",
+       subtitle = "Logistic Regression (Simple)") +
   theme(plot.title = element_text(hjust = 0.5, face = "bold", color = "darkolivegreen"),
         plot.subtitle = element_text(hjust = 0.5, color = "lightskyblue"),
         strip.text = element_blank())
@@ -3470,5 +3376,7 @@ gg_bd_log_DE_BK <- plot(bd_log_BK, max_features = 5) +
 
 ggarrange(gg_bd_rf_DE_JC, gg_bd_rf_DE_RK, gg_bd_rf_DE_BK,
           nrow = 1)
-ggarrange(gg_bd_log_DE_JC, gg_bd_log_DE_RK, gg_bd_log_DE_BK,
+ggarrange(gg_bd_log_Full_DE_JC, gg_bd_log_Full_DE_RK, gg_bd_log_Full_DE_BK,
+          nrow = 1)
+ggarrange(gg_bd_log_Simple_DE_JC, gg_bd_log_Simple_DE_RK, gg_bd_log_Simple_DE_BK,
           nrow = 1)

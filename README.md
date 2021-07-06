@@ -614,7 +614,7 @@ RF-PCA | 0.676 | 0.684 | 0.944 | 0.191 | 0.689 | 0.944 | 0.796
 > **Note (Logistic Regression "Full" - Position)**
 
 > **BENCH:** From EDA average Bench by Position **_[ CB = 14reps | DE = 24reps | OG = 26reps | RB = 20reps | WR = 14reps ]_**. At A High- Level it still sticks with the same general relationship, As you bench reps increase so those the probability of a player being drafted.
-> - _RB & OG_ that benches below 20 the Full Regression Model predicts them on average as not being drafted. _Unlikely for a OG to only bench 20lbs_ 
+> - _RB & OG_ that benches below 20 the Full Regression Model predicts them on average as not being drafted. _Unlikely for a OG to only bench 20lbs_
 
 > **FORTY:** From EDA average 40 time by Position **_[ CB = 4.49secs | DE = 4.83secs | OG = 5.31secs | RB = 4.56secs | WR = 4.51secs ]_**. At A High- Level it still sticks with the same general relationship, As you 40 times increase the probability of a player being drafted decreases.
 > - _RB, WR, & CB_ must run a 40 time of at least 4.7 or the Full Regression Model will predict on average those players as not being drafted. _DE_ at least 5.1secs. _OG & OT_ at least 5.5.
@@ -643,37 +643,7 @@ RF-PCA | 0.676 | 0.684 | 0.944 | 0.191 | 0.689 | 0.944 | 0.796
 **Samples**
 <img src="Images/PA/data_Full.PNG" width="  1000">
 
-<img src="Images/PA/cm_rf_full.PNG" width="  1000">
 
-Position | Accuracy | Sensitivity | Specificity | Precision | F1
---- | --- | --- | --- | --- | ---
-Wide Receivers | 0.774 | 0.97 | 0.45 | 0.744 | 0.842
-Running Backs | 0.75 | 0.9 | 0.5 | 0.75 | 0.818
-Offensive Line | 0.646 | 0.92 | 0.348 | 0.605 | 0.730
-Corner Backs | 0.696 | 0.974 | 0.059 | 0.704 | 0.817
-Defensive Ends | 0.656 | 0.884 | 0.111 | 0.704 | 0.784
-
-<img src="Images/PA/cm_log_full.PNG" width="  1000">
-
-Position | Accuracy | Sensitivity | Specificity | Precision | F1
---- | --- | --- | --- | --- | ---
-Wide Receivers | 0.736 | 0.879 | 0.5 | 0.744 | 0.806
-Running Backs | 0.75 | 0.9 | 0.5 | 0.75 | 0.818
-Offensive Line | 0.583 | 0.8 | 0.348 | 0.571 | 0.667
-Corner Backs | 0.679 | 0.974 | 0 | 0.691 | 0.809
-Defensive Ends | 0.656 | 0.860 | 0.167 | 0.712 | 0.779
-
-<img src="Images/PA/cm_log_simple.PNG" width="  1000">
-
-Position | Accuracy | Sensitivity | Specificity | Precision | F1
---- | --- | --- | --- | --- | ---
-Wide Receivers | 0.736 | 0.879 | 0.5 | 0.744 | 0.806
-Running Backs | 0.75 | 0.9 | 0.5 | 0.75 | 0.818
-Offensive Line | 0.583 | 0.8 | 0.348 | 0.571 | 0.667
-Corner Backs | 0.679 | 0.974 | 0 | 0.691 | 0.809
-Defensive Ends | 0.656 | 0.860 | 0.167 | 0.712 | 0.779
-
-> **Note (Metrics)**: In terms of **F1 Score** Random Forrest is out performing Logistic Regression, However by a small margin
 
 ### Wide Receivers
 
