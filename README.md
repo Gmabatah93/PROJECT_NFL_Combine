@@ -655,14 +655,14 @@ RF-PCA | 0.676 | 0.684 | 0.944 | 0.191 | 0.689 | 0.944 | 0.796
 > **MARUC LUCAS**
 > - **_Random Forrest:_** (average prediction **65.1%**)
 >   + _Weight and Position_ had the most influential contribution to the prediction with **_-12.4%_**.
->   + _three_cone, vertical and forty_ added **4.4%**
+>   + Three_cone, Vertical and Forty_ added **4.4%**
 > - **_Logistic Regression (Full):_** (average prediction **66.5%**)
 >   + _Position & Weight_  had the most influential contribution to the prediction with **_-33%_**.
->   +  _Forty, side, and three cone_ added **_23.5%_**
+>   +  _Forty, Side, and Three_cone_ added **_23.5%_**
 > - **_Logistic Regression (Simple):_** (average prediction **65.9%**)
 >   + _Forty_ had the most influential contribution to the prediction with **_10.1%_**.
 >   + _Position & Weight_ substracted **_-14.6%_**.
->   + _broad jump & conference_ added **_11.3%_**
+>   + _Broad_jump & Conference_ added **_11.3%_**
 
 > **SAMMY WATKINS**
 > - **_Random Forrest:_** (average prediction **65.1%**)
@@ -696,12 +696,60 @@ RF-PCA | 0.676 | 0.684 | 0.944 | 0.191 | 0.689 | 0.944 | 0.796
 <img src="Images/PA/bd_log_Full_RB.PNG" width="  900">
 <img src="Images/PA/bd_log_Simple_RB.PNG" width="  900">
 
+> **NICK CHUBB**
+> - **_Random Forrest:_** (average prediction **65.1%**)
+>   + _Weight = 227_ was the single most influential feature towards the prediction with **_-6.2%_**
+>   + _Position = "RB"_ substracted **_-3.3%_**
+>   + _Bench = 29, Forty = 4.52, Broad_jump = 128_ added **_13.4%_**
+> - **_Logistic Regression (Full):_** (average prediction **66.5%**)
+>   + _Position = "RB"_ was the single most influential feature towards the prediction with **_-23%_**
+>   + _Weight = 227_ substracted **_-14.4%_**
+>   + _Forty = 4.52, Bench = 29, Vertical = 38.5_ added **_38.3%_**
+> - **_Logistic Regression (Simple):_** (average prediction **65.9%**)
+>   + _Forty = 4.52_ was the single most influential feature towards the prediction with **_-13.7%_**
+>   + _Position = "RB"_ substracted **_-6.6%_**
+>   + _Bench = 29 & Broad_jump = 128_ added **_13.5%_**
+>   + _Conference = "SEC"_ added **_3.2%_**
+
+> **MIKE BELL**
+> - **_Random Forrest:_** (average prediction **65.1%**)
+>   + _Weight = 221_ was the single most influential feature towards the prediction with **_-6.9%_**
+>   + _Position = "RB"_ substracted **_-4%_**
+>   + _Bench = 19, Broad_jump = 112, Three_cone = 7.16_ substracted **_-5.3%_**
+> - **_Logistic Regression (Full):_** (average prediction **66.5%**)
+>   + _Position = "RB"_ was the single most influential feature towards the prediction with **_-23%_**
+>   + _Weight = 221_ substracted **_-10.8%_**
+>   + _Side = "Offense"_ added **_7.4%_**
+>   + _Forty = 4.6 & Three_cone = 7.16_ added **_12.9%_**  
+> - **_Logistic Regression (Simple):_** (average prediction **65.9%**)
+>   + _Position = "RB"_ was the single most influential feature towards the prediction with **_-10.8%_**
+>   + _Weight = 221_ substracted **_-7.1%_**
+>   + _Forty = 4.6, Bench = 19, Height = 72_ added **_9.3%_**
+
+> **MAURICE JONES-DREW**
+> - **_Random Forrest:_** (average prediction **65.1%**)
+>   + _Height = 67 & Weight = 207_ substracted **_15.3%_**
+>   + _Forty = 4.39, Vertical = 36, Three_cone = 7.08_ added **_16.1%_**
+> - **_Logistic Regression (Full):_** (average prediction **66.5%**)
+>   + _Weight = 207 & Position = "RB"_ substracted **_39.7%_**
+>   + _Forty = 4.39, Side = "Offense", Three_cone = 7.08_ added **_38.8%_**
+> - **_Logistic Regression (Simple):_** (average prediction **65.9%**)
+>   + _Forty = 4.39_ added **_18.8%_**
+>   + _Weight = 207, Position = "RB", height = 67_ substracted **_17.9_**
+>   + _Bench = 18_ substracted **_3.8%_**
+
 ### Offensive Line
 
 **Break-Down**
 <img src="Images/PA/bd_rf_OL.PNG" width="  900">
 <img src="Images/PA/bd_log_Full_OL.PNG" width="  900">
 <img src="Images/PA/bd_log_Simple_OL.PNG" width="  900">
+
+> **TAYLOR LEWAN**
+
+> **JORDAN MORGAN
+
+> **TONY TELLA**
 
 ### Cornerbacks
 
