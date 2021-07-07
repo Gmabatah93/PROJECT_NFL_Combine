@@ -727,13 +727,13 @@ RF-PCA | 0.676 | 0.684 | 0.944 | 0.191 | 0.689 | 0.944 | 0.796
 >   + _Forty = 4.6, Bench = 19, Height = 72_ added **_9.3%_**
 
 > **MAURICE JONES-DREW**
-> - **_Random Forrest:_** (average prediction **65.1%**)
+> - **_Random Forrest:_**
 >   + _Height = 67 & Weight = 207_ substracted **_15.3%_**
 >   + _Forty = 4.39, Vertical = 36, Three_cone = 7.08_ added **_16.1%_**
-> - **_Logistic Regression (Full):_** (average prediction **66.5%**)
+> - **_Logistic Regression (Full):_**
 >   + _Weight = 207 & Position = "RB"_ substracted **_39.7%_**
 >   + _Forty = 4.39, Side = "Offense", Three_cone = 7.08_ added **_38.8%_**
-> - **_Logistic Regression (Simple):_** (average prediction **65.9%**)
+> - **_Logistic Regression (Simple):_**
 >   + _Forty = 4.39_ added **_18.8%_**
 >   + _Weight = 207, Position = "RB", height = 67_ substracted **_17.9_**
 >   + _Bench = 18_ substracted **_3.8%_**
@@ -746,10 +746,43 @@ RF-PCA | 0.676 | 0.684 | 0.944 | 0.191 | 0.689 | 0.944 | 0.796
 <img src="Images/PA/bd_log_Simple_OL.PNG" width="  900">
 
 > **TAYLOR LEWAN**
+> - **_Random Forrest:_**
+>   + _[ Bench = 29, Weight = 309, Position = "OT" ]_ added **_11.6%_**
+>   + _shuttle = 4.49_ added **_2.4%_**
+>   + _height = 79_ added **_4.3%_**
+> - **_Logistic Regression (Full):_**
+>   + _[ Weight = 309 & Position = "OT" ]_ added **_23.2%_**
+>   +  _[ Forty = 4.87_ & Bench = 29 ]_ added **_6.5%_**
+> - **_Logistic Regression (Simple):_**
+>   + _[ Position = "OT" & Weight = 309 ]_ added **_20.8%_**
+>   + _[ Bench = 29 & Forty = 4.87 ]_ added **_5.9%_**
+>   + _Conference = "Big 10"_ added **_1.4%_**
 
-> **JORDAN MORGAN
+> **JORDAN MORGAN**
+> - **_Random Forrest:_**
+>   + _Conference = "Division II & III"_ substracted **_-13%_**
+>   + _[ Three_cone = 8.13, Vertical = 27, Shuttle = 4.73 ]_ substracted **_-10.1%_**
+>   + _Weight = 309_ added **_4%_**
+> - **_Logistic Regression (Full):_**
+>   +  _Forty = 5.36_ substracted **_-40.7%_**
+>   + _Conference = "Division II & III"_ substracted **_14.9%_**
+>   + _[ Weight = 309, Position = "OG", side = "Offense" ]_ added **_17%_**
+> - **_Logistic Regression (Simple):_**
+>   +  _Forty = 5.36_ substracted **_-33.6%_**
+>   + _Conference = "Division II & III"_ substracted **_18.3%_**
+>   + _[ Weight = 309, Position = "OG" ]_ added **_13.7%_**
+>   + _Broad_jump = 102_ substracted **_-5.3%_**
 
 > **TONY TELLA**
+> - **_Random Forrest:_**
+>   + _[ Forty = 5.44, Three_cone = 8.17, Vertical = 24.5, Shuttle = 4.84 ]_ substracted **_-22%_**
+>   + _Weight = 307_ added **_4.1%_**
+> - **_Logistic Regression (Full):_**
+>   + _[ Forty = 5.44, Three_cone = 8.17, Vertical = 24.5 ]_ substracted **_-61%_**
+>   + _[ Weight = 307, Position = "OG" ]_ added **_17%_**
+> - **_Logistic Regression (Simple):_**
+>   + _[ Forty = 5.44, Broad_jump = 97, Bench = 24 ]_ substracted **_-43.8%_**
+>   + _[ Weight = 307 & Position = "OG" ]_ added **_21.9%_**
 
 ### Cornerbacks
 
