@@ -2924,7 +2924,7 @@ gg_bd_log_Full_WR_ML <- plot(bd_log_Full_ML, max_features = 5) +
   theme(plot.title = element_text(hjust = 0.5, face = "bold", color = "tomato"),
         plot.subtitle = element_text(hjust = 0.5, color = "midnightblue"),
         strip.text = element_blank())
-gg_bd_log_Simple_WR_ML <- plot(bd_log_Full_ML, max_features = 5) +
+gg_bd_log_Simple_WR_ML <- plot(bd_log_Simple_ML, max_features = 5) +
   labs(title = "Marcus Lucas",
        subtitle = "Logistic Regression (Simple)") +
   theme(plot.title = element_text(hjust = 0.5, face = "bold", color = "tomato"),

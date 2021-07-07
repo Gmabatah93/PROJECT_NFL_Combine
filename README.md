@@ -643,7 +643,7 @@ RF-PCA | 0.676 | 0.684 | 0.944 | 0.191 | 0.689 | 0.944 | 0.796
 **Samples**
 <img src="Images/PA/data_Full.PNG" width="  1000">
 
-
+> **Baseline Prediction**: Random Forrest = **65.1%** | Logistic Regression (Full) = **66.5%** | Logistic Regression (Simple) = **66.9%**
 
 ### Wide Receivers
 
@@ -652,7 +652,42 @@ RF-PCA | 0.676 | 0.684 | 0.944 | 0.191 | 0.689 | 0.944 | 0.796
 <img src="Images/PA/bd_log_Full_WR.PNG" width="  900">
 <img src="Images/PA/bd_log_Simple_WR.PNG" width="  900">
 
-> **Note (WR)**
+> **MARUC LUCAS**
+> - **_Random Forrest:_** (average prediction **65.1%**)
+>   + _Weight and Position_ had the most influential contribution to the prediction with **_-12.4%_**.
+>   + _three_cone, vertical and forty_ added **4.4%**
+> - **_Logistic Regression (Full):_** (average prediction **66.5%**)
+>   + _Position & Weight_  had the most influential contribution to the prediction with **_-33%_**.
+>   +  _Forty, side, and three cone_ added **_23.5%_**
+> - **_Logistic Regression (Simple):_** (average prediction **65.9%**)
+>   + _Forty_ had the most influential contribution to the prediction with **_10.1%_**.
+>   + _Position & Weight_ substracted **_-14.6%_**.
+>   + _broad jump & conference_ added **_11.3%_**
+
+> **SAMMY WATKINS**
+> - **_Random Forrest:_** (average prediction **65.1%**)
+>   + _Weight = 211 & Position = "WR"_ had the most influential contribution to the prediction with **_-12%_**
+>   + _[ Forty = 4.43, Bench = 16, three_cone = 6.96 ]_ added **_1.9%_** to the prediction
+> - **_Logistic Regression (Full):_** (average prediction **66.5%**)
+>   + -[ Weight = 211 & Position = "WR" ]_ had the most influential contribution to the prediction with **_-35.9%_**
+>   + _[ Forty = 4.43, three_cone = 6.96, side = "Offense" ]_ added **_40%_** to the prediction
+> - **_Logistic Regression (Simple):_** (average prediction **65.9%**)
+>   + _Forty = 4.43_ had the most influential contribution with **_17.3%_**
+>   + _[ Weight = 211 & Position = "WR" ]_ substracted **_-12.6%_** to the prediction
+>   + _[ broad_jump = 126 & Bench = 16 ]_ added **_1.5%_** to the prediction
+
+> **MARQUES COLSTON**
+> - **_Random Forrest:_** (average prediction **65.1%**)
+>   + _Conference = "Division I -AA"_ was the most influential to the contribution with **_-9.4%_**
+>   + _[ Weight = 224 & Position = "WR" ]_ added **_8.9%_** to the prediction
+>   + _[ Bench = 16 & Forty = 4.5 ]_  added just under **_1%_** to the prediction
+> - **_Logistic Regression (Full):_** (average prediction **66.5%**)
+>   + _[ Position = "WR" & Conference = "Division I -AA" ]_ had the most influence towards the prediction with **_38.4%_**
+>   + _[ Forty = 4.5, Weight = 224, Three_cone = 6.94 ]_ added **_15.8%_** to the prediction
+> - **_Logistic Regression (Simple):_** (average prediction **65.9%**)
+>   + _Conference = "Division I - AA"_ was the single most influential feature towards the prediction with **_-17.7%_**
+>   + _Forty = 4.5_ added **_19.1%_** towards the prediction
+>   + _[ Position = "WR", Weight = 224, Bench = 16 ]_ added **_-23.9%_** to the prediction.
 
 ### Running Backs
 
